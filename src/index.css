@@ -7,3 +7,10 @@
 body {
   background: #080810;
 }
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  background: #080810;
+  text-align: left;
+}
