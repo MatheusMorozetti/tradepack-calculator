@@ -1,5 +1,88 @@
 import { useState, useMemo } from "react";
 
+// ============================================================
+// SENHA DE ACESSO — altere aqui para trocar a senha
+const SENHA_CORRETA = "ravenquest2026";
+// ============================================================
+
+function LoginScreen({ onLogin }) {
+  const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState(false);
+  const [tentativas, setTentativas] = useState(0);
+
+  const handleSubmit = () => {
+    if (senha === SENHA_CORRETA) {
+      onLogin();
+    } else {
+      setErro(true);
+      setTentativas(t => t + 1);
+      setSenha("");
+      setTimeout(() => setErro(false), 2000);
+    }
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#080810",
+      backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontFamily: "'Space Mono', monospace",
+    }}>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      <div style={{
+        background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)",
+        borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 360,
+      }}>
+        <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>
+          ⚔ RavenQuest · Merchant Ledger ⚔
+        </div>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>
+          Tradepack Prime
+        </div>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#c4a050", marginBottom: 32 }}>
+          Calculator
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <input
+            type="password"
+            placeholder="Digite a senha de acesso"
+            value={senha}
+            onChange={e => setSenha(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSubmit()}
+            style={{
+              width: "100%", background: erro ? "rgba(248,113,113,0.08)" : "rgba(0,0,0,0.4)",
+              border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`,
+              borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14,
+              fontFamily: "'Space Mono', monospace", outline: "none",
+              boxSizing: "border-box", transition: "border 0.2s",
+            }}
+          />
+        </div>
+
+        {erro && (
+          <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12, letterSpacing: "0.05em" }}>
+            ❌ Senha incorreta{tentativas >= 3 ? ` (${tentativas} tentativas)` : ""}
+          </div>
+        )}
+
+        <button onClick={handleSubmit} style={{
+          width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)",
+          border: "none", borderRadius: 8, color: "#000", padding: "12px",
+          cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13,
+          fontWeight: "bold", letterSpacing: "0.08em",
+        }}>
+          ENTRAR →
+        </button>
+
+        <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>
+          ToilZero Calculator · Acesso restrito
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const fmt = (n, d = 2) => n == null ? "—" : n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmtInt = (n) => Math.round(n).toLocaleString("pt-BR");
 const fmtUSD = (n) => `$${fmt(Math.abs(n), 3)}`;
@@ -114,13 +197,13 @@ export default function App() {
   const [diasSemana, setDiasSemana] = useState(7);
   const [silverPorPack, setSilverPorPack] = useState(95000);
   const [imPorPack, setImPorPack] = useState(1030869);
-  const [enhanced, setEnhanced] = useState(false);
+  const [qtdEnhanced, setQtdEnhanced] = useState(0);  // packs com Enhanced (×2 IM)
+  const [qtdPlunder, setQtdPlunder] = useState(0);    // packs no Plunder (+15%)
   const [custoCert, setCustoCert] = useState(1.2);
 
   // BÔNUS
-  const [barteringI] = useState(true);   // fixo - você tem
-  const [barteringII] = useState(true);  // fixo - você tem
-  const [plunderAtivo, setPlunderAtivo] = useState(false);
+  const [barteringI] = useState(true);
+  const [barteringII] = useState(true);
 
   // ATIVIDADES COMPARATIVAS
   const [silverHoraCaca, setSilverHoraCaca] = useState(4830102);
@@ -139,11 +222,26 @@ export default function App() {
 
   const r = useMemo(() => {
     const bonusBartering = 1 + (barteringI ? 0.05 : 0) + (barteringII ? 0.10 : 0);
-    const bonusPlunder = plunderAtivo ? 1.15 : 1;
-    const bonusTotal = bonusBartering * bonusPlunder;
-    const imMult = enhanced ? 2 : 1;
-    const imEfetiva = imPorPack * imMult * bonusTotal;
-    const packsSemanais = Math.floor(qtdPacks * diasSemana / 7);
+    const packsSemanais = qtdPacks;
+
+    // Quantidades validadas (não pode ultrapassar total de packs)
+    const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
+    const plunderVal = Math.min(qtdPlunder, packsSemanais);
+    const packsNormais = packsSemanais - enhancedVal;
+
+    // IM por categoria de pack
+    const imNormal = imPorPack * bonusBartering;
+    const imEnhanced = imPorPack * 2 * bonusBartering;
+    const imPlunderBonus = imPorPack * bonusBartering * 0.15; // bônus extra dos packs no plunder
+
+    // IM total semana
+    const imNormalTotal = packsNormais * imNormal;
+    const imEnhancedTotal = enhancedVal * imEnhanced;
+    const imPlunderTotal = plunderVal * imPlunderBonus; // bônus adicional do plunder
+    const imTotal_semana = imNormalTotal + imEnhancedTotal + imPlunderTotal;
+
+    // IM efetiva média por pack (para exibição)
+    const imEfetiva = packsSemanais > 0 ? imTotal_semana / packsSemanais : imPorPack * bonusBartering;
 
     // Custos do pack
     const mats = packAtual.materiais;
@@ -203,8 +301,10 @@ export default function App() {
     const diferencaEstrategia = profitRealUSD_mes - profitAlternativoUSD_mes;
 
     return {
-      bonusBartering, bonusPlunder, bonusTotal, imMult, imEfetiva,
-      packsSemanais, custoProducaoTotal, valorMktTotal, certCusto_Q, certCusto_S,
+      bonusBartering, imEfetiva,
+      packsSemanais, enhancedVal, plunderVal, packsNormais,
+      imNormalTotal, imEnhancedTotal, imPlunderTotal,
+      custoProducaoTotal, valorMktTotal, certCusto_Q, certCusto_S,
       silverLiqPorPack, imTotal_semana, questIM, questCerts, questLiq,
       lucroVendaMkt, questVendaMkt, questPack, deltaQUEST,
       imBreakeven, imBreaakevenEnhanced,
@@ -217,8 +317,8 @@ export default function App() {
       expUSD_mes_only, vendaMktUSD_mes,
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, joiasTotal,
-    packSelecionado, qtdPacks, diasSemana, silverPorPack, imPorPack,
-    enhanced, custoCert, plunderAtivo, matsOverride,
+    packSelecionado, qtdPacks, silverPorPack, imPorPack,
+    qtdEnhanced, qtdPlunder, custoCert, matsOverride,
     silverHoraCaca, silverHoraMineracao, horasPorSemana]);
 
   const tabs = [
@@ -227,6 +327,9 @@ export default function App() {
     { id: "mercado", label: "💰 Materiais" },
     { id: "calibracao", label: "📐 Calibração" },
   ];
+
+  const [autenticado, setAutenticado] = useState(false);
+  if (!autenticado) return <LoginScreen onLogin={() => setAutenticado(true)} />;
 
   return (
     <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 15% 15%, rgba(196,160,80,0.07) 0%, transparent 55%)", fontFamily: "'Space Mono', monospace", color: "#f0e6c8", padding: "20px 16px" }}>
@@ -328,8 +431,40 @@ export default function App() {
                 <Field label="Custo certificado" value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
               </div>
 
-              <Toggle label="🔮 Prime Enhanced (×2 IM)" value={enhanced} onChange={setEnhanced} sub="Viabiliza break-even com Bartering I+II" accent />
-              <Toggle label="⚔️ Plunder Channel (+15%)" value={plunderAtivo} onChange={setPlunderAtivo} sub="Disponível: domingo → segunda apenas" />
+              <Divider label="Packs Especiais" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <Field label="🔮 Packs com Enhanced" value={qtdEnhanced} onChange={v => setQtdEnhanced(Math.min(v, qtdPacks))} step={1} suffix="packs" hint={`×2 IM · máx ${qtdPacks} packs`} color={qtdEnhanced > 0 ? gold : undefined} />
+                <Field label="⚔️ Packs no Plunder" value={qtdPlunder} onChange={v => setQtdPlunder(Math.min(v, qtdPacks))} step={1} suffix="packs" hint={`+15% IM · domingo→segunda`} color={qtdPlunder > 0 ? red : undefined} />
+              </div>
+
+              {/* Breakdown visual dos packs */}
+              {(qtdEnhanced > 0 || qtdPlunder > 0) && (
+                <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px", marginTop: 4 }}>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Breakdown dos {qtdPacks} packs</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 11 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: "#c0c0d0" }}>📦 Packs normais</span>
+                      <span style={{ color: "#c0c0d0", fontFamily: "'Space Mono', monospace" }}>{r.packsNormais} × {fmtInt(r.imEfetiva > 0 ? r.imNormalTotal / Math.max(r.packsNormais, 1) : imPorPack * r.bonusBartering)} IM = {fmtInt(r.imNormalTotal)}</span>
+                    </div>
+                    {qtdEnhanced > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: gold }}>🔮 Enhanced (×2)</span>
+                        <span style={{ color: gold, fontFamily: "'Space Mono', monospace" }}>{r.enhancedVal} × {fmtInt(imPorPack * r.bonusBartering * 2)} IM = {fmtInt(r.imEnhancedTotal)}</span>
+                      </div>
+                    )}
+                    {qtdPlunder > 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: red }}>⚔️ Plunder (+15%)</span>
+                        <span style={{ color: red, fontFamily: "'Space Mono', monospace" }}>+{fmtInt(r.imPlunderTotal)} IM bônus</span>
+                      </div>
+                    )}
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 6, display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ color: gold, fontWeight: "bold" }}>Total IM packs</span>
+                      <span style={{ color: gold, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.imTotal_semana)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </Section>
 
             <Section title="Bônus Ativos" icon="⚡" borderColor="rgba(196,160,80,0.4)">
@@ -342,17 +477,18 @@ export default function App() {
                   <span style={{ color: green, fontSize: 12 }}>✅ Bartering II (+10%)</span>
                   <span style={{ color: green, fontSize: 12 }}>T7 · 3.000 rep</span>
                 </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                  <span style={{ color: qtdEnhanced > 0 ? gold : dim, fontSize: 12 }}>{qtdEnhanced > 0 ? "🔮" : "⬜"} Enhanced (×2 IM)</span>
+                  <span style={{ color: qtdEnhanced > 0 ? gold : dim, fontSize: 12 }}>{qtdEnhanced > 0 ? `${qtdEnhanced} packs` : "inativo"}</span>
+                </div>
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ color: plunderAtivo ? green : dim, fontSize: 12 }}>{plunderAtivo ? "✅" : "⬜"} Plunder (+15%)</span>
-                  <span style={{ color: plunderAtivo ? green : dim, fontSize: 12 }}>{plunderAtivo ? "ativo" : "inativo"}</span>
+                  <span style={{ color: qtdPlunder > 0 ? red : dim, fontSize: 12 }}>{qtdPlunder > 0 ? "⚔️" : "⬜"} Plunder (+15%)</span>
+                  <span style={{ color: qtdPlunder > 0 ? red : dim, fontSize: 12 }}>{qtdPlunder > 0 ? `${qtdPlunder} packs` : "inativo"}</span>
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Stat label="Bônus Bartering" value={`+${fmt((r.bonusBartering - 1) * 100, 0)}%`} color={gold} />
-                <Stat label="Multiplicador Total" value={`×${fmt(r.bonusTotal * r.imMult, 2)}`} sub={enhanced ? "com Enhanced" : "sem Enhanced"} color={enhanced ? gold : dim} />
-              </div>
-              <div style={{ marginTop: 10 }}>
-                <Stat label="IM Efetiva/Pack" value={fmtInt(r.imEfetiva)} sub="com todos os bônus ativos" color={gold} highlight />
+                <Stat label="IM Média/Pack" value={fmtInt(r.imEfetiva)} sub="média com todos os bônus" color={gold} />
               </div>
             </Section>
           </div>
@@ -552,7 +688,19 @@ export default function App() {
               <Field label="QUEST recebido" value={calQUEST} onChange={setCalQUEST} step={1} suffix="QUEST" hint="Chest de sexta" />
               <Field label="Joias acumuladas" value={calJoias} onChange={setCalJoias} step={10} suffix="💎" />
             </div>
-            <Field label="IM gerada pelos packs (separe da expedição)" value={calIMpacks} onChange={setCalIMpacks} step={100000} suffix="IM" hint="Sua IM dos packs: 10.308.690" />
+
+            {/* IM dos packs calculada automaticamente */}
+            <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>IM gerada pelos packs (calculado automaticamente)</div>
+                  <div style={{ color: "#505060", fontSize: 10 }}>{fmtInt(qtdPacks)} packs × {fmtInt(imPorPack)} IM/pack</div>
+                </div>
+                <div style={{ color: blue, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>
+                  {fmtInt(qtdPacks * imPorPack)} IM
+                </div>
+              </div>
+            </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
               <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px" }}>
@@ -561,20 +709,20 @@ export default function App() {
                 <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{calQUEST} ÷ {fmtInt(calIM)}</div>
               </div>
               <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Joia calculado</div>
-                <div style={{ color: green, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(calIMjoia)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(calIM - calIMpacks)} ÷ {fmtInt(calJoias)}</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM Expedição/sem</div>
+                <div style={{ color: green, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(calIM - qtdPacks * imPorPack)}</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(calIM)} - {fmtInt(qtdPacks * imPorPack)}</div>
               </div>
               <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Pack calculado</div>
-                <div style={{ color: green, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(calIMpacks / 10)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(calIMpacks)} ÷ 10 packs</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Pack (automático)</div>
+                <div style={{ color: blue, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imPorPack)}</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>configurado na aba Tradepack</div>
               </div>
             </div>
 
-            <button onClick={() => { setPoolRate(parseFloat(calPoolRate.toFixed(9))); setImExpSemana(Math.round(calIM - calIMpacks)); setJoiasTotal(calJoias); setImPorPack(Math.round(calIMpacks / 10)); }}
+            <button onClick={() => { setPoolRate(parseFloat(calPoolRate.toFixed(9))); setImExpSemana(Math.round(calIM - qtdPacks * imPorPack)); setJoiasTotal(calJoias); }}
               style={{ width: "100%", background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.08))", border: "1px solid rgba(74,222,128,0.4)", borderRadius: 8, color: green, padding: "11px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: "0.06em" }}>
-              ✅ Aplicar: Pool Rate {calPoolRate.toFixed(8)} · IM Exp/sem {fmtInt(calIM - calIMpacks)} · IM/Pack {fmtInt(calIMpacks / 10)}
+              ✅ Aplicar: Pool Rate {calPoolRate.toFixed(8)} · IM Exp/sem {fmtInt(calIM - qtdPacks * imPorPack)}
             </button>
           </Section>
 
