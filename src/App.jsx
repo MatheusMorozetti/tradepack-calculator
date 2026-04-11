@@ -137,7 +137,8 @@ export default function App() {
   const setMat = (nome, campo, val) => setMatsOverride(prev => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
 
   const r = useMemo(() => {
-    const bonusBartering = 1.15; // Bartering I (5%) + II (10%)
+    const MES = 30 / 7; // Mês calendário exato em semanas
+    const bonusBartering = 1.15;
     const packsSemanais = qtdPacks;
     const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
     const plunderVal = Math.min(qtdPlunder, packsSemanais);
@@ -159,10 +160,13 @@ export default function App() {
     const certCusto_S = certCusto_Q * questToSilver;
     const silverLiqPorPack = silverPorPack - custoProducaoTotal;
 
-    // QUEST dos packs
-    const questIM = imTotal_semana * poolRate;
-    const questCerts = packsSemanais * certCusto_Q;
-    const questLiq = questIM - questCerts;
+    // QUEST dos packs — semanal e mensal
+    const questIM_sem = imTotal_semana * poolRate;
+    const questCerts_sem = packsSemanais * certCusto_Q;
+    const questLiq_sem = questIM_sem - questCerts_sem;
+    const questIM_mes = questIM_sem * MES;
+    const questCerts_mes = questCerts_sem * MES;
+    const questLiq_mes = questLiq_sem * MES;
 
     // Custo oportunidade
     const lucroVendaMkt = valorMktTotal - custoProducaoTotal;
@@ -175,39 +179,61 @@ export default function App() {
     const imBreakeven = poolRate > 0 ? questNecessarioPorPack / poolRate : 0;
     const imBreaakevenEnhanced = poolRate > 0 ? questNecessarioPorPack / (poolRate * 2) : 0;
 
-    // Expedição
+    // Expedição — semanal e mensal
     const expIM = imExpSemana;
-    const expQUEST = expIM * poolRate;
-    const expUSD_mes = expQUEST * questUSD * 4.3;
+    const expQUEST_sem = expIM * poolRate;
+    const expUSD_sem = expQUEST_sem * questUSD;
+    const expQUEST_mes = expQUEST_sem * MES;
+    const expUSD_mes = expQUEST_mes * questUSD;
 
-    // Totais
+    // Silver dos packs — semanal e mensal
+    const silverPacks_sem = packsSemanais * silverLiqPorPack;
+    const silverPacks_mes = silverPacks_sem * MES;
+    const questSilverPacks_sem = silverPacks_sem / questToSilver;
+    const questSilverPacks_mes = silverPacks_mes / questToSilver;
+
+    // Totais — semanal e mensal
     const totalIM = expIM + imTotal_semana;
-    const totalQUEST_liq = expQUEST + questLiq + (packsSemanais * silverLiqPorPack / questToSilver);
-    const totalUSD_mes = totalQUEST_liq * questUSD * 4.3;
+    const totalQUEST_sem = expQUEST_sem + questLiq_sem + questSilverPacks_sem;
+    const totalQUEST_mes = totalQUEST_sem * MES;
+    const totalUSD_sem = totalQUEST_sem * questUSD;
+    const totalUSD_mes = totalQUEST_mes * questUSD;
 
-    // Comparativo atividades
+    // Comparativo atividades — semanal e mensal
     const silverCaca_sem = silverHoraCaca * horasPorSemana;
     const silverMin_sem = silverHoraMineracao * horasPorSemana;
-    const usdCaca_mes = (silverCaca_sem / questToSilver) * questUSD * 4.3;
-    const usdMin_mes = (silverMin_sem / questToSilver) * questUSD * 4.3;
+    const usdCaca_sem = (silverCaca_sem / questToSilver) * questUSD;
+    const usdMin_sem = (silverMin_sem / questToSilver) * questUSD;
+    const usdCaca_mes = usdCaca_sem * MES;
+    const usdMin_mes = usdMin_sem * MES;
 
-    // Estratégias
-    const lucroVenderMkt_total = packsSemanais * lucroVendaMkt;
-    const profitRealUSD_mes = totalUSD_mes;
-    const profitAlternativoUSD_mes = expUSD_mes + (packsSemanais * lucroVendaMkt / questToSilver) * questUSD * 4.3;
-    const diferencaEstrategia = profitRealUSD_mes - profitAlternativoUSD_mes;
+    // Estratégias — semanal e mensal
+    const lucroVenderMkt_sem = packsSemanais * lucroVendaMkt;
+    const lucroVenderMkt_mes = lucroVenderMkt_sem * MES;
+
+    const profitReal_sem = totalUSD_sem;
+    const profitReal_mes = totalUSD_mes;
+
+    const profitAlt_sem = expUSD_sem + (lucroVenderMkt_sem / questToSilver) * questUSD;
+    const profitAlt_mes = profitAlt_sem * MES;
+
+    const diferenca_sem = profitReal_sem - profitAlt_sem;
+    const diferenca_mes = profitReal_mes - profitAlt_mes;
 
     return {
-      bonusBartering, packsSemanais, enhancedVal, plunderVal, packsNormais,
+      MES, bonusBartering, packsSemanais, enhancedVal, plunderVal, packsNormais,
       imBase, imNormalTotal, imEnhancedTotal, imPlunderTotal, imTotal_semana, imEfetiva,
       custoProducaoTotal, valorMktTotal, certCusto_Q, certCusto_S,
-      silverLiqPorPack, questIM, questCerts, questLiq,
+      silverLiqPorPack, silverPacks_sem, silverPacks_mes,
+      questIM_sem, questIM_mes, questCerts_sem, questCerts_mes, questLiq_sem, questLiq_mes,
       lucroVendaMkt, questVendaMkt, questPack, deltaQUEST,
       imBreakeven, imBreaakevenEnhanced, questNecessarioPorPack,
-      expIM, expQUEST, expUSD_mes, totalIM,
-      totalQUEST_liq, totalUSD_mes,
-      silverCaca_sem, silverMin_sem, usdCaca_mes, usdMin_mes,
-      lucroVenderMkt_total, profitRealUSD_mes, profitAlternativoUSD_mes, diferencaEstrategia,
+      expIM, expQUEST_sem, expQUEST_mes, expUSD_sem, expUSD_mes,
+      totalIM, totalQUEST_sem, totalQUEST_mes, totalUSD_sem, totalUSD_mes,
+      silverCaca_sem, silverMin_sem, usdCaca_sem, usdMin_sem, usdCaca_mes, usdMin_mes,
+      lucroVenderMkt_sem, lucroVenderMkt_mes,
+      profitReal_sem, profitReal_mes, profitAlt_sem, profitAlt_mes,
+      diferenca_sem, diferenca_mes,
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, imPorPack, qtdEnhanced, qtdPlunder, custoCert,
@@ -242,31 +268,36 @@ export default function App() {
 
       {/* RESULTADO PRINCIPAL — 3 CENÁRIOS */}
       <div style={{ background: "linear-gradient(135deg, rgba(196,160,80,0.10), rgba(196,160,80,0.02))", border: "1px solid rgba(196,160,80,0.4)", borderRadius: 16, padding: "20px 24px", marginBottom: 20 }}>
-        <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>💰 Comparativo de Estratégias — Mensal</div>
+        <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>💰 Comparativo de Estratégias</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+          {/* Fazendo os packs */}
           <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📦 Fazendo os Packs Prime</div>
-            <div style={{ color: green, fontSize: 30, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitRealUSD_mes)}</div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + silver + QUEST<br/>Você realmente recebe isso ✅</div>
+            <div style={{ color: green, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
+            <div style={{ color: green, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
+            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + silver + QUEST ✅</div>
           </div>
+          {/* Vendendo materiais */}
           <div style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>💰 Vendendo os Materiais</div>
-            <div style={{ color: orange, fontSize: 30, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlternativoUSD_mes)}</div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + venda no mkt<br/>Sem custo de certificados ✅</div>
+            <div style={{ color: orange, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
+            <div style={{ color: orange, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
+            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + venda no mkt ✅</div>
           </div>
-          <div style={{ background: r.diferencaEstrategia >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferencaEstrategia >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
+          {/* Diferença */}
+          <div style={{ background: r.diferenca_mes >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferenca_mes >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📊 Diferença de Estratégia</div>
-            <div style={{ color: pc(r.diferencaEstrategia), fontSize: 30, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.diferencaEstrategia >= 0 ? "+" : ""}{fmtUSD(r.diferencaEstrategia)}</div>
+            <div style={{ color: pc(r.diferenca_mes), fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.diferenca_mes >= 0 ? "+" : ""}{fmtUSD(r.diferenca_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
+            <div style={{ color: pc(r.diferenca_sem), fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>{r.diferenca_sem >= 0 ? "+" : ""}{fmtUSD(r.diferenca_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
             <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>
-              {r.diferencaEstrategia >= 0 ? "Pack compensa ✅" : "Vender mat. é melhor ❌"}<br/>
-              {r.diferencaEstrategia < 0 ? `Deixa ${fmtUSD(Math.abs(r.diferencaEstrategia))}/mês na mesa` : "Ganho extra fazendo pack"}
+              {r.diferenca_mes >= 0 ? "Pack compensa ✅" : "Vender mat. é melhor ❌"}
             </div>
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          <Stat label="Expedição/mês" value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmtInt(joiasTotal)} 💎 · ${fmtInt(imExpSemana)} IM`} color={blue} />
+          <Stat label="Expedição" value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
           <Stat label="IM Packs/sem" value={fmtInt(r.imTotal_semana)} sub={`${r.packsSemanais} packs`} color={gold} />
-          <Stat label="QUEST IM líq." value={fmt(r.questLiq)} sub={`-${fmt(r.questCerts)} Q certs`} color={pc(r.questLiq)} />
+          <Stat label="QUEST IM líq." value={`${fmt(r.questLiq_sem)}/sem`} sub={`${fmt(r.questLiq_mes)}/mês · -${fmt(r.questCerts_sem)} Q certs`} color={pc(r.questLiq_sem)} />
           <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub="por pack" color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
         </div>
       </div>
@@ -369,6 +400,8 @@ export default function App() {
                 <Stat label="Vender materiais" value={fmtInt(r.lucroVendaMkt)} sub="pós custo produção" color={orange} />
                 <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub="por pack" color={purple} />
                 <Stat label="Custo cert" value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
+                <Stat label="QUEST IM líq./sem" value={`${fmt(r.questLiq_sem)} Q`} sub={`${fmtUSD(r.questLiq_sem * questUSD)}/sem`} color={pc(r.questLiq_sem)} />
+                <Stat label="QUEST IM líq./mês" value={`${fmt(r.questLiq_mes)} Q`} sub={`${fmtUSD(r.questLiq_mes * questUSD)}/mês`} color={pc(r.questLiq_mes)} highlight />
               </div>
             </Section>
 
@@ -377,9 +410,10 @@ export default function App() {
                 <Field label="💎 Joias Acumuladas" value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint="Total acumulado (não reseta)" />
                 <Field label="IM Expedição/Semana" value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint="Seu dado real: 4.312.920" color={green} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                 <Stat label="IM Expedição/sem" value={fmtInt(r.expIM)} />
-                <Stat label="QUEST Expedição" value={`${fmt(r.expQUEST)} Q`} sub={`${fmtUSD(r.expUSD_mes)}/mês`} color={blue} />
+                <Stat label="QUEST/sem" value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
+                <Stat label="USD/mês" value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
               </div>
             </Section>
 
@@ -403,32 +437,35 @@ export default function App() {
               <Field label="Silver/hora — Mineração" value={silverHoraMineracao} onChange={setSilverHoraMineracao} step={10000} suffix="silver" hint="Seu dado real: 4.516.250" />
               <Field label="Horas/semana disponíveis" value={horasPorSemana} onChange={setHorasPorSemana} step={1} suffix="h" />
             </div>
-            <Divider label="Resultado Mensal" />
+            <Divider label="Resultado Semanal e Mensal" />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
               {[
-                { label: "🏹 Caça Infusion", value: fmtUSD(r.usdCaca_mes), sub: `${fmtInt(r.silverCaca_sem)} silver/sem`, color: red },
-                { label: "⛏️ Mineração", value: fmtUSD(r.usdMin_mes), sub: `${fmtInt(r.silverMin_sem)} silver/sem`, color: blue },
-                { label: "📦 Tradepack Prime", value: fmtUSD(r.totalUSD_mes), sub: "exp + packs", color: gold },
+                { label: "🏹 Caça Infusion", sem: fmtUSD(r.usdCaca_sem), mes: fmtUSD(r.usdCaca_mes), sub: `${fmtInt(r.silverCaca_sem)} silver/sem`, color: red },
+                { label: "⛏️ Mineração", sem: fmtUSD(r.usdMin_sem), mes: fmtUSD(r.usdMin_mes), sub: `${fmtInt(r.silverMin_sem)} silver/sem`, color: blue },
+                { label: "📦 Tradepack Prime", sem: fmtUSD(r.totalUSD_sem), mes: fmtUSD(r.totalUSD_mes), sub: "exp + packs", color: gold },
               ].map((a, i) => (
                 <div key={i} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 16, textAlign: "center" }}>
                   <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{a.label}</div>
-                  <div style={{ color: a.color, fontSize: 22, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{a.value}</div>
-                  <div style={{ color: "#555565", fontSize: 11, marginTop: 4 }}>/mês · {a.sub}</div>
+                  <div style={{ color: a.color, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>+{a.mes}<span style={{ fontSize: 11 }}>/mês</span></div>
+                  <div style={{ color: a.color, fontSize: 14, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{a.sem}<span style={{ fontSize: 11 }}>/sem</span></div>
+                  <div style={{ color: "#555565", fontSize: 11, marginTop: 4 }}>{a.sub}</div>
                 </div>
               ))}
             </div>
-            <Divider label="Pack vs Vender Materiais (semanal)" />
+            <Divider label="Pack vs Vender Materiais" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 12, padding: 16, textAlign: "center" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📦 Fazer {r.packsSemanais} packs prime</div>
-                <div style={{ color: green, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.packsSemanais * r.silverLiqPorPack)} silver</div>
-                <div style={{ color: purple, fontSize: 12, marginTop: 4 }}>+ {fmt(r.questLiq)} QUEST ({fmtUSD(r.questLiq * questUSD)})</div>
-                <div style={{ color: "#555565", fontSize: 10, marginTop: 4 }}>custo certs: -{fmt(r.questCerts)} QUEST</div>
+                <div style={{ color: green, fontSize: 16, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.silverPacks_sem)} silver/sem</div>
+                <div style={{ color: green, fontSize: 13, marginTop: 2 }}>{fmtInt(r.silverPacks_mes)} silver/mês</div>
+                <div style={{ color: purple, fontSize: 12, marginTop: 6 }}>+ {fmt(r.questLiq_sem)} Q/sem · {fmt(r.questLiq_mes)} Q/mês</div>
+                <div style={{ color: "#555565", fontSize: 10, marginTop: 4 }}>custo certs: -{fmt(r.questCerts_sem)} Q/sem</div>
               </div>
               <div style={{ background: "rgba(251,146,60,0.05)", border: "1px solid rgba(251,146,60,0.25)", borderRadius: 12, padding: 16, textAlign: "center" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>💰 Vender materiais no mercado</div>
-                <div style={{ color: orange, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.lucroVenderMkt_total)} silver</div>
-                <div style={{ color: "#555565", fontSize: 12, marginTop: 4 }}>{fmtUSD(r.lucroVenderMkt_total / questToSilver * questUSD * 4.3)}/mês</div>
+                <div style={{ color: orange, fontSize: 16, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.lucroVenderMkt_sem)} silver/sem</div>
+                <div style={{ color: orange, fontSize: 13, marginTop: 2 }}>{fmtInt(r.lucroVenderMkt_mes)} silver/mês</div>
+                <div style={{ color: "#555565", fontSize: 12, marginTop: 6 }}>{fmtUSD(r.profitAlt_sem)}/sem · {fmtUSD(r.profitAlt_mes)}/mês</div>
                 <div style={{ color: "#555565", fontSize: 10, marginTop: 4 }}>sem custo de certificados</div>
               </div>
             </div>
