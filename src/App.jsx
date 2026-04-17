@@ -133,19 +133,27 @@ export default function App() {
   // MATERIAIS
   const packAtual = PACKS[packSelecionado];
   const [matsOverride, setMatsOverride] = useState({});
+  const [matsQUEST, setMatsQUEST] = useState({}); // materiais plantados com QUEST (-20%)
   const getMat = (nome, campo) => (matsOverride[nome]?.[campo] !== undefined ? matsOverride[nome][campo] : packAtual.materiais.find(m => m.nome === nome)?.[campo] ?? 0);
   const setMat = (nome, campo, val) => setMatsOverride(prev => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
+  const toggleQUEST = (nome) => setMatsQUEST(prev => ({ ...prev, [nome]: !prev[nome] }));
+  const getCustoReal = (nome) => {
+    const base = getMat(nome, "custoProducao");
+    return matsQUEST[nome] ? base * 0.8 : base;
+  };
 
   const r = useMemo(() => {
-    const MES = 30 / 7; // Mês calendário exato em semanas
-    const bonusBartering = 1.15;
+    const MES = 30 / 7;
     const packsSemanais = qtdPacks;
     const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
     const plunderVal = Math.min(qtdPlunder, packsSemanais);
     const packsNormais = packsSemanais - enhancedVal;
 
     // IM por categoria
-    const imBase = imPorPack * bonusBartering;
+    // IMPORTANTE: imPorPack já inclui o Bartering (calculado pelo jogo no silver_value)
+    // Fórmula real: IM = silver_value × 10 (prime) × bartering (já embutido no jogo)
+    // Enhanced = ×2 adicional | Plunder = +15% adicional sobre o imPorPack observado
+    const imBase = imPorPack;
     const imNormalTotal = packsNormais * imBase;
     const imEnhancedTotal = enhancedVal * imBase * 2;
     const imPlunderTotal = plunderVal * imBase * 0.15;
@@ -154,7 +162,7 @@ export default function App() {
 
     // Custos
     const mats = packAtual.materiais;
-    const custoProducaoTotal = mats.reduce((acc, m) => acc + m.qtd * getMat(m.nome, "custoProducao"), 0);
+    const custoProducaoTotal = mats.reduce((acc, m) => acc + m.qtd * getCustoReal(m.nome), 0);
     const valorMktTotal = mats.reduce((acc, m) => acc + m.qtd * getMat(m.nome, "precoMkt"), 0);
     const certCusto_Q = 10 * custoCert;
     const certCusto_S = certCusto_Q * questToSilver;
@@ -221,7 +229,7 @@ export default function App() {
     const diferenca_mes = profitReal_mes - profitAlt_mes;
 
     return {
-      MES, bonusBartering, packsSemanais, enhancedVal, plunderVal, packsNormais,
+      MES, packsSemanais, enhancedVal, plunderVal, packsNormais,
       imBase, imNormalTotal, imEnhancedTotal, imPlunderTotal, imTotal_semana, imEfetiva,
       custoProducaoTotal, valorMktTotal, certCusto_Q, certCusto_S,
       silverLiqPorPack, silverPacks_sem, silverPacks_mes,
@@ -237,7 +245,7 @@ export default function App() {
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, imPorPack, qtdEnhanced, qtdPlunder, custoCert,
-    matsOverride, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
+    matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
 
   if (!autenticado) return <LoginScreen onLogin={() => setAutenticado(true)} />;
 
@@ -363,20 +371,23 @@ export default function App() {
             <Section title="Bônus Ativos" icon="⚡" borderColor="rgba(196,160,80,0.4)">
               <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
                 {[
-                  { label: "✅ Bartering I (+5%)", sub: "T3 · 1.000 rep", color: green },
-                  { label: "✅ Bartering II (+10%)", sub: "T7 · 3.000 rep", color: green },
-                  { label: `${qtdEnhanced > 0 ? "🔮" : "⬜"} Enhanced (×2 IM)`, sub: qtdEnhanced > 0 ? `${qtdEnhanced} packs` : "inativo", color: qtdEnhanced > 0 ? gold : dim },
-                  { label: `${qtdPlunder > 0 ? "⚔️" : "⬜"} Plunder (+15%)`, sub: qtdPlunder > 0 ? `${qtdPlunder} packs` : "inativo", color: qtdPlunder > 0 ? red : dim },
+                  { label: "✅ Bartering I (+5%)", sub: "embutido no IM/pack observado", color: green },
+                  { label: "✅ Bartering II (+10%)", sub: "embutido no IM/pack observado", color: green },
+                  { label: `${qtdEnhanced > 0 ? "🔮" : "⬜"} Enhanced (×2 IM)`, sub: qtdEnhanced > 0 ? `${qtdEnhanced} packs · aplicado sobre o IM observado` : "inativo", color: qtdEnhanced > 0 ? gold : dim },
+                  { label: `${qtdPlunder > 0 ? "⚔️" : "⬜"} Plunder (+15%)`, sub: qtdPlunder > 0 ? `${qtdPlunder} packs · dom→seg` : "inativo", color: qtdPlunder > 0 ? red : dim },
                 ].map((b, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < 3 ? 6 : 0 }}>
                     <span style={{ color: b.color, fontSize: 12 }}>{b.label}</span>
-                    <span style={{ color: b.color, fontSize: 12 }}>{b.sub}</span>
+                    <span style={{ color: "#505060", fontSize: 11 }}>{b.sub}</span>
                   </div>
                 ))}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <Stat label="Bônus Bartering" value="+15%" color={gold} />
-                <Stat label="IM Média/Pack" value={fmtInt(r.imEfetiva)} sub="média ponderada" color={gold} />
+              <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "10px 14px", fontSize: 11, color: dim, lineHeight: 1.6 }}>
+                ℹ️ O campo <strong style={{ color: gold }}>IM base/pack</strong> deve ser o valor <strong style={{ color: gold }}>observado no jogo</strong> após entregar o pack — ele já inclui o Bartering e o ×10 do Prime. Enhanced e Plunder são aplicados sobre esse valor.
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+                <Stat label="IM base/pack (observado)" value={fmtInt(imPorPack)} sub="inclui Prime ×10 + Bartering" color={gold} />
+                <Stat label="IM Média/Pack efetiva" value={fmtInt(r.imEfetiva)} sub="com Enhanced + Plunder" color={gold} />
               </div>
             </Section>
           </div>
@@ -435,7 +446,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
               <Field label="Silver/hora — Caça Infusion" value={silverHoraCaca} onChange={setSilverHoraCaca} step={10000} suffix="silver" hint="Seu dado real: 4.830.102" />
               <Field label="Silver/hora — Mineração" value={silverHoraMineracao} onChange={setSilverHoraMineracao} step={10000} suffix="silver" hint="Seu dado real: 4.516.250" />
-              <Field label="Horas/semana disponíveis" value={horasPorSemana} onChange={setHorasPorSemana} step={1} suffix="h" />
+              <Field label="⏱️ Horas farmando/semana" value={horasPorSemana} onChange={setHorasPorSemana} step={1} suffix="h" hint="Horas reais que você fica farmando" />
             </div>
             <Divider label="Resultado Semanal e Mensal" />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
@@ -488,34 +499,53 @@ export default function App() {
           <Section title={`Receita & Mercado — ${packSelecionado}`} icon="💰" accent>
             <div style={{ marginBottom: 14 }}>
               <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack</label>
-              <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); }}
+              <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
                 style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }}>
                 {Object.keys(PACKS).map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
+            <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 11, color: dim }}>
+              🌱 <strong style={{ color: purple }}>Plantar com QUEST</strong> — aplica <strong style={{ color: green }}>-20%</strong> no custo de produção do material selecionado. Ative por linha.
+            </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 16 }}>
               <thead>
-                <tr>{["Material", "Qtd", "Custo Prod./un", "Preço Mkt/un", "Custo Total", "Valor Mkt"].map(h => (
-                  <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
+                <tr>{["Material", "Qtd", "Custo Prod./un", "🌱 QUEST (-20%)", "Custo Real/un", "Preço Mkt/un", "Custo Total", "Valor Mkt"].map(h => (
+                  <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
                 ))}</tr>
               </thead>
               <tbody>
                 {packAtual.materiais.map((m, i) => {
                   const cp = getMat(m.nome, "custoProducao");
                   const pm = getMat(m.nome, "precoMkt");
+                  const comQUEST = !!matsQUEST[m.nome];
+                  const custoReal = comQUEST ? cp * 0.8 : cp;
                   return (
-                    <tr key={i}>
-                      <td style={{ padding: "8px 10px", color: "#c0c0d0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.nome}</td>
+                    <tr key={i} style={{ background: comQUEST ? "rgba(167,139,250,0.05)" : "transparent" }}>
+                      <td style={{ padding: "8px 10px", color: comQUEST ? purple : "#c0c0d0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.qtd}</td>
                       <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <input type="number" value={cp} onChange={e => setMat(m.nome, "custoProducao", parseFloat(e.target.value) || 0)}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 4, color: "#f0e6c8", padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <button onClick={() => toggleQUEST(m.nome)} style={{
+                          background: comQUEST ? "rgba(167,139,250,0.25)" : "rgba(0,0,0,0.3)",
+                          border: `1px solid ${comQUEST ? "rgba(167,139,250,0.6)" : "rgba(255,255,255,0.1)"}`,
+                          borderRadius: 6, color: comQUEST ? purple : "#404050",
+                          padding: "4px 10px", cursor: "pointer", fontSize: 11,
+                          fontFamily: "'Space Mono', monospace", transition: "all 0.15s",
+                        }}>
+                          {comQUEST ? "✅ ativo" : "⬜ não"}
+                        </button>
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: comQUEST ? green : "#a0a0b0", fontWeight: comQUEST ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {fmtInt(custoReal)}{comQUEST && <span style={{ fontSize: 9, marginLeft: 4, color: green }}>-20%</span>}
+                      </td>
                       <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <input type="number" value={pm} onChange={e => setMat(m.nome, "precoMkt", parseFloat(e.target.value) || 0)}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: 90, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(m.qtd * cp)}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: comQUEST ? green : red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(m.qtd * custoReal)}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: orange, borderBottom: "1px solid rgba(255,255,255,0.04)", fontWeight: "bold" }}>{fmtInt(m.qtd * pm)}</td>
                     </tr>
                   );
