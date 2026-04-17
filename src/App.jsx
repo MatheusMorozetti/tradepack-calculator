@@ -69,7 +69,7 @@ function LoginScreen({ onLogin }) {
   };
 
   const handleOtp = async () => {
-    if (!otpCode || otpCode.length < 8) { setErro("Informe o código de 8 dígitos."); return; }
+    if (!otpCode || otpCode.length < 6) { setErro("Informe o código de 6 dígitos."); return; }
     setLoading(true); setErro("");
     const { error } = await supabase.auth.verifyOtp({
       email: emailRecovery,
@@ -145,9 +145,9 @@ function LoginScreen({ onLogin }) {
         {modo === "otp" && <>
           <div style={{ color: "#4ade80", fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
           <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-            Insira o código de 8 dígitos recebido no email.
+            Insira o código de 6 dígitos recebido no email.
           </div>
-          <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder="Código de 8 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))} onKeyDown={e => e.key === "Enter" && handleOtp()}
+          <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder="Código de 6 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
             style={{ ...inputStyle(!!erro), fontSize: 24, letterSpacing: "0.3em", textAlign: "center" }} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
