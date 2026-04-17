@@ -119,8 +119,8 @@ export default function App() {
   // TRADEPACK
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
   const [qtdPacks, setQtdPacks] = useState(10);
-  const [silverPorPack, setSilverPorPack] = useState(95000);
-  const [imPorPack, setImPorPack] = useState(1030869);
+  const [silverPorPack, setSilverPorPack] = useState(79126);
+  const imPorPack = silverPorPack * 10; // IM = silver_value × 10 (prime patch 1.0.7.1)
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
   const [qtdPlunder, setQtdPlunder] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
@@ -334,8 +334,14 @@ export default function App() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="Packs por semana" value={qtdPacks} onChange={setQtdPacks} step={1} />
                 <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint="Varia por demanda/rota" />
-                <Field label="IM base/pack" value={imPorPack} onChange={setImPorPack} step={10000} suffix="IM" hint="Real medido: 1.030.869" />
                 <Field label="Custo certificado" value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
+                <div>
+                  <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
+                  <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px" }}>
+                    <div style={{ color: green, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(imPorPack)}</div>
+                    <div style={{ color: "#505060", fontSize: 10, marginTop: 2 }}>{fmtInt(silverPorPack)} silver × 10 (prime)</div>
+                  </div>
+                </div>
               </div>
 
               <Divider label="Packs Especiais" />
@@ -386,7 +392,7 @@ export default function App() {
                 ℹ️ O campo <strong style={{ color: gold }}>IM base/pack</strong> deve ser o valor <strong style={{ color: gold }}>observado no jogo</strong> após entregar o pack — ele já inclui o Bartering e o ×10 do Prime. Enhanced e Plunder são aplicados sobre esse valor.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
-                <Stat label="IM base/pack (observado)" value={fmtInt(imPorPack)} sub="inclui Prime ×10 + Bartering" color={gold} />
+                <Stat label="Silver/pack" value={fmtInt(silverPorPack)} sub="valor entregue" color={blue} />
                 <Stat label="IM Média/Pack efetiva" value={fmtInt(r.imEfetiva)} sub="com Enhanced + Plunder" color={gold} />
               </div>
             </Section>
@@ -594,7 +600,7 @@ export default function App() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>IM gerada pelos packs (automático)</div>
-                  <div style={{ color: "#505060", fontSize: 10 }}>{fmtInt(qtdPacks)} packs × {fmtInt(imPorPack)} IM/pack</div>
+                  <div style={{ color: "#505060", fontSize: 10 }}>{fmtInt(qtdPacks)} packs × {fmtInt(silverPorPack)} silver × 10 (prime)</div>
                 </div>
                 <div style={{ color: blue, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(qtdPacks * imPorPack)} IM</div>
               </div>
@@ -611,9 +617,9 @@ export default function App() {
                 <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(calIM)} - {fmtInt(qtdPacks * imPorPack)}</div>
               </div>
               <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Pack (configurado)</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Pack (automático)</div>
                 <div style={{ color: blue, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imPorPack)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>via aba Tradepack</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(silverPorPack)} × 10 (prime)</div>
               </div>
             </div>
             <button onClick={() => { setPoolRate(parseFloat(calPoolRate.toFixed(9))); setImExpSemana(Math.round(calIM - qtdPacks * imPorPack)); setJoiasTotal(calJoias); }}
@@ -629,7 +635,7 @@ export default function App() {
               <div>QUEST recebido: <span style={{ color: green }}>386</span></div>
               <div>Joias: <span style={{ color: green }}>664</span></div>
               <div>Pool Rate: <span style={{ color: green }}>0,0000264</span></div>
-              <div>IM/Pack (10 packs): <span style={{ color: green }}>1.030.869</span></div>
+              <div>IM/Pack: <span style={{ color: green }}>silver × 10 (calculado automaticamente)</span></div>
               <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento para manter o modelo preciso.</div>
             </div>
           </Section>
