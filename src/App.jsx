@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
 
 // tabId único por aba — gerado no nível do módulo, acessível por todos os componentes
-// sessionStorage é isolado por aba, então cada aba tem seu próprio ID
 const tabId = (() => {
   let id = sessionStorage.getItem("tabId");
   if (!id) {
@@ -11,93 +10,6 @@ const tabId = (() => {
   }
   return id;
 })();
-
-// Captura o tipo da URL ANTES do Supabase processar e limpar o hash
-// Necessário porque SafeLinks/proxies causam delay no redirect
-const urlHash = window.location.hash;
-const isPasswordRecovery = urlHash.includes("type=recovery") || sessionStorage.getItem("pendingRecovery") === "1";
-if (urlHash.includes("type=recovery")) {
-  sessionStorage.setItem("pendingRecovery", "1");
-}
-
-// ── RESET DE SENHA ─────────────────────────────────────────────────────────
-function ResetPasswordScreen() {
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmar, setConfirmar] = useState("");
-  const [erro, setErro] = useState("");
-  const [sucesso, setSucesso] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [sessionReady, setSessionReady] = useState(false);
-
-  // Aguarda o Supabase processar o token da URL e estabelecer a sessão
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setSessionReady(true);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleReset = async () => {
-    if (!novaSenha || !confirmar) { setErro("Preencha os dois campos."); return; }
-    if (novaSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
-    if (novaSenha !== confirmar) { setErro("As senhas não coincidem."); return; }
-
-    setLoading(true); setErro("");
-    const { error } = await supabase.auth.updateUser({ password: novaSenha });
-    if (error) {
-      setErro("Erro ao atualizar senha. Tente novamente.");
-      setLoading(false); return;
-    }
-    await supabase.auth.signOut();
-    sessionStorage.removeItem("pendingRecovery");
-    setSucesso(true);
-    setLoading(false);
-  };
-
-  return (
-    <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-      <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
-        <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>Tradepack Prime</div>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, fontWeight: 700, color: "#c4a050", marginBottom: 24 }}>Calculator</div>
-
-        {sucesso ? (
-          <div>
-            <div style={{ color: "#4ade80", fontSize: 32, marginBottom: 16 }}>✅</div>
-            <div style={{ color: "#4ade80", fontSize: 14, marginBottom: 8 }}>Senha atualizada com sucesso!</div>
-            <div style={{ color: "#505060", fontSize: 11, marginBottom: 24 }}>Você pode fazer login com a nova senha.</div>
-            <button onClick={() => { window.location.hash = ""; window.location.reload(); }}
-              style={{ width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
-              IR PARA O LOGIN →
-            </button>
-          </div>
-        ) : !sessionReady ? (
-          <div style={{ color: "#505060", fontSize: 12, letterSpacing: "0.1em" }}>
-            ⟳ Validando link de recuperação...
-          </div>
-        ) : (
-          <div>
-            <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 24, lineHeight: 1.6 }}>
-              Defina sua nova senha de acesso.
-            </div>
-            <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
-              style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
-            <input type="password" placeholder="Confirmar senha" value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleReset()}
-              style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`, borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
-            {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
-            <button onClick={handleReset} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
-              {loading ? "SALVANDO..." : "SALVAR NOVA SENHA →"}
-            </button>
-          </div>
-        )}
-        <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>ToilZero Calculator · Acesso restrito</div>
-      </div>
-    </div>
-  );
-}
 
 // ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
 function LoginScreen({ onLogin }) {
@@ -159,7 +71,7 @@ function LoginScreen({ onLogin }) {
   };
 
   const handleOtp = async () => {
-    if (!otpCode || otpCode.length < 6) { setErro("Informe o código de 6 dígitos."); return; }
+    if (!otpCode || otpCode.length < 8) { setErro("Informe o código de 8 dígitos."); return; }
     setLoading(true); setErro("");
     const { error } = await supabase.auth.verifyOtp({
       email: emailRecovery,
@@ -235,9 +147,9 @@ function LoginScreen({ onLogin }) {
         {modo === "otp" && <>
           <div style={{ color: "#4ade80", fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
           <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-            Insira o código de 6 dígitos recebido no email.
+            Insira o código de 8 dígitos recebido no email.
           </div>
-          <input type="text" placeholder="Código de 6 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
+          <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder="Código de 8 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 8))} onKeyDown={e => e.key === "Enter" && handleOtp()}
             style={{ ...inputStyle(!!erro), fontSize: 24, letterSpacing: "0.3em", textAlign: "center" }} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
@@ -339,8 +251,7 @@ export default function App() {
   const [userId, setUserId] = useState("");
   const [sessionAtual, setSessionAtual] = useState("");
   const [expiresAt, setExpiresAt] = useState(null);
-  const [initialLoading, setInitialLoading] = useState(!isPasswordRecovery);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(isPasswordRecovery);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [tab, setTab] = useState("tradepack");
 
   // Função de logout
@@ -349,18 +260,6 @@ export default function App() {
     setAutenticado(false);
     setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
   };
-
-  // Detecta PASSWORD_RECOVERY via onAuthStateChange (complementa a detecção por hash)
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        sessionStorage.setItem("pendingRecovery", "1");
-        setIsRecoveryMode(true);
-        setInitialLoading(false);
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   // Persistência de sessão — ao recarregar o browser, restaura a sessão
   useEffect(() => {
@@ -633,8 +532,6 @@ export default function App() {
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
-
-  if (isRecoveryMode) return <ResetPasswordScreen />;
 
   if (initialLoading) return (
     <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
