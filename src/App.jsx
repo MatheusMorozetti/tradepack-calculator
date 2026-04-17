@@ -1,26 +1,90 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "./supabase";
 
-const SENHA_CORRETA = "ravenquest2026";
+// tabId único por aba — gerado no nível do módulo, acessível por todos os componentes
+// sessionStorage é isolado por aba, então cada aba tem seu próprio ID
+const tabId = (() => {
+  let id = sessionStorage.getItem("tabId");
+  if (!id) {
+    id = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    sessionStorage.setItem("tabId", id);
+  }
+  return id;
+})();
 
+// ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
 function LoginScreen({ onLogin }) {
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState(false);
-  const [tentativas, setTentativas] = useState(0);
-  const handleSubmit = () => {
-    if (senha === SENHA_CORRETA) { onLogin(); }
-    else { setErro(true); setTentativas(t => t + 1); setSenha(""); setTimeout(() => setErro(false), 2000); }
+  const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!email || !senha) { setErro("Preencha email e senha."); return; }
+    setLoading(true); setErro("");
+
+    // 1. Autentica no Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    if (error) { setErro("Email ou senha incorretos."); setLoading(false); return; }
+
+    // 2. Valida perfil e expiração
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles").select("*").eq("id", data.user.id).single();
+
+    if (profileError || !profile) {
+      await supabase.auth.signOut();
+      setErro("Perfil não encontrado. Contate o suporte.");
+      setLoading(false); return;
+    }
+
+    if (!profile.active) {
+      await supabase.auth.signOut();
+      setErro("Acesso suspenso. Contate o suporte.");
+      setLoading(false); return;
+    }
+
+    if (new Date(profile.expires_at) < new Date()) {
+      await supabase.auth.signOut();
+      setErro("Acesso expirado. Renove sua assinatura.");
+      setLoading(false); return;
+    }
+
+    // 3. Registra sessão única — tabId é único por aba/dispositivo
+    const { error: upsertError } = await supabase.from("active_sessions").upsert({
+      user_id: data.user.id,
+      session_id: tabId,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (upsertError) {
+      await supabase.auth.signOut();
+      setErro("Erro ao registrar sessão. Tente novamente.");
+      setLoading(false); return;
+    }
+
+    onLogin(data.user, tabId, profile);
+    setLoading(false);
   };
+
   return (
     <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-      <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 360 }}>
+      <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
         <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
         <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>Tradepack Prime</div>
         <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#c4a050", marginBottom: 32 }}>Calculator</div>
-        <input type="password" placeholder="Digite a senha de acesso" value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()}
-          style={{ width: "100%", background: erro ? "rgba(248,113,113,0.08)" : "rgba(0,0,0,0.4)", border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`, borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
-        {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ Senha incorreta{tentativas >= 3 ? ` (${tentativas} tentativas)` : ""}</div>}
-        <button onClick={handleSubmit} style={{ width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>ENTRAR →</button>
+
+        <input type="email" placeholder="Seu email de acesso" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()}
+          style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+
+        <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()}
+          style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`, borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+
+        {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+
+        <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+          {loading ? "VERIFICANDO..." : "ENTRAR →"}
+        </button>
         <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>ToilZero Calculator · Acesso restrito</div>
       </div>
     </div>
@@ -93,13 +157,81 @@ function Divider({ label }) {
   );
 }
 
-function Tag({ text, color }) {
-  return <span style={{ background: `${color}22`, border: `1px solid ${color}55`, borderRadius: 4, padding: "2px 7px", fontSize: 10, color, fontFamily: "'Space Mono', monospace", marginRight: 4 }}>{text}</span>;
-}
-
 export default function App() {
   const [autenticado, setAutenticado] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState("");
+  const [sessionAtual, setSessionAtual] = useState("");
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [tab, setTab] = useState("tradepack");
+
+  // Função de logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setAutenticado(false);
+    setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
+  };
+
+  // Persistência de sessão — ao recarregar o browser, restaura a sessão
+  useEffect(() => {
+    const restoreSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setInitialLoading(false); return; }
+
+      const { data: profile } = await supabase
+        .from("profiles").select("*").eq("id", session.user.id).single();
+
+      if (!profile || !profile.active || new Date(profile.expires_at) < new Date()) {
+        await supabase.auth.signOut();
+        setInitialLoading(false); return;
+      }
+
+      // Valida sessão única — condição estrita: sem registro = bloqueia
+      // tabId é único por aba, então se outra aba/dispositivo logou, o ID não bate
+      const { data: activeSession, error: sessionError } = await supabase
+        .from("active_sessions").select("session_id").eq("user_id", session.user.id).single();
+
+      if (sessionError || !activeSession || activeSession.session_id !== tabId) {
+        await supabase.auth.signOut();
+        setInitialLoading(false); return;
+      }
+
+      // Registra o tabId desta aba como sessão ativa
+      await supabase.from("active_sessions").upsert({
+        user_id: session.user.id,
+        session_id: tabId,
+        updated_at: new Date().toISOString(),
+      });
+
+      setUserId(session.user.id);
+      setUserEmail(profile.email);
+      setSessionAtual(tabId);
+      setExpiresAt(profile.expires_at);
+      setAutenticado(true);
+      setInitialLoading(false);
+    };
+    restoreSession();
+  }, []);
+
+  // Verificação de sessão única a cada 60 segundos
+  useEffect(() => {
+    if (!autenticado || !userId || !sessionAtual) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("active_sessions")
+        .select("session_id")
+        .eq("user_id", userId)
+        .single();
+      if (data?.session_id !== sessionAtual) {
+        await supabase.auth.signOut();
+        alert("⚠️ Sessão encerrada: acesso detectado em outro dispositivo.");
+        setAutenticado(false);
+        setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [autenticado, userId, sessionAtual]);
 
   // MERCADO
   const [poolRate, setPoolRate] = useState(0.0000264);
@@ -117,7 +249,7 @@ export default function App() {
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
   const [qtdPacks, setQtdPacks] = useState(10);
   const [silverPorPack, setSilverPorPack] = useState(79126);
-  const imPorPack = silverPorPack * 10; // IM = silver_value × 10 (prime patch 1.0.7.1)
+  const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
   const [qtdPlunder, setQtdPlunder] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
@@ -130,7 +262,7 @@ export default function App() {
   // MATERIAIS
   const packAtual = PACKS[packSelecionado];
   const [matsOverride, setMatsOverride] = useState({});
-  const [matsQUEST, setMatsQUEST] = useState({}); // materiais plantados com QUEST (-20%)
+  const [matsQUEST, setMatsQUEST] = useState({});
   const getMat = (nome, campo) => (matsOverride[nome]?.[campo] !== undefined ? matsOverride[nome][campo] : packAtual.materiais.find(m => m.nome === nome)?.[campo] ?? 0);
   const setMat = (nome, campo, val) => setMatsOverride(prev => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
   const toggleQUEST = (nome) => setMatsQUEST(prev => ({ ...prev, [nome]: !prev[nome] }));
@@ -138,6 +270,75 @@ export default function App() {
     const base = getMat(nome, "custoProducao");
     return matsQUEST[nome] ? base * 0.8 : base;
   };
+
+  // ── SUPABASE SETTINGS SYNC ────────────────────────────────────────────────
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  // Carrega as configurações do usuário ao autenticar
+  useEffect(() => {
+    if (!autenticado || !userId || settingsLoaded) return;
+    const loadSettings = async () => {
+      setDataLoading(true);
+      const { data } = await supabase
+        .from("user_settings")
+        .select("settings")
+        .eq("user_id", userId)
+        .single();
+      if (data?.settings && Object.keys(data.settings).length > 0) {
+        const s = data.settings;
+        if (s.poolRate !== undefined) setPoolRate(s.poolRate);
+        if (s.questUSD !== undefined) setQuestUSD(s.questUSD);
+        if (s.questToSilver !== undefined) setQuestToSilver(s.questToSilver);
+        if (s.calQUEST !== undefined) setCalQUEST(s.calQUEST);
+        if (s.imExpSemana !== undefined) setImExpSemana(s.imExpSemana);
+        if (s.joiasTotal !== undefined) setJoiasTotal(s.joiasTotal);
+        if (s.packSelecionado !== undefined) setPackSelecionado(s.packSelecionado);
+        if (s.qtdPacks !== undefined) setQtdPacks(s.qtdPacks);
+        if (s.silverPorPack !== undefined) setSilverPorPack(s.silverPorPack);
+        if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
+        if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
+        if (s.custoCert !== undefined) setCustoCert(s.custoCert);
+        if (s.silverHoraCaca !== undefined) setSilverHoraCaca(s.silverHoraCaca);
+        if (s.silverHoraMineracao !== undefined) setSilverHoraMineracao(s.silverHoraMineracao);
+        if (s.horasPorSemana !== undefined) setHorasPorSemana(s.horasPorSemana);
+        if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
+        if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
+      }
+      setSettingsLoaded(true);
+      setDataLoading(false);
+    };
+    loadSettings();
+  }, [autenticado, userId, settingsLoaded]);
+
+  // Salva automaticamente 3 segundos após qualquer mudança
+  useEffect(() => {
+    if (!autenticado || !userId || !settingsLoaded) return;
+    setSaving(true);
+    const timeout = setTimeout(async () => {
+      try {
+        await supabase.from("user_settings").upsert({
+          user_id: userId,
+          settings: {
+            poolRate, questUSD, questToSilver, calQUEST,
+            imExpSemana, joiasTotal, packSelecionado,
+            qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
+            silverHoraCaca, silverHoraMineracao, horasPorSemana,
+            matsOverride, matsQUEST,
+          },
+          updated_at: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.error("Erro ao salvar configurações:", e);
+      } finally {
+        setSaving(false);
+      }
+    }, 3000);
+    return () => { clearTimeout(timeout); setSaving(false); };
+  }, [poolRate, questUSD, questToSilver, calQUEST, imExpSemana, joiasTotal,
+    packSelecionado, qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
+    silverHoraCaca, silverHoraMineracao, horasPorSemana, matsOverride, matsQUEST]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -244,7 +445,23 @@ export default function App() {
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
 
-  if (!autenticado) return <LoginScreen onLogin={() => setAutenticado(true)} />;
+  if (initialLoading) return (
+    <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, color: "#c4a050", marginBottom: 16 }}>Tradepack Prime</div>
+        <div style={{ color: "#505060", fontSize: 11, letterSpacing: "0.15em" }}>CARREGANDO...</div>
+      </div>
+    </div>
+  );
+
+  if (!autenticado) return <LoginScreen onLogin={(user, sessionId, profile) => {
+    setUserId(user.id);
+    setUserEmail(profile.email);
+    setSessionAtual(sessionId);
+    setExpiresAt(profile.expires_at);
+    setAutenticado(true);
+  }} />;
 
   const tabs = [
     { id: "tradepack", label: "📦 Tradepack" },
@@ -257,17 +474,63 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 15% 15%, rgba(196,160,80,0.07) 0%, transparent 55%)", fontFamily: "'Space Mono', monospace", color: "#f0e6c8", padding: "20px 16px" }}>
       <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
+      {/* WATERMARK — email do usuário para rastreabilidade */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden", opacity: 0.055 }}>
+        {Array.from({ length: 48 }).map((_, i) => (
+          <div key={i} style={{ position: "absolute", top: `${(i % 8) * 13}%`, left: `${Math.floor(i / 8) * 17}%`, transform: "rotate(-30deg)", color: "#ffffff", fontSize: 12, fontFamily: "monospace", whiteSpace: "nowrap", userSelect: "none" }}>
+            {userEmail}
+          </div>
+        ))}
+      </div>
+
       {/* HEADER */}
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <div style={{ fontSize: 10, color: gold, letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 4 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
-        <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: 26, fontWeight: 700, color: "#f0e6c8", margin: 0 }}>Tradepack Prime</h1>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 26, fontWeight: 700, color: gold, margin: "0 0 8px" }}>Calculator v5</div>
-        <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
-          <Tag text="dados reais" color={green} />
-          <Tag text="break-even IM" color={green} />
-          <Tag text="Enhanced + Plunder por qtd" color={gold} />
-          <Tag text="Bartering I+II" color={blue} />
-          <Tag text="patch 1.0.7.1" color={purple} />
+      <div style={{ textAlign: "center", marginBottom: 28 }}>
+        {/* Linha decorativa superior */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 16 }}>
+          <div style={{ height: 1, width: 60, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.5))" }} />
+          <div style={{ fontSize: 10, color: "rgba(196,160,80,0.7)", letterSpacing: "0.35em", textTransform: "uppercase" }}>RavenQuest · Merchant Ledger</div>
+          <div style={{ height: 1, width: 60, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.5))" }} />
+        </div>
+
+        {/* Título principal */}
+        <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: 32, fontWeight: 700, color: "#f0e6c8", margin: "0 0 2px", letterSpacing: "0.05em" }}>Tradepack Prime</h1>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 32, fontWeight: 700, background: "linear-gradient(135deg, #c4a050, #f0d080, #c4a050)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 16 }}>Calculator</div>
+
+        {/* Linha decorativa inferior */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+          <div style={{ height: 1, flex: 1, maxWidth: 120, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.3))" }} />
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(196,160,80,0.5)" }} />
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: gold }} />
+            <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(196,160,80,0.5)" }} />
+          </div>
+          <div style={{ height: 1, flex: 1, maxWidth: 120, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.3))" }} />
+        </div>
+
+        {/* Indicador de salvamento */}
+        <div style={{ marginTop: 10, fontSize: 10, color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.5)", letterSpacing: "0.1em", transition: "color 0.5s" }}>
+          {dataLoading ? "⟳ carregando seus dados..." : saving ? "⟳ salvando..." : settingsLoaded ? "✓ dados sincronizados" : ""}
+        </div>
+
+        {/* Barra de usuário — logout + expiração */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 10 }}>
+          {/* Expiração */}
+          {expiresAt && (() => {
+            const dias = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+            const expColor = dias <= 7 ? "#f87171" : dias <= 14 ? "#fb923c" : "#505060";
+            return (
+              <div style={{ fontSize: 10, color: expColor, letterSpacing: "0.08em" }}>
+                {dias <= 7 && "⚠️ "}{dias > 0 ? `Acesso válido por ${dias} dia${dias !== 1 ? "s" : ""}` : "Acesso expirado"}
+              </div>
+            );
+          })()}
+
+          {/* Logout */}
+          <button onClick={handleLogout} style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 6, color: "rgba(248,113,113,0.6)", padding: "4px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.08em", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.target.style.background = "rgba(248,113,113,0.15)"; e.target.style.color = "#f87171"; }}
+            onMouseLeave={e => { e.target.style.background = "rgba(248,113,113,0.08)"; e.target.style.color = "rgba(248,113,113,0.6)"; }}>
+            SAIR
+          </button>
         </div>
       </div>
 
@@ -655,22 +918,27 @@ export default function App() {
             </button>
           </Section>
 
-          <Section title="Histórico de Calibrações" icon="📅">
+          <Section title="Última Calibração Aplicada" icon="📅">
             <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 14, fontSize: 11, color: dim, lineHeight: 1.8 }}>
-              <div style={{ color: gold, marginBottom: 8, fontFamily: "'Cinzel', serif", fontSize: 12 }}>Semana atual (dados reais)</div>
-              <div>IM Total: <span style={{ color: green }}>14.621.610</span></div>
-              <div>QUEST recebido: <span style={{ color: green }}>386</span></div>
-              <div>Joias: <span style={{ color: green }}>664</span></div>
-              <div>Pool Rate: <span style={{ color: green }}>0,0000264</span></div>
-              <div>IM/Pack: <span style={{ color: green }}>silver × 10 (calculado automaticamente)</span></div>
-              <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento para manter o modelo preciso.</div>
+              <div style={{ color: gold, marginBottom: 8, fontFamily: "'Cinzel', serif", fontSize: 12 }}>Dados ativos no modelo</div>
+              <div>IM Expedição/sem: <span style={{ color: blue }}>{fmtInt(imExpSemana)}</span></div>
+              <div>IM Packs/sem: <span style={{ color: gold }}>{fmtInt(r.imTotal_semana)}</span></div>
+              <div>IM Total: <span style={{ color: green }}>{fmtInt(imExpSemana + r.imTotal_semana)}</span></div>
+              <div>QUEST recebido: <span style={{ color: green }}>{fmtInt(calQUEST)}</span></div>
+              <div>Pool Rate ativo: <span style={{ color: green }}>{poolRate.toFixed(8)}</span></div>
+              <div>IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span></div>
+              <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar.</div>
             </div>
           </Section>
         </div>
       )}
 
-      <div style={{ textAlign: "center", color: "#303040", fontSize: 10, letterSpacing: "0.1em", marginTop: 10 }}>
-        ToilZero Calculator v5 · dados reais · break-even · Enhanced + Plunder por qtd · patch 1.0.7.1
+      <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(196,160,80,0.1)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
+          <div style={{ height: 1, width: 40, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.3))" }} />
+          <span style={{ color: "rgba(196,160,80,0.4)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>ToilZero · Tradepack Prime Calculator</span>
+          <div style={{ height: 1, width: 40, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.3))" }} />
+        </div>
       </div>
     </div>
   );
