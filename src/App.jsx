@@ -242,6 +242,7 @@ export default function App() {
   const [sessionAtual, setSessionAtual] = useState("");
   const [expiresAt, setExpiresAt] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
   const [tab, setTab] = useState("tradepack");
 
   // Função de logout
@@ -250,6 +251,17 @@ export default function App() {
     setAutenticado(false);
     setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
   };
+
+  // Detecta PASSWORD_RECOVERY antes de qualquer outra lógica de sessão
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
+        setInitialLoading(false);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Persistência de sessão — ao recarregar o browser, restaura a sessão
   useEffect(() => {
@@ -523,13 +535,7 @@ export default function App() {
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
 
-  // Detecta link de recovery na URL (#type=recovery)
-  const isRecovery = window.location.hash.includes("type=recovery");
-  if (isRecovery) {
-    // Processa o token do link de recovery via Supabase
-    supabase.auth.getSession(); // inicializa a sessão com o token da URL
-    return <ResetPasswordScreen />;
-  }
+  if (isRecoveryMode) return <ResetPasswordScreen />;
 
   if (initialLoading) return (
     <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
