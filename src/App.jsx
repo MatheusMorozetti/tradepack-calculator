@@ -19,6 +19,17 @@ function ResetPasswordScreen() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+
+  // Aguarda o Supabase processar o token da URL e estabelecer a sessão
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setSessionReady(true);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleReset = async () => {
     if (!novaSenha || !confirmar) { setErro("Preencha os dois campos."); return; }
@@ -28,7 +39,7 @@ function ResetPasswordScreen() {
     setLoading(true); setErro("");
     const { error } = await supabase.auth.updateUser({ password: novaSenha });
     if (error) {
-      setErro("Erro ao atualizar senha. O link pode ter expirado.");
+      setErro("Erro ao atualizar senha. Tente novamente.");
       setLoading(false); return;
     }
     await supabase.auth.signOut();
@@ -49,9 +60,14 @@ function ResetPasswordScreen() {
             <div style={{ color: "#4ade80", fontSize: 32, marginBottom: 16 }}>✅</div>
             <div style={{ color: "#4ade80", fontSize: 14, marginBottom: 8 }}>Senha atualizada com sucesso!</div>
             <div style={{ color: "#505060", fontSize: 11, marginBottom: 24 }}>Você pode fazer login com a nova senha.</div>
-            <button onClick={() => window.location.href = "/"} style={{ width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+            <button onClick={() => { window.location.hash = ""; window.location.reload(); }}
+              style={{ width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
               IR PARA O LOGIN →
             </button>
+          </div>
+        ) : !sessionReady ? (
+          <div style={{ color: "#505060", fontSize: 12, letterSpacing: "0.1em" }}>
+            ⟳ Validando link de recuperação...
           </div>
         ) : (
           <div>
