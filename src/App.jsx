@@ -62,9 +62,7 @@ function LoginScreen({ onLogin }) {
   const handleForgot = async () => {
     if (!emailRecovery) { setErro("Informe seu email."); return; }
     setLoading(true); setErro("");
-    const { error } = await supabase.auth.resetPasswordForEmail(emailRecovery, {
-      redirectTo: window.location.origin,
-    });
+    const { error } = await supabase.auth.resetPasswordForEmail(emailRecovery);
     if (error) { setErro("Erro ao enviar email. Verifique o endereço."); setLoading(false); return; }
     setModo("otp");
     setLoading(false);
