@@ -12,6 +12,14 @@ const tabId = (() => {
   return id;
 })();
 
+// Captura o tipo da URL ANTES do Supabase processar e limpar o hash
+// Necessário porque SafeLinks/proxies causam delay no redirect
+const urlHash = window.location.hash;
+const isPasswordRecovery = urlHash.includes("type=recovery") || sessionStorage.getItem("pendingRecovery") === "1";
+if (urlHash.includes("type=recovery")) {
+  sessionStorage.setItem("pendingRecovery", "1");
+}
+
 // ── RESET DE SENHA ─────────────────────────────────────────────────────────
 function ResetPasswordScreen() {
   const [novaSenha, setNovaSenha] = useState("");
@@ -43,6 +51,7 @@ function ResetPasswordScreen() {
       setLoading(false); return;
     }
     await supabase.auth.signOut();
+    sessionStorage.removeItem("pendingRecovery");
     setSucesso(true);
     setLoading(false);
   };
@@ -241,8 +250,8 @@ export default function App() {
   const [userId, setUserId] = useState("");
   const [sessionAtual, setSessionAtual] = useState("");
   const [expiresAt, setExpiresAt] = useState(null);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!isPasswordRecovery);
+  const [isRecoveryMode, setIsRecoveryMode] = useState(isPasswordRecovery);
   const [tab, setTab] = useState("tradepack");
 
   // Função de logout
@@ -252,10 +261,11 @@ export default function App() {
     setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
   };
 
-  // Detecta PASSWORD_RECOVERY antes de qualquer outra lógica de sessão
+  // Detecta PASSWORD_RECOVERY via onAuthStateChange (complementa a detecção por hash)
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("pendingRecovery", "1");
         setIsRecoveryMode(true);
         setInitialLoading(false);
       }
