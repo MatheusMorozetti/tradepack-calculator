@@ -406,10 +406,30 @@ export default function App() {
                 <div style={{ color: pc(r.deltaQUEST), fontSize: 14, marginTop: 4 }}>{r.deltaQUEST >= 0 ? "+" : ""}{fmt(r.deltaQUEST)} QUEST/pack vs vender</div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-                <Stat label="IM necessária/pack" value={fmtInt(r.imBreakeven)} sub="sem Enhanced" color={red} />
-                <Stat label="IM necessária/pack" value={fmtInt(r.imBreaakevenEnhanced)} sub="com Enhanced" color={orange} />
-                <Stat label="IM atual/pack" value={fmtInt(r.imEfetiva)} sub="média com bônus" color={pc(r.imEfetiva - r.imBreakeven)} />
-                <Stat label="Margem" value={`${r.imEfetiva >= r.imBreakeven ? "+" : ""}${fmtInt(r.imEfetiva - r.imBreakeven)}`} sub="IM acima/abaixo" color={pc(r.imEfetiva - r.imBreakeven)} />
+                <Stat
+                  label="IM base necessária (sem Enhanced)"
+                  value={fmtInt(r.imBreakeven)}
+                  sub={`IM base atual: ${fmtInt(r.imBase)} · ${r.imBase >= r.imBreakeven ? "✅ passa" : "❌ não passa"}`}
+                  color={r.imBase >= r.imBreakeven ? green : red}
+                />
+                <Stat
+                  label="IM base necessária (com Enhanced)"
+                  value={fmtInt(r.imBreaakevenEnhanced)}
+                  sub={`IM base atual: ${fmtInt(r.imBase)} · ${r.imBase >= r.imBreaakevenEnhanced ? "✅ passa" : "❌ não passa"}`}
+                  color={r.imBase >= r.imBreaakevenEnhanced ? green : orange}
+                />
+                <Stat
+                  label="IM base/pack atual"
+                  value={fmtInt(r.imBase)}
+                  sub={`silver × 10 = ${fmtInt(silverPorPack)} × 10`}
+                  color={dim}
+                />
+                <Stat
+                  label="Margem (base vs necessária)"
+                  value={`${r.imBase >= r.imBreakeven ? "+" : ""}${fmtInt(r.imBase - r.imBreakeven)}`}
+                  sub={`sem Enhanced · ${r.imBase >= r.imBreakeven ? "compensa" : "não compensa"}`}
+                  color={pc(r.imBase - r.imBreakeven)}
+                />
               </div>
               <Divider label="Por pack · comparativo" />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
