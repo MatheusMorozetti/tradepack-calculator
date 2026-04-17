@@ -107,10 +107,7 @@ export default function App() {
   const [questToSilver, setQuestToSilver] = useState(50650);
 
   // CALIBRAÇÃO
-  const [calIM, setCalIM] = useState(14621610);
   const [calQUEST, setCalQUEST] = useState(386);
-  const [calJoias, setCalJoias] = useState(664);
-  const calPoolRate = calIM > 0 ? calQUEST / calIM : 0;
 
   // EXPEDIÇÃO
   const [imExpSemana, setImExpSemana] = useState(4312920);
@@ -244,7 +241,7 @@ export default function App() {
       diferenca_sem, diferenca_mes,
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
-    qtdPacks, silverPorPack, imPorPack, qtdEnhanced, qtdPlunder, custoCert,
+    qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
 
   if (!autenticado) return <LoginScreen onLogin={() => setAutenticado(true)} />;
@@ -326,7 +323,7 @@ export default function App() {
             <Section title="Configuração do Pack" icon="📦">
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack Selecionado</label>
-                <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); }}
+                <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
                   style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }}>
                   {Object.keys(PACKS).map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
@@ -389,7 +386,7 @@ export default function App() {
                 ))}
               </div>
               <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "10px 14px", fontSize: 11, color: dim, lineHeight: 1.6 }}>
-                ℹ️ O campo <strong style={{ color: gold }}>IM base/pack</strong> deve ser o valor <strong style={{ color: gold }}>observado no jogo</strong> após entregar o pack — ele já inclui o Bartering e o ×10 do Prime. Enhanced e Plunder são aplicados sobre esse valor.
+                ℹ️ <strong style={{ color: gold }}>IM base/pack</strong> é calculada automaticamente como <strong style={{ color: gold }}>silver × 10</strong> (multiplicador Prime do patch 1.0.7.1). O Bartering já está embutido no silver recebido. Enhanced (×2) e Plunder (+15%) são aplicados sobre esse valor.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
                 <Stat label="Silver/pack" value={fmtInt(silverPorPack)} sub="valor entregue" color={blue} />
@@ -455,11 +452,17 @@ export default function App() {
             </Section>
 
             <Section title="Mercado & Pool" icon="📊">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="Pool Rate" value={poolRate} onChange={setPoolRate} step="0.0000001" hint="Real: 0,0000264" color={green} />
-                <Field label="QUEST (USD)" value={questUSD} onChange={setQuestUSD} step="0.0001" suffix="USD" />
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pool Rate (calculado via calibração)</label>
+                <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ color: green, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{poolRate.toFixed(8)}</span>
+                  <span style={{ color: "#404050", fontSize: 10 }}>QUEST ÷ IM Total · atualize via aba Calibração</span>
+                </div>
               </div>
-              <Field label="QUEST → Silver" value={questToSilver} onChange={setQuestToSilver} step="100" suffix="silver" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <Field label="QUEST (USD)" value={questUSD} onChange={setQuestUSD} step="0.0001" suffix="USD" />
+                <Field label="QUEST → Silver" value={questToSilver} onChange={setQuestToSilver} step="100" suffix="silver" />
+              </div>
             </Section>
           </div>
         </div>
@@ -609,42 +612,46 @@ export default function App() {
         <div>
           <Section title="Calibração com Dados Reais" icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-              Insira seus dados reais de sexta-feira. A IM dos packs é calculada automaticamente a partir da configuração da aba Tradepack.
+              Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder).
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-              <Field label="IM Total na semana" value={calIM} onChange={setCalIM} step={100000} suffix="IM" hint="Exp + Packs juntos" />
-              <Field label="QUEST recebido" value={calQUEST} onChange={setCalQUEST} step={1} suffix="QUEST" hint="Chest de sexta" />
-              <Field label="Joias acumuladas" value={calJoias} onChange={setCalJoias} step={10} suffix="💎" />
+
+            <div style={{ marginBottom: 14 }}>
+              <Field label="QUEST recebido" value={calQUEST} onChange={setCalQUEST} step={1} suffix="QUEST" hint="Chest de sexta-feira" />
             </div>
-            <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, padding: "12px 16px", marginBottom: 14 }}>
+
+            {/* IM Total automática */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+              <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, padding: "12px 14px" }}>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Expedição/sem</div>
+                <div style={{ color: blue, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imExpSemana)}</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>da aba Tradepack</div>
+              </div>
+              <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px" }}>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Packs/sem</div>
+                <div style={{ color: gold, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(r.imTotal_semana)}</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>incl. Enhanced + Plunder</div>
+              </div>
+              <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 8, padding: "12px 14px" }}>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Total (automático)</div>
+                <div style={{ color: green, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imExpSemana + r.imTotal_semana)}</div>
+                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>Exp + Packs</div>
+              </div>
+            </div>
+
+            {/* Pool Rate calculado */}
+            <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>IM gerada pelos packs (automático)</div>
-                  <div style={{ color: "#505060", fontSize: 10 }}>{fmtInt(qtdPacks)} packs × {fmtInt(silverPorPack)} silver × 10 (prime)</div>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>Pool Rate calculado</div>
+                  <div style={{ color: "#505060", fontSize: 10 }}>{calQUEST} QUEST ÷ {fmtInt(imExpSemana + r.imTotal_semana)} IM</div>
                 </div>
-                <div style={{ color: blue, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(qtdPacks * imPorPack)} IM</div>
+                <div style={{ color: green, fontSize: 22, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}</div>
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
-              <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>Pool Rate calculado</div>
-                <div style={{ color: green, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{calPoolRate.toFixed(8)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{calQUEST} ÷ {fmtInt(calIM)}</div>
-              </div>
-              <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM Expedição/sem</div>
-                <div style={{ color: green, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(calIM - qtdPacks * imPorPack)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(calIM)} - {fmtInt(qtdPacks * imPorPack)}</div>
-              </div>
-              <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 8, padding: "12px 16px" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 6 }}>IM/Pack (automático)</div>
-                <div style={{ color: blue, fontSize: 18, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imPorPack)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{fmtInt(silverPorPack)} × 10 (prime)</div>
-              </div>
-            </div>
-            <button onClick={() => { setPoolRate(parseFloat(calPoolRate.toFixed(9))); setImExpSemana(Math.round(calIM - qtdPacks * imPorPack)); setJoiasTotal(calJoias); }}
+
+            <button onClick={() => setPoolRate(parseFloat((calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(9)))}
               style={{ width: "100%", background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.08))", border: "1px solid rgba(74,222,128,0.4)", borderRadius: 8, color: green, padding: "11px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: "0.06em" }}>
-              ✅ Aplicar: Pool Rate {calPoolRate.toFixed(8)} · IM Exp/sem {fmtInt(calIM - qtdPacks * imPorPack)}
+              ✅ Aplicar Pool Rate: {(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}
             </button>
           </Section>
 
