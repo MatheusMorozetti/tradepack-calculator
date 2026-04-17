@@ -105,53 +105,95 @@ function LoginScreen({ onLogin }) {
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modo, setModo] = useState("login"); // "login" | "forgot" | "otp" | "newpassword"
+  const [emailRecovery, setEmailRecovery] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmar, setConfirmar] = useState("");
 
   const handleSubmit = async () => {
     if (!email || !senha) { setErro("Preencha email e senha."); return; }
     setLoading(true); setErro("");
-
-    // 1. Autentica no Supabase
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
     if (error) { setErro("Email ou senha incorretos."); setLoading(false); return; }
-
-    // 2. Valida perfil e expiração
     const { data: profile, error: profileError } = await supabase
       .from("profiles").select("*").eq("id", data.user.id).single();
-
     if (profileError || !profile) {
       await supabase.auth.signOut();
       setErro("Perfil não encontrado. Contate o suporte.");
       setLoading(false); return;
     }
-
     if (!profile.active) {
       await supabase.auth.signOut();
       setErro("Acesso suspenso. Contate o suporte.");
       setLoading(false); return;
     }
-
     if (new Date(profile.expires_at) < new Date()) {
       await supabase.auth.signOut();
       setErro("Acesso expirado. Renove sua assinatura.");
       setLoading(false); return;
     }
-
-    // 3. Registra sessão única — tabId é único por aba/dispositivo
     const { error: upsertError } = await supabase.from("active_sessions").upsert({
       user_id: data.user.id,
       session_id: tabId,
       updated_at: new Date().toISOString(),
     });
-
     if (upsertError) {
       await supabase.auth.signOut();
       setErro("Erro ao registrar sessão. Tente novamente.");
       setLoading(false); return;
     }
-
     onLogin(data.user, tabId, profile);
     setLoading(false);
   };
+
+  const handleForgot = async () => {
+    if (!emailRecovery) { setErro("Informe seu email."); return; }
+    setLoading(true); setErro("");
+    const { error } = await supabase.auth.resetPasswordForEmail(emailRecovery, {
+      redirectTo: window.location.origin,
+    });
+    if (error) { setErro("Erro ao enviar email. Verifique o endereço."); setLoading(false); return; }
+    setModo("otp");
+    setLoading(false);
+  };
+
+  const handleOtp = async () => {
+    if (!otpCode || otpCode.length < 6) { setErro("Informe o código de 6 dígitos."); return; }
+    setLoading(true); setErro("");
+    const { error } = await supabase.auth.verifyOtp({
+      email: emailRecovery,
+      token: otpCode,
+      type: "recovery",
+    });
+    if (error) { setErro("Código inválido ou expirado. Solicite um novo."); setLoading(false); return; }
+    setModo("newpassword");
+    setLoading(false);
+  };
+
+  const handleNewPassword = async () => {
+    if (!novaSenha || !confirmar) { setErro("Preencha os dois campos."); return; }
+    if (novaSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
+    if (novaSenha !== confirmar) { setErro("As senhas não coincidem."); return; }
+    setLoading(true); setErro("");
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+    if (error) { setErro("Erro ao atualizar senha. Tente novamente."); setLoading(false); return; }
+    await supabase.auth.signOut();
+    sessionStorage.removeItem("pendingRecovery");
+    setModo("login");
+    setErro("");
+    setNovaSenha(""); setConfirmar(""); setOtpCode(""); setEmailRecovery("");
+    setLoading(false);
+    alert("✅ Senha atualizada! Faça login com a nova senha.");
+  };
+
+  const inputStyle = (hasError) => ({
+    width: "100%", background: "rgba(0,0,0,0.4)",
+    border: `1px solid ${hasError ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`,
+    borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14,
+    fontFamily: "'Space Mono', monospace", outline: "none",
+    boxSizing: "border-box", marginBottom: 10,
+  });
 
   return (
     <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
@@ -159,19 +201,66 @@ function LoginScreen({ onLogin }) {
       <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
         <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
         <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>Tradepack Prime</div>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#c4a050", marginBottom: 32 }}>Calculator</div>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#c4a050", marginBottom: 28 }}>Calculator</div>
 
-        <input type="email" placeholder="Seu email de acesso" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()}
-          style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+        {/* LOGIN */}
+        {modo === "login" && <>
+          <input type="email" placeholder="Seu email de acesso" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(false)} />
+          <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(!!erro)} />
+          {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+          <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
+            {loading ? "VERIFICANDO..." : "ENTRAR →"}
+          </button>
+          <button onClick={() => { setModo("forgot"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
+            Esqueci minha senha
+          </button>
+        </>}
 
-        <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()}
-          style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`, borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+        {/* ESQUECI MINHA SENHA */}
+        {modo === "forgot" && <>
+          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+            Informe seu email. Você receberá um código de 6 dígitos para redefinir a senha.
+          </div>
+          <input type="email" placeholder="Seu email de acesso" value={emailRecovery} onChange={e => setEmailRecovery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleForgot()} style={inputStyle(!!erro)} />
+          {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+          <button onClick={handleForgot} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
+            {loading ? "ENVIANDO..." : "ENVIAR CÓDIGO →"}
+          </button>
+          <button onClick={() => { setModo("login"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+            ← Voltar ao login
+          </button>
+        </>}
 
-        {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+        {/* INSERIR CÓDIGO OTP */}
+        {modo === "otp" && <>
+          <div style={{ color: "#4ade80", fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
+          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+            Insira o código de 6 dígitos recebido no email.
+          </div>
+          <input type="text" placeholder="Código de 6 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
+            style={{ ...inputStyle(!!erro), fontSize: 24, letterSpacing: "0.3em", textAlign: "center" }} />
+          {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+          <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
+            {loading ? "VERIFICANDO..." : "VERIFICAR CÓDIGO →"}
+          </button>
+          <button onClick={() => { setModo("forgot"); setErro(""); setOtpCode(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+            ← Reenviar código
+          </button>
+        </>}
 
-        <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
-          {loading ? "VERIFICANDO..." : "ENTRAR →"}
-        </button>
+        {/* NOVA SENHA */}
+        {modo === "newpassword" && <>
+          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+            Código verificado. Defina sua nova senha.
+          </div>
+          <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} style={inputStyle(false)} />
+          <input type="password" placeholder="Confirmar senha" value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleNewPassword()} style={inputStyle(!!erro)} />
+          {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+          <button onClick={handleNewPassword} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+            {loading ? "SALVANDO..." : "SALVAR NOVA SENHA →"}
+          </button>
+        </>}
+
         <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>ToilZero Calculator · Acesso restrito</div>
       </div>
     </div>
