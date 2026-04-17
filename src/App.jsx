@@ -12,6 +12,68 @@ const tabId = (() => {
   return id;
 })();
 
+// ── RESET DE SENHA ─────────────────────────────────────────────────────────
+function ResetPasswordScreen() {
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmar, setConfirmar] = useState("");
+  const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleReset = async () => {
+    if (!novaSenha || !confirmar) { setErro("Preencha os dois campos."); return; }
+    if (novaSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
+    if (novaSenha !== confirmar) { setErro("As senhas não coincidem."); return; }
+
+    setLoading(true); setErro("");
+    const { error } = await supabase.auth.updateUser({ password: novaSenha });
+    if (error) {
+      setErro("Erro ao atualizar senha. O link pode ter expirado.");
+      setLoading(false); return;
+    }
+    await supabase.auth.signOut();
+    setSucesso(true);
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
+        <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>Tradepack Prime</div>
+        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, fontWeight: 700, color: "#c4a050", marginBottom: 24 }}>Calculator</div>
+
+        {sucesso ? (
+          <div>
+            <div style={{ color: "#4ade80", fontSize: 32, marginBottom: 16 }}>✅</div>
+            <div style={{ color: "#4ade80", fontSize: 14, marginBottom: 8 }}>Senha atualizada com sucesso!</div>
+            <div style={{ color: "#505060", fontSize: 11, marginBottom: 24 }}>Você pode fazer login com a nova senha.</div>
+            <button onClick={() => window.location.href = "/"} style={{ width: "100%", background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+              IR PARA O LOGIN →
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 24, lineHeight: 1.6 }}>
+              Defina sua nova senha de acesso.
+            </div>
+            <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
+              style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 10 }} />
+            <input type="password" placeholder="Confirmar senha" value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleReset()}
+              style={{ width: "100%", background: "rgba(0,0,0,0.4)", border: `1px solid ${erro ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`, borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14, fontFamily: "'Space Mono', monospace", outline: "none", boxSizing: "border-box", marginBottom: 12 }} />
+            {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
+            <button onClick={handleReset} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+              {loading ? "SALVANDO..." : "SALVAR NOVA SENHA →"}
+            </button>
+          </div>
+        )}
+        <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>ToilZero Calculator · Acesso restrito</div>
+      </div>
+    </div>
+  );
+}
+
 // ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
 function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -444,6 +506,14 @@ export default function App() {
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
+
+  // Detecta link de recovery na URL (#type=recovery)
+  const isRecovery = window.location.hash.includes("type=recovery");
+  if (isRecovery) {
+    // Processa o token do link de recovery via Supabase
+    supabase.auth.getSession(); // inicializa a sessão com o token da URL
+    return <ResetPasswordScreen />;
+  }
 
   if (initialLoading) return (
     <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
