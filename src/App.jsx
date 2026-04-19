@@ -386,6 +386,41 @@ export default function App() {
 
   const toUSD = (silver) => (silver / questToSilver) * questUSD;
 
+  // ── INFUSIONS ─────────────────────────────────────────────────────────────
+  const INFUSIONS = [
+    { nome: "Infusion",           exp: 10,  tipo: "terra" },
+    { nome: "Warband Infusion",   exp: 20,  tipo: "terra" },
+    { nome: "Ancient Infusion",   exp: 40,  tipo: "terra" },
+    { nome: "Carved Infusion",    exp: 60,  tipo: "terra" },
+    { nome: "Ghostly Infusion",   exp: 75,  tipo: "terra" },
+    { nome: "Ornate Infusion",    exp: 90,  tipo: "terra" },
+    { nome: "Radiant Infusion",   exp: 105, tipo: "terra" },
+    { nome: "Tidal Infusion",     exp: 45,  tipo: "mar"   },
+    { nome: "Abyssal Infusion",   exp: 275, tipo: "mar"   },
+    { nome: "Oceanic Infusion",   exp: 125, tipo: "mar"   },
+    { nome: "Maelstrom Infusion", exp: 550, tipo: "mar"   },
+  ];
+
+  const [infusionPrecos, setInfusionPrecos] = useState(
+    Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
+  );
+  const [infusionTargetEXP, setInfusionTargetEXP] = useState(10000);
+
+  const setInfusionPreco = (nome, val) =>
+    setInfusionPrecos(prev => ({ ...prev, [nome]: val }));
+
+  const infusionRanking = INFUSIONS
+    .map(inf => {
+      const preco = infusionPrecos[inf.nome] || 0;
+      const silverPerExp = preco > 0 ? preco / inf.exp : Infinity;
+      const qtdNecessaria = preco > 0 ? Math.ceil(infusionTargetEXP / inf.exp) : 0;
+      const custoTotal = qtdNecessaria * preco;
+      return { ...inf, preco, silverPerExp, qtdNecessaria, custoTotal };
+    })
+    .sort((a, b) => a.silverPerExp - b.silverPerExp);
+
+  const melhorInfusion = infusionRanking.find(i => i.preco > 0);
+
   // MATERIAIS
   const packAtual = PACKS[packSelecionado];
   const [matsOverride, setMatsOverride] = useState({});
@@ -480,42 +515,6 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP]);
-
-  // ── INFUSIONS ─────────────────────────────────────────────────────────────
-  const INFUSIONS = [
-    { nome: "Infusion",           exp: 10,  tipo: "terra" },
-    { nome: "Warband Infusion",   exp: 20,  tipo: "terra" },
-    { nome: "Ancient Infusion",   exp: 40,  tipo: "terra" },
-    { nome: "Carved Infusion",    exp: 60,  tipo: "terra" },
-    { nome: "Ghostly Infusion",   exp: 75,  tipo: "terra" },
-    { nome: "Ornate Infusion",    exp: 90,  tipo: "terra" },
-    { nome: "Radiant Infusion",   exp: 105, tipo: "terra" },
-    { nome: "Tidal Infusion",     exp: 45,  tipo: "mar"   },
-    { nome: "Abyssal Infusion",   exp: 275, tipo: "mar"   },
-    { nome: "Oceanic Infusion",   exp: 125, tipo: "mar"   },
-    { nome: "Maelstrom Infusion", exp: 550, tipo: "mar"   },
-  ];
-
-  const [infusionPrecos, setInfusionPrecos] = useState(
-    Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
-  );
-  const [infusionTargetEXP, setInfusionTargetEXP] = useState(10000);
-
-  const setInfusionPreco = (nome, val) =>
-    setInfusionPrecos(prev => ({ ...prev, [nome]: val }));
-
-  // Ranking calculado: silver/EXP por infusion
-  const infusionRanking = INFUSIONS
-    .map(inf => {
-      const preco = infusionPrecos[inf.nome] || 0;
-      const silverPerExp = preco > 0 ? preco / inf.exp : Infinity;
-      const qtdNecessaria = preco > 0 ? Math.ceil(infusionTargetEXP / inf.exp) : 0;
-      const custoTotal = qtdNecessaria * preco;
-      return { ...inf, preco, silverPerExp, qtdNecessaria, custoTotal };
-    })
-    .sort((a, b) => a.silverPerExp - b.silverPerExp);
-
-  const melhorInfusion = infusionRanking.find(i => i.preco > 0);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
