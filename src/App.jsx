@@ -516,6 +516,8 @@ export default function App() {
     .sort((a, b) => a.silverPerExp - b.silverPerExp);
 
   const melhorInfusion = infusionRanking.find(i => i.preco > 0);
+
+  const r = useMemo(() => {
     const MES = 30 / 7;
     const packsSemanais = qtdPacks;
     const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
