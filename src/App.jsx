@@ -13,7 +13,7 @@ const tabId = (() => {
 
 // Helper para inputs numéricos inline (fora do componente Field)
 // Mesmo comportamento: digita livremente, converte no onBlur
-function NumInput({ value, onChange, min = 0, max, style, placeholder }) {
+function NumInput({ value, onChange, min = 0, max, style, placeholder, format }) {
   const [local, setLocal] = useState(String(value));
   const [focused, setFocused] = useState(false);
 
@@ -30,12 +30,17 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder }) {
     setLocal(String(final));
   };
 
+  // Mostra valor formatado quando não está em foco
+  const displayValue = focused
+    ? local
+    : (format ? format(value) : (value === 0 ? "0" : fmtInt(value)));
+
   return (
     <input
       type="text"
       inputMode="decimal"
-      placeholder={placeholder}
-      value={focused ? local : String(value)}
+      placeholder={placeholder || "0"}
+      value={displayValue}
       onChange={e => { setLocal(e.target.value); const p = parseFloat(e.target.value.replace(",",".")); if (!isNaN(p)) onChange(p); }}
       onFocus={() => { setFocused(true); setLocal(String(value)); }}
       onBlur={() => { setFocused(false); commit(local); }}
@@ -265,6 +270,8 @@ function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, co
     setLocalValue(String(final));
   };
 
+  const displayValue = focused ? localValue : fmtInt(value);
+
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{label}</label>
@@ -272,7 +279,7 @@ function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, co
         <input
           type="text"
           inputMode="decimal"
-          value={focused ? localValue : String(value)}
+          value={displayValue}
           onChange={handleChange}
           onFocus={() => { setFocused(true); setLocalValue(String(value)); }}
           onBlur={handleBlur}
@@ -1444,7 +1451,6 @@ export default function App() {
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: purple, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
                       <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        {inf.preco > 0 && <div style={{ color: orange, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
                         <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.35)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
@@ -1485,7 +1491,6 @@ export default function App() {
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: blue, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
                       <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        {inf.preco > 0 && <div style={{ color: blue, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
                         <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.35)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
