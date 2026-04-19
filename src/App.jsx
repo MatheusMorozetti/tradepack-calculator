@@ -405,9 +405,20 @@ export default function App() {
     Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
   );
   const [infusionTargetEXP, setInfusionTargetEXP] = useState(10000);
+  const [infusionQtdHora, setInfusionQtdHora] = useState(
+    Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
+  );
+  const [infusionCompra, setInfusionCompra] = useState(
+    Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
+  );
+  const [taxaMkt, setTaxaMkt] = useState(5);
 
   const setInfusionPreco = (nome, val) =>
     setInfusionPrecos(prev => ({ ...prev, [nome]: val }));
+  const setInfusionQtd = (nome, val) =>
+    setInfusionQtdHora(prev => ({ ...prev, [nome]: val }));
+  const setInfusionBuy = (nome, val) =>
+    setInfusionCompra(prev => ({ ...prev, [nome]: val }));
 
   const infusionRanking = INFUSIONS
     .map(inf => {
@@ -420,6 +431,31 @@ export default function App() {
     .sort((a, b) => a.silverPerExp - b.silverPerExp);
 
   const melhorInfusion = infusionRanking.find(i => i.preco > 0);
+
+  // Ranking de Hunt — silver/hora = qtd_por_hora × preço_mkt
+  const huntDropRanking = INFUSIONS
+    .map(inf => {
+      const qtd = infusionQtdHora[inf.nome] || 0;
+      const preco = infusionPrecos[inf.nome] || 0;
+      const silverHora = qtd * preco;
+      return { ...inf, qtd, preco, silverHora };
+    })
+    .filter(i => i.silverHora > 0)
+    .sort((a, b) => b.silverHora - a.silverHora);
+
+  // Ranking de Flip — lucro = preço_venda × (1 - taxa%) - preço_compra
+  const flipRanking = INFUSIONS
+    .map(inf => {
+      const venda = infusionPrecos[inf.nome] || 0;
+      const compra = infusionCompra[inf.nome] || 0;
+      const lucroUnit = venda > 0 && compra > 0
+        ? venda * (1 - taxaMkt / 100) - compra : 0;
+      const margemPct = compra > 0 && lucroUnit > 0
+        ? (lucroUnit / compra) * 100 : 0;
+      return { ...inf, venda, compra, lucroUnit, margemPct };
+    })
+    .filter(i => i.lucroUnit > 0)
+    .sort((a, b) => b.margemPct - a.margemPct);
 
   // MATERIAIS
   const packAtual = PACKS[packSelecionado];
@@ -475,6 +511,9 @@ export default function App() {
         if (s.mineGems !== undefined) setMineGems(s.mineGems);
         if (s.infusionPrecos !== undefined) setInfusionPrecos(s.infusionPrecos);
         if (s.infusionTargetEXP !== undefined) setInfusionTargetEXP(s.infusionTargetEXP);
+        if (s.infusionQtdHora !== undefined) setInfusionQtdHora(s.infusionQtdHora);
+        if (s.infusionCompra !== undefined) setInfusionCompra(s.infusionCompra);
+        if (s.taxaMkt !== undefined) setTaxaMkt(s.taxaMkt);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -498,7 +537,7 @@ export default function App() {
             huntHorasDia, huntAddonQtd, huntAddonPreco,
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
-            infusionPrecos, infusionTargetEXP,
+            infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
           },
           updated_at: new Date().toISOString(),
         });
@@ -514,7 +553,7 @@ export default function App() {
     matsOverride, matsQUEST,
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
-    infusionPrecos, infusionTargetEXP]);
+    infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -1350,6 +1389,116 @@ export default function App() {
                 })}
               </tbody>
             </table>
+          </Section>
+
+          {/* MELHOR PARA CAÇAR */}
+          <Section title="🏹 Melhor para Caçar" icon="⚔️" borderColor="rgba(248,113,113,0.3)">
+            <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+              📌 Insira a <strong style={{ color: red }}>quantidade dropada por hora</strong> para cada infusion. O ranking mostra qual gera mais silver/hora ao caçar.
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
+              <thead>
+                <tr>{["#", "Infusion", "Tipo", "Preço Mkt", "Qtd / hora", "Silver / hora", "USD / hora"].map(h => (
+                  <th key={h} style={{ color: red, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(248,113,113,0.2)" }}>{h}</th>
+                ))}</tr>
+              </thead>
+              <tbody>
+                {INFUSIONS.map(inf => {
+                  const qtd = infusionQtdHora[inf.nome] || 0;
+                  const preco = infusionPrecos[inf.nome] || 0;
+                  const silverH = qtd * preco;
+                  const rank = huntDropRanking.findIndex(r => r.nome === inf.nome);
+                  const isBest = rank === 0 && silverH > 0;
+                  return (
+                    <tr key={inf.nome} style={{ background: isBest ? "rgba(248,113,113,0.06)" : "transparent" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? `#${rank + 1}` : "—"}</td>
+                      <td style={{ padding: "8px 10px", color: isBest ? red : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.tipo === "mar" ? blue : gold, fontSize: 10, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.tipo === "mar" ? "🌊 Mar" : "⚔️ Terra"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: preco > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{preco > 0 ? fmtInt(preco) : "—"}</td>
+                      <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <input type="number" value={qtd} onChange={e => setInfusionQtd(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 4, color: red, padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : (silverH > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtInt(silverH) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: silverH > 0 ? dim : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtUSD(toUSD(silverH)) : "—"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {huntDropRanking.length > 0 && (
+              <div style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ color: red, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>🏆 Melhor para caçar</div>
+                  <div style={{ color: "#f0e6c8", fontSize: 16, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{huntDropRanking[0].nome}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ color: red, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(huntDropRanking[0].silverHora)}<span style={{ fontSize: 11 }}> silver/h</span></div>
+                  <div style={{ color: dim, fontSize: 11 }}>{fmtUSD(toUSD(huntDropRanking[0].silverHora * 24 * 30))}/mês</div>
+                </div>
+              </div>
+            )}
+          </Section>
+
+          {/* MELHOR PARA REVENDER */}
+          <Section title="💸 Melhor para Revender (Flip)" icon="📈" borderColor="rgba(74,222,128,0.3)">
+            <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+              📌 Insira o <strong style={{ color: blue }}>preço de compra</strong> (oferta mais barata no mkt) e o <strong style={{ color: orange }}>preço de venda</strong> (campo Preço Mkt na tabela acima). O ranking mostra qual tem maior margem.
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+              <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Taxa do mercado:</label>
+              <input type="number" value={taxaMkt} onChange={e => setTaxaMkt(parseFloat(e.target.value) || 0)} min={0} max={100} step={0.5}
+                style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, color: green, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
+              <span style={{ color: green, fontSize: 13 }}>%</span>
+              <span style={{ color: "#404050", fontSize: 10 }}>desconto do marketplace na venda</span>
+            </div>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
+              <thead>
+                <tr>{["#", "Infusion", "Comprar por", "Vender por", "Lucro / un", "Margem %"].map(h => (
+                  <th key={h} style={{ color: green, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(74,222,128,0.2)" }}>{h}</th>
+                ))}</tr>
+              </thead>
+              <tbody>
+                {INFUSIONS.map(inf => {
+                  const venda = infusionPrecos[inf.nome] || 0;
+                  const compra = infusionCompra[inf.nome] || 0;
+                  const lucro = venda > 0 && compra > 0 ? venda * (1 - taxaMkt / 100) - compra : 0;
+                  const margem = compra > 0 && lucro > 0 ? (lucro / compra) * 100 : 0;
+                  const rank = flipRanking.findIndex(r => r.nome === inf.nome);
+                  const isBest = rank === 0 && lucro > 0;
+                  return (
+                    <tr key={inf.nome} style={{ background: isBest ? "rgba(74,222,128,0.06)" : "transparent" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{lucro > 0 ? `#${rank + 1}` : "—"}</td>
+                      <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
+                      <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <input type="number" value={compra} onChange={e => setInfusionBuy(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: 100, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: venda > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{venda > 0 ? fmtInt(venda) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: lucro > 0 ? green : (lucro < 0 ? red : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {compra > 0 && venda > 0 ? (lucro > 0 ? "+" : "") + fmtInt(lucro) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: margem > 0 ? green : (lucro < 0 ? red : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {margem > 0 ? `+${fmt(margem, 1)}%` : (lucro < 0 ? `${fmt((lucro / compra) * 100, 1)}%` : "—")}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {flipRanking.length > 0 && (
+              <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ color: green, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>🏆 Melhor para revender</div>
+                  <div style={{ color: "#f0e6c8", fontSize: 16, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{flipRanking[0].nome}</div>
+                  <div style={{ color: dim, fontSize: 11, marginTop: 2 }}>compra: {fmtInt(flipRanking[0].compra)} · venda: {fmtInt(flipRanking[0].venda)}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ color: green, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>+{fmtInt(flipRanking[0].lucroUnit)}<span style={{ fontSize: 11 }}>/un</span></div>
+                  <div style={{ color: green, fontSize: 14 }}>+{fmt(flipRanking[0].margemPct, 1)}% margem</div>
+                </div>
+              </div>
+            )}
           </Section>
         </div>
       )}
