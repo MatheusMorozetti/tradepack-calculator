@@ -14,10 +14,10 @@ const tabId = (() => {
 // Helper para inputs numéricos inline (fora do componente Field)
 // Mesmo comportamento: digita livremente, converte no onBlur
 function NumInput({ value, onChange, min = 0, max, style, placeholder }) {
-  const [local, setLocal] = React.useState(String(value));
-  const [focused, setFocused] = React.useState(false);
+  const [local, setLocal] = useState(String(value));
+  const [focused, setFocused] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!focused) setLocal(String(value));
   }, [value, focused]);
 
@@ -241,11 +241,11 @@ const PACKS = {
 };
 
 function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, color }) {
-  const [localValue, setLocalValue] = React.useState(String(value));
-  const [focused, setFocused] = React.useState(false);
+  const [localValue, setLocalValue] = useState(String(value));
+  const [focused, setFocused] = useState(false);
 
   // Sincroniza valor externo quando não está em foco
-  React.useEffect(() => {
+  useEffect(() => {
     if (!focused) setLocalValue(String(value));
   }, [value, focused]);
 
