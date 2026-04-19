@@ -251,13 +251,23 @@ export default function App() {
   const [expiresAt, setExpiresAt] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [tab, setTab] = useState("tradepack");
+  const [showTutorial, setShowTutorial] = useState(false);
+  const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
 
   // Função de logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setAutenticado(false);
     setUserEmail(""); setUserId(""); setSessionAtual(""); setExpiresAt(null);
+    setShowTutorial(false);
   };
+
+  // Abre tutorial na primeira vez que o usuário acessa
+  useEffect(() => {
+    if (!autenticado || !userId) return;
+    const tutorialVisto = localStorage.getItem(`tutorial_visto_${userId}`);
+    if (!tutorialVisto) setShowTutorial(true);
+  }, [autenticado, userId]);
 
   // Persistência de sessão — ao recarregar o browser, restaura a sessão
   useEffect(() => {
@@ -692,7 +702,52 @@ export default function App() {
         ))}
       </div>
 
-      {/* HEADER */}
+      {/* MODAL TUTORIAL */}
+      {showTutorial && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#0d0d1a", border: "1px solid rgba(196,160,80,0.4)", borderRadius: 16, width: "100%", maxWidth: 780, boxShadow: "0 0 60px rgba(196,160,80,0.15)" }}>
+
+            {/* Header modal */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid rgba(196,160,80,0.15)" }}>
+              <div>
+                <div style={{ fontSize: 10, color: "rgba(196,160,80,0.6)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 4 }}>Bem-vindo ao</div>
+                <div style={{ fontFamily: "'Cinzel', serif", fontSize: 18, fontWeight: 700, color: "#f0e6c8" }}>Tradepack Prime Calculator</div>
+              </div>
+              <button onClick={() => setShowTutorial(false)}
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#707080", padding: "6px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12 }}>
+                ✕ Fechar
+              </button>
+            </div>
+
+            {/* Player YouTube */}
+            <div style={{ padding: "20px 24px" }}>
+              <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(196,160,80,0.2)" }}>
+                <iframe
+                  src={`https://www.youtube.com/embed/${TUTORIAL_VIDEO_ID}?rel=0&modestbranding=1`}
+                  style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Tutorial - Tradepack Prime Calculator"
+                />
+              </div>
+            </div>
+
+            {/* Footer modal */}
+            <div style={{ padding: "0 24px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <button onClick={() => {
+                localStorage.setItem(`tutorial_visto_${userId}`, "1");
+                setShowTutorial(false);
+              }} style={{ background: "none", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, color: "rgba(196,160,80,0.5)", padding: "8px 16px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.05em" }}>
+                Não mostrar novamente
+              </button>
+              <button onClick={() => setShowTutorial(false)}
+                style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "10px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, fontWeight: "bold", letterSpacing: "0.08em" }}>
+                COMEÇAR →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ textAlign: "center", marginBottom: 28 }}>
         {/* Linha decorativa superior */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 16 }}>
@@ -733,6 +788,15 @@ export default function App() {
               </div>
             );
           })()}
+
+          {/* Botão Tutorial */}
+          <button onClick={() => setShowTutorial(true)}
+            title="Ver tutorial"
+            style={{ background: "rgba(196,160,80,0.08)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "rgba(196,160,80,0.6)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.05em", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.target.style.background = "rgba(196,160,80,0.18)"; e.target.style.color = "#c4a050"; }}
+            onMouseLeave={e => { e.target.style.background = "rgba(196,160,80,0.08)"; e.target.style.color = "rgba(196,160,80,0.6)"; }}>
+            ? Tutorial
+          </button>
 
           {/* Logout */}
           <button onClick={handleLogout} style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 6, color: "rgba(248,113,113,0.6)", padding: "4px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.08em", transition: "all 0.2s" }}
