@@ -438,6 +438,8 @@ export default function App() {
         if (s.mineHorasDia !== undefined) setMineHorasDia(s.mineHorasDia);
         if (s.mineOres !== undefined) setMineOres(s.mineOres);
         if (s.mineGems !== undefined) setMineGems(s.mineGems);
+        if (s.infusionPrecos !== undefined) setInfusionPrecos(s.infusionPrecos);
+        if (s.infusionTargetEXP !== undefined) setInfusionTargetEXP(s.infusionTargetEXP);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -461,6 +463,7 @@ export default function App() {
             huntHorasDia, huntAddonQtd, huntAddonPreco,
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
+            infusionPrecos, infusionTargetEXP,
           },
           updated_at: new Date().toISOString(),
         });
@@ -475,9 +478,44 @@ export default function App() {
     packSelecionado, qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST,
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
-    mineHorasDia, mineOres, mineGems]);
+    mineHorasDia, mineOres, mineGems,
+    infusionPrecos, infusionTargetEXP]);
 
-  const r = useMemo(() => {
+  // ── INFUSIONS ─────────────────────────────────────────────────────────────
+  const INFUSIONS = [
+    { nome: "Infusion",           exp: 10,  tipo: "terra" },
+    { nome: "Warband Infusion",   exp: 20,  tipo: "terra" },
+    { nome: "Ancient Infusion",   exp: 40,  tipo: "terra" },
+    { nome: "Carved Infusion",    exp: 60,  tipo: "terra" },
+    { nome: "Ghostly Infusion",   exp: 75,  tipo: "terra" },
+    { nome: "Ornate Infusion",    exp: 90,  tipo: "terra" },
+    { nome: "Radiant Infusion",   exp: 105, tipo: "terra" },
+    { nome: "Tidal Infusion",     exp: 45,  tipo: "mar"   },
+    { nome: "Abyssal Infusion",   exp: 275, tipo: "mar"   },
+    { nome: "Oceanic Infusion",   exp: 125, tipo: "mar"   },
+    { nome: "Maelstrom Infusion", exp: 550, tipo: "mar"   },
+  ];
+
+  const [infusionPrecos, setInfusionPrecos] = useState(
+    Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
+  );
+  const [infusionTargetEXP, setInfusionTargetEXP] = useState(10000);
+
+  const setInfusionPreco = (nome, val) =>
+    setInfusionPrecos(prev => ({ ...prev, [nome]: val }));
+
+  // Ranking calculado: silver/EXP por infusion
+  const infusionRanking = INFUSIONS
+    .map(inf => {
+      const preco = infusionPrecos[inf.nome] || 0;
+      const silverPerExp = preco > 0 ? preco / inf.exp : Infinity;
+      const qtdNecessaria = preco > 0 ? Math.ceil(infusionTargetEXP / inf.exp) : 0;
+      const custoTotal = qtdNecessaria * preco;
+      return { ...inf, preco, silverPerExp, qtdNecessaria, custoTotal };
+    })
+    .sort((a, b) => a.silverPerExp - b.silverPerExp);
+
+  const melhorInfusion = infusionRanking.find(i => i.preco > 0);
     const MES = 30 / 7;
     const packsSemanais = qtdPacks;
     const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
@@ -597,6 +635,7 @@ export default function App() {
     { id: "tradepack", label: "📦 Tradepack" },
     { id: "comparativo", label: "🏹 Hunt" },
     { id: "mercado", label: "💰 Materiais" },
+    { id: "infusion", label: "✨ Infusion" },
     { id: "calibracao", label: "📐 Calibração" },
   ];
 
@@ -1191,6 +1230,123 @@ export default function App() {
               <div>IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span></div>
               <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar.</div>
             </div>
+          </Section>
+        </div>
+      )}
+
+      {/* TAB: INFUSION */}
+      {tab === "infusion" && (
+        <div>
+          {/* Target EXP */}
+          <Section title="✨ Calculadora de Infusion" icon="⚗️" accent>
+            <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+              💡 Insira o <strong style={{ color: purple }}>preço de mercado</strong> de cada Infusion e o <strong style={{ color: gold }}>EXP que você precisa ganhar</strong>. A calculadora mostra qual comprar e quanto vai custar.
+            </div>
+
+            {/* Target EXP */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>EXP necessário:</label>
+              <input type="number" value={infusionTargetEXP} onChange={e => setInfusionTargetEXP(parseFloat(e.target.value) || 0)} min={0} step={1000}
+                style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${gold}55`, borderRadius: 6, color: gold, padding: "8px 14px", fontSize: 16, width: 160, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
+              <span style={{ color: "#404050", fontSize: 10 }}>EXP para infundir no item</span>
+            </div>
+
+            {/* Melhor opção destaque */}
+            {melhorInfusion && (
+              <div style={{ background: "linear-gradient(135deg, rgba(74,222,128,0.08), rgba(74,222,128,0.02))", border: "1px solid rgba(74,222,128,0.35)", borderRadius: 12, padding: "16px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ color: green, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>✅ Melhor custo-benefício atual</div>
+                  <div style={{ color: "#f0e6c8", fontSize: 18, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{melhorInfusion.nome}</div>
+                  <div style={{ color: dim, fontSize: 11, marginTop: 4 }}>{melhorInfusion.exp} EXP/un · {fmtInt(melhorInfusion.preco)} silver/un</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>Para {fmtInt(infusionTargetEXP)} EXP</div>
+                  <div style={{ color: green, fontSize: 22, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(melhorInfusion.custoTotal)}</div>
+                  <div style={{ color: dim, fontSize: 10 }}>{fmtInt(melhorInfusion.qtdNecessaria)} unidades</div>
+                </div>
+              </div>
+            )}
+
+            {/* Tabela Terra */}
+            <Divider label="⚔️ Infusions de Terra" />
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 20 }}>
+              <thead>
+                <tr>
+                  {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                    <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {infusionRanking.filter(i => i.tipo === "terra").map((inf, rankIdx) => {
+                  const rank = infusionRanking.findIndex(r => r.nome === inf.nome);
+                  const isBest = rank === 0 && inf.preco > 0;
+                  const rowColor = isBest ? "rgba(74,222,128,0.06)" : "transparent";
+                  return (
+                    <tr key={inf.nome} style={{ background: rowColor }}>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? `#${rank + 1}` : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: purple, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
+                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.25)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: 110, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? orange : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Tabela Mar */}
+            <Divider label="🌊 Infusions de Mar" />
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <thead>
+                <tr>
+                  {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                    <th key={h} style={{ color: blue, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {infusionRanking.filter(i => i.tipo === "mar").map((inf) => {
+                  const rank = infusionRanking.findIndex(r => r.nome === inf.nome);
+                  const isBest = rank === 0 && inf.preco > 0;
+                  return (
+                    <tr key={inf.nome} style={{ background: isBest ? "rgba(74,222,128,0.06)" : "transparent" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? `#${rank + 1}` : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: blue, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
+                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: 110, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? blue : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </Section>
         </div>
       )}
