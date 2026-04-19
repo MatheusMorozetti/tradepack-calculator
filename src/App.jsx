@@ -98,20 +98,24 @@ function LoginScreen({ onLogin }) {
   };
 
   const inputStyle = (hasError) => ({
-    width: "100%", background: "rgba(0,0,0,0.4)",
-    border: `1px solid ${hasError ? "rgba(248,113,113,0.6)" : "rgba(196,160,80,0.3)"}`,
-    borderRadius: 8, color: "#f0e6c8", padding: "12px 16px", fontSize: 14,
+    width: "100%", background: BG_CARD,
+    border: `1px solid ${hasError ? "rgba(248,113,113,0.6)" : "rgba(96,165,250,0.15)"}`,
+    borderRadius: 8, color: TEXT_PRIM, padding: "12px 16px", fontSize: 14,
     fontFamily: "'Space Mono', monospace", outline: "none",
     boxSizing: "border-box", marginBottom: 10,
   });
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 50% 40%, rgba(196,160,80,0.08) 0%, transparent 60%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-      <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
-        <div style={{ fontSize: 10, color: "#c4a050", letterSpacing: "0.3em", textTransform: "uppercase", marginBottom: 12 }}>⚔ RavenQuest · Merchant Ledger ⚔</div>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#f0e6c8", marginBottom: 4 }}>Tradepack Prime</div>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 22, fontWeight: 700, color: "#c4a050", marginBottom: 28 }}>Calculator</div>
+    <div style={{ minHeight: "100vh", background: BG_DEEP, backgroundImage: "radial-gradient(ellipse at 50% 30%, rgba(30,58,95,0.4) 0%, transparent 65%)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+      <div style={{ background: BG_SURFACE, border: "1px solid rgba(96,165,250,0.12)", borderRadius: 16, padding: "40px 48px", textAlign: "center", width: 380 }}>
+
+        {/* Logo RavenLab */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+          <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 120, height: 120, objectFit: "contain" }} />
+        </div>
+
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 32 }}>RavenQuest · Economy Intelligence</div>
 
         {/* LOGIN */}
         {modo === "login" && <>
@@ -121,57 +125,57 @@ function LoginScreen({ onLogin }) {
           <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
             {loading ? "VERIFICANDO..." : "ENTRAR →"}
           </button>
-          <button onClick={() => { setModo("forgot"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
+          <button onClick={() => { setModo("forgot"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
             Esqueci minha senha
           </button>
         </>}
 
         {/* ESQUECI MINHA SENHA */}
         {modo === "forgot" && <>
-          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
             Informe seu email. Você receberá um código de 6 dígitos para redefinir a senha.
           </div>
           <input type="email" placeholder="Seu email de acesso" value={emailRecovery} onChange={e => setEmailRecovery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleForgot()} style={inputStyle(!!erro)} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
-          <button onClick={handleForgot} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
+          <button onClick={handleForgot} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
             {loading ? "ENVIANDO..." : "ENVIAR CÓDIGO →"}
           </button>
-          <button onClick={() => { setModo("login"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+          <button onClick={() => { setModo("login"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
             ← Voltar ao login
           </button>
         </>}
 
         {/* INSERIR CÓDIGO OTP */}
         {modo === "otp" && <>
-          <div style={{ color: "#4ade80", fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
-          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+          <div style={{ color: green, fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
             Insira o código de 6 dígitos recebido no email.
           </div>
           <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder="Código de 6 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
             style={{ ...inputStyle(!!erro), fontSize: 24, letterSpacing: "0.3em", textAlign: "center" }} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
-          <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
+          <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
             {loading ? "VERIFICANDO..." : "VERIFICAR CÓDIGO →"}
           </button>
-          <button onClick={() => { setModo("forgot"); setErro(""); setOtpCode(""); }} style={{ background: "none", border: "none", color: "rgba(196,160,80,0.5)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
+          <button onClick={() => { setModo("forgot"); setErro(""); setOtpCode(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
             ← Reenviar código
           </button>
         </>}
 
         {/* NOVA SENHA */}
         {modo === "newpassword" && <>
-          <div style={{ color: "#a0a0b0", fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
             Código verificado. Defina sua nova senha.
           </div>
           <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} style={inputStyle(false)} />
           <input type="password" placeholder="Confirmar senha" value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleNewPassword()} style={inputStyle(!!erro)} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
-          <button onClick={handleNewPassword} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
+          <button onClick={handleNewPassword} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
             {loading ? "SALVANDO..." : "SALVAR NOVA SENHA →"}
           </button>
         </>}
 
-        <div style={{ color: "#303040", fontSize: 10, marginTop: 24 }}>ToilZero Calculator · Acesso restrito</div>
+        <div style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, marginTop: 24, letterSpacing: "0.1em" }}>ToilZero · RavenLab · Acesso restrito</div>
       </div>
     </div>
   );
@@ -180,8 +184,16 @@ function LoginScreen({ onLogin }) {
 const fmt = (n, d = 2) => n == null ? "—" : n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmtInt = (n) => Math.round(n).toLocaleString("pt-BR");
 const fmtUSD = (n) => `$${fmt(Math.abs(n), 3)}`;
-const green = "#4ade80", red = "#f87171", gold = "#c4a050", blue = "#60a5fa", dim = "#a0a0b0", purple = "#a78bfa", orange = "#fb923c";
-const pc = (v) => v > 0 ? green : v < 0 ? red : "#f0e6c8";
+const green = "#4ade80", red = "#f87171", gold = "#c4a050", blue = "#60a5fa", dim = "#8fa0b8", purple = "#a78bfa", orange = "#fb923c";
+const pc = (v) => v > 0 ? green : v < 0 ? red : "#e0eaf8";
+
+// Aether Blue palette
+const BG_DEEP    = "#050810";
+const BG_SURFACE = "#080f1e";
+const BG_CARD    = "#0d1525";
+const BG_ACCENT  = "#1e3a5f";
+const TEXT_PRIM  = "#e0eaf8";
+const TEXT_DIM   = "#8fa0b8";
 
 const PACKS = {
   "Pickled Vegetables": { materiais: [
@@ -664,11 +676,12 @@ export default function App() {
     matsOverride, matsQUEST]);
 
   if (initialLoading) return (
-    <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <div style={{ minHeight: "100vh", background: BG_DEEP, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 20, color: "#c4a050", marginBottom: 16 }}>Tradepack Prime</div>
-        <div style={{ color: "#505060", fontSize: 11, letterSpacing: "0.15em" }}>CARREGANDO...</div>
+        <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 80, height: 80, objectFit: "contain", marginBottom: 16 }} />
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: 700, color: TEXT_PRIM, letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 8 }}>RavenLab</div>
+        <div style={{ color: TEXT_DIM, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase" }}>Carregando...</div>
       </div>
     </div>
   );
@@ -690,11 +703,11 @@ export default function App() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#080810", backgroundImage: "radial-gradient(ellipse at 15% 15%, rgba(196,160,80,0.07) 0%, transparent 55%)", fontFamily: "'Space Mono', monospace", color: "#f0e6c8", padding: "20px 16px" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <div style={{ minHeight: "100vh", background: BG_DEEP, backgroundImage: "radial-gradient(ellipse at 20% 10%, rgba(30,58,95,0.35) 0%, transparent 55%)", fontFamily: "'Space Mono', monospace", color: TEXT_PRIM, padding: "20px 16px" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 
-      {/* WATERMARK — email do usuário para rastreabilidade */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden", opacity: 0.055 }}>
+      {/* WATERMARK */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999, overflow: "hidden", opacity: 0.045 }}>
         {Array.from({ length: 48 }).map((_, i) => (
           <div key={i} style={{ position: "absolute", top: `${(i % 8) * 13}%`, left: `${Math.floor(i / 8) * 17}%`, transform: "rotate(-30deg)", color: "#ffffff", fontSize: 12, fontFamily: "monospace", whiteSpace: "nowrap", userSelect: "none" }}>
             {userEmail}
@@ -702,42 +715,75 @@ export default function App() {
         ))}
       </div>
 
+      {/* HEADER */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, paddingBottom: 16, borderBottom: "1px solid rgba(96,165,250,0.08)" }}>
+
+        {/* Logo + Nome */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 44, height: 44, objectFit: "contain" }} />
+          <div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, fontWeight: 700, color: TEXT_PRIM, letterSpacing: "0.15em", textTransform: "uppercase" }}>RavenLab</div>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.2em", textTransform: "uppercase" }}>RavenQuest · Economy Intelligence</div>
+          </div>
+        </div>
+
+        {/* Centro: status de sync */}
+        <div style={{ fontSize: 10, color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.45)", letterSpacing: "0.1em", transition: "color 0.5s" }}>
+          {dataLoading ? "⟳ carregando..." : saving ? "⟳ salvando..." : settingsLoaded ? "✓ sincronizado" : ""}
+        </div>
+
+        {/* Direita: expiração + tutorial + logout */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {expiresAt && (() => {
+            const dias = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
+            const expColor = dias <= 7 ? "#f87171" : dias <= 14 ? "#fb923c" : TEXT_DIM;
+            return (
+              <div style={{ fontSize: 10, color: expColor, letterSpacing: "0.06em" }}>
+                {dias <= 7 && "⚠️ "}{dias > 0 ? `${dias}d restantes` : "Expirado"}
+              </div>
+            );
+          })()}
+          <button onClick={() => setShowTutorial(true)} title="Ver tutorial"
+            style={{ background: "rgba(30,58,95,0.5)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, color: "rgba(96,165,250,0.5)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.05em", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.target.style.background = "rgba(30,58,95,0.8)"; e.target.style.color = "#60a5fa"; }}
+            onMouseLeave={e => { e.target.style.background = "rgba(30,58,95,0.5)"; e.target.style.color = "rgba(96,165,250,0.5)"; }}>
+            ? Tutorial
+          </button>
+          <button onClick={handleLogout}
+            style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 6, color: "rgba(248,113,113,0.5)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.08em", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.target.style.background = "rgba(248,113,113,0.12)"; e.target.style.color = "#f87171"; }}
+            onMouseLeave={e => { e.target.style.background = "rgba(248,113,113,0.06)"; e.target.style.color = "rgba(248,113,113,0.5)"; }}>
+            Sair
+          </button>
+        </div>
+      </div>
       {/* MODAL TUTORIAL */}
       {showTutorial && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: "#0d0d1a", border: "1px solid rgba(196,160,80,0.4)", borderRadius: 16, width: "100%", maxWidth: 780, boxShadow: "0 0 60px rgba(196,160,80,0.15)" }}>
-
-            {/* Header modal */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid rgba(196,160,80,0.15)" }}>
-              <div>
-                <div style={{ fontSize: 10, color: "rgba(196,160,80,0.6)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 4 }}>Bem-vindo ao</div>
-                <div style={{ fontFamily: "'Cinzel', serif", fontSize: 18, fontWeight: 700, color: "#f0e6c8" }}>Tradepack Prime Calculator</div>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 10000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: BG_SURFACE, border: "1px solid rgba(96,165,250,0.15)", borderRadius: 16, width: "100%", maxWidth: 780 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid rgba(96,165,250,0.08)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 48, height: 48, objectFit: "contain" }} />
+                <div>
+                  <div style={{ fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 4 }}>Bem-vindo ao</div>
+                  <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 14, fontWeight: 700, color: TEXT_PRIM, letterSpacing: "0.1em", textTransform: "uppercase" }}>RavenLab</div>
+                </div>
               </div>
-              <button onClick={() => setShowTutorial(false)}
-                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "#707080", padding: "6px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12 }}>
+              <button onClick={() => setShowTutorial(false)} style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 8, color: TEXT_DIM, padding: "6px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11 }}>
                 ✕ Fechar
               </button>
             </div>
-
-            {/* Player YouTube */}
             <div style={{ padding: "20px 24px" }}>
-              <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(196,160,80,0.2)" }}>
-                <iframe
-                  src={`https://www.youtube.com/embed/${TUTORIAL_VIDEO_ID}?rel=0&modestbranding=1`}
+              <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, borderRadius: 10, overflow: "hidden", border: "1px solid rgba(96,165,250,0.1)" }}>
+                <iframe src={`https://www.youtube.com/embed/${TUTORIAL_VIDEO_ID}?rel=0&modestbranding=1`}
                   style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none" }}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title="Tutorial - Tradepack Prime Calculator"
-                />
+                  allowFullScreen title="Tutorial - Merchant Ledger" />
               </div>
             </div>
-
-            {/* Footer modal */}
             <div style={{ padding: "0 24px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <button onClick={() => {
-                localStorage.setItem(`tutorial_visto_${userId}`, "1");
-                setShowTutorial(false);
-              }} style={{ background: "none", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, color: "rgba(196,160,80,0.5)", padding: "8px 16px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.05em" }}>
+              <button onClick={() => { localStorage.setItem(`tutorial_visto_${userId}`, "1"); setShowTutorial(false); }}
+                style={{ background: "none", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 8, color: TEXT_DIM, padding: "8px 16px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11 }}>
                 Não mostrar novamente
               </button>
               <button onClick={() => setShowTutorial(false)}
@@ -748,67 +794,9 @@ export default function App() {
           </div>
         </div>
       )}
-      <div style={{ textAlign: "center", marginBottom: 28 }}>
-        {/* Linha decorativa superior */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 16 }}>
-          <div style={{ height: 1, width: 60, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.5))" }} />
-          <div style={{ fontSize: 10, color: "rgba(196,160,80,0.7)", letterSpacing: "0.35em", textTransform: "uppercase" }}>RavenQuest · Merchant Ledger</div>
-          <div style={{ height: 1, width: 60, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.5))" }} />
-        </div>
-
-        {/* Título principal */}
-        <h1 style={{ fontFamily: "'Cinzel', serif", fontSize: 32, fontWeight: 700, color: "#f0e6c8", margin: "0 0 2px", letterSpacing: "0.05em" }}>Tradepack Prime</h1>
-        <div style={{ fontFamily: "'Cinzel', serif", fontSize: 32, fontWeight: 700, background: "linear-gradient(135deg, #c4a050, #f0d080, #c4a050)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: 16 }}>Calculator</div>
-
-        {/* Linha decorativa inferior */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
-          <div style={{ height: 1, flex: 1, maxWidth: 120, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.3))" }} />
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(196,160,80,0.5)" }} />
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: gold }} />
-            <div style={{ width: 4, height: 4, borderRadius: "50%", background: "rgba(196,160,80,0.5)" }} />
-          </div>
-          <div style={{ height: 1, flex: 1, maxWidth: 120, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.3))" }} />
-        </div>
-
-        {/* Indicador de salvamento */}
-        <div style={{ marginTop: 10, fontSize: 10, color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.5)", letterSpacing: "0.1em", transition: "color 0.5s" }}>
-          {dataLoading ? "⟳ carregando seus dados..." : saving ? "⟳ salvando..." : settingsLoaded ? "✓ dados sincronizados" : ""}
-        </div>
-
-        {/* Barra de usuário — logout + expiração */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 10 }}>
-          {/* Expiração */}
-          {expiresAt && (() => {
-            const dias = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
-            const expColor = dias <= 7 ? "#f87171" : dias <= 14 ? "#fb923c" : "#505060";
-            return (
-              <div style={{ fontSize: 10, color: expColor, letterSpacing: "0.08em" }}>
-                {dias <= 7 && "⚠️ "}{dias > 0 ? `Acesso válido por ${dias} dia${dias !== 1 ? "s" : ""}` : "Acesso expirado"}
-              </div>
-            );
-          })()}
-
-          {/* Botão Tutorial */}
-          <button onClick={() => setShowTutorial(true)}
-            title="Ver tutorial"
-            style={{ background: "rgba(196,160,80,0.08)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "rgba(196,160,80,0.6)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.05em", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.target.style.background = "rgba(196,160,80,0.18)"; e.target.style.color = "#c4a050"; }}
-            onMouseLeave={e => { e.target.style.background = "rgba(196,160,80,0.08)"; e.target.style.color = "rgba(196,160,80,0.6)"; }}>
-            ? Tutorial
-          </button>
-
-          {/* Logout */}
-          <button onClick={handleLogout} style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)", borderRadius: 6, color: "rgba(248,113,113,0.6)", padding: "4px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.08em", transition: "all 0.2s" }}
-            onMouseEnter={e => { e.target.style.background = "rgba(248,113,113,0.15)"; e.target.style.color = "#f87171"; }}
-            onMouseLeave={e => { e.target.style.background = "rgba(248,113,113,0.08)"; e.target.style.color = "rgba(248,113,113,0.6)"; }}>
-            SAIR
-          </button>
-        </div>
-      </div>
 
       {/* RESULTADO PRINCIPAL — 3 CENÁRIOS */}
-      <div style={{ background: "linear-gradient(135deg, rgba(196,160,80,0.10), rgba(196,160,80,0.02))", border: "1px solid rgba(196,160,80,0.4)", borderRadius: 16, padding: "20px 24px", marginBottom: 20 }}>
+      <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 16, padding: "20px 24px", marginBottom: 20 }}>
         <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>💰 Comparativo de Estratégias</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
           {/* Fazendo os packs */}
@@ -1567,11 +1555,11 @@ export default function App() {
         </div>
       )}
 
-      <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(196,160,80,0.1)" }}>
+      <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(96,165,250,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
-          <div style={{ height: 1, width: 40, background: "linear-gradient(to right, transparent, rgba(196,160,80,0.3))" }} />
-          <span style={{ color: "rgba(196,160,80,0.4)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>ToilZero · Tradepack Prime Calculator</span>
-          <div style={{ height: 1, width: 40, background: "linear-gradient(to left, transparent, rgba(196,160,80,0.3))" }} />
+          <div style={{ height: 1, width: 40, background: "linear-gradient(to right, transparent, rgba(96,165,250,0.15))" }} />
+          <span style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>ToilZero · RavenLab · RavenQuest Economy Intelligence</span>
+          <div style={{ height: 1, width: 40, background: "linear-gradient(to left, transparent, rgba(96,165,250,0.15))" }} />
         </div>
       </div>
     </div>
