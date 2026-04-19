@@ -1117,9 +1117,9 @@ export default function App() {
                     <tr key={i} style={{ background: comQUEST ? "rgba(167,139,250,0.05)" : "transparent" }}>
                       <td style={{ padding: "8px 10px", color: comQUEST ? purple : "#c0c0d0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.qtd}</td>
-                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "4px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <input type="number" value={cp} onChange={e => setMat(m.nome, "custoProducao", parseFloat(e.target.value) || 0)}
-                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 4, color: "#f0e6c8", padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 4, color: "#f0e6c8", padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <button onClick={() => toggleQUEST(m.nome)} style={{
@@ -1135,9 +1135,9 @@ export default function App() {
                       <td style={{ padding: "8px 10px", textAlign: "right", color: comQUEST ? green : "#a0a0b0", fontWeight: comQUEST ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {fmtInt(custoReal)}{comQUEST && <span style={{ fontSize: 9, marginLeft: 4, color: green }}>-20%</span>}
                       </td>
-                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "4px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <input type="number" value={pm} onChange={e => setMat(m.nome, "precoMkt", parseFloat(e.target.value) || 0)}
-                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: 90, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: comQUEST ? green : red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(m.qtd * custoReal)}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: orange, borderBottom: "1px solid rgba(255,255,255,0.04)", fontWeight: "bold" }}>{fmtInt(m.qtd * pm)}</td>
@@ -1274,7 +1274,7 @@ export default function App() {
               <thead>
                 <tr>
                   {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
-                    <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
+                    <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -1285,22 +1285,23 @@ export default function App() {
                   const rowColor = isBest ? "rgba(74,222,128,0.06)" : "transparent";
                   return (
                     <tr key={inf.nome} style={{ background: rowColor }}>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? `#${rank + 1}` : "—"}
                       </td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: purple, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
-                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: purple, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
+                      <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 && <div style={{ color: orange, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
                         <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
-                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.25)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: 110, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.35)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? orange : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? orange : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
                       </td>
                     </tr>
@@ -1315,7 +1316,7 @@ export default function App() {
               <thead>
                 <tr>
                   {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
-                    <th key={h} style={{ color: blue, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>{h}</th>
+                    <th key={h} style={{ color: blue, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -1325,22 +1326,23 @@ export default function App() {
                   const isBest = rank === 0 && inf.preco > 0;
                   return (
                     <tr key={inf.nome} style={{ background: isBest ? "rgba(74,222,128,0.06)" : "transparent" }}>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? `#${rank + 1}` : "—"}
                       </td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: blue, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
-                      <td style={{ padding: "4px 10px", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: blue, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
+                      <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        {inf.preco > 0 && <div style={{ color: blue, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
                         <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
-                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: 110, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
+                          style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.35)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "right", color: isBest ? green : (inf.preco > 0 ? blue : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? blue : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
                       </td>
                     </tr>
