@@ -340,15 +340,16 @@ export default function App() {
   const [qtdPlunder, setQtdPlunder] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
 
-  // HUNT — itens coletados por período
-  const [huntPeriodo, setHuntPeriodo] = useState("hora"); // "minuto" | "hora" | "dia"
+  // HUNT — itens coletados por 1 HORA (base fixa)
+  const [huntHorasDia, setHuntHorasDia] = useState(3);
   const [huntAddonQtd, setHuntAddonQtd] = useState(0);
   const [huntAddonPreco, setHuntAddonPreco] = useState(0);
   const [huntInfusionQtd, setHuntInfusionQtd] = useState(0);
   const [huntInfusionPreco, setHuntInfusionPreco] = useState(0);
   const [huntNPC, setHuntNPC] = useState(0);
 
-  // MINERAÇÃO — ores
+  // MINERAÇÃO — itens coletados por 1 HORA (base fixa)
+  const [mineHorasDia, setMineHorasDia] = useState(3);
   const [mineOres, setMineOres] = useState({
     "Copper Ore":   { qtd: 0, preco: 0 },
     "Tin Ore":      { qtd: 0, preco: 0 },
@@ -372,23 +373,17 @@ export default function App() {
   const setOre = (nome, campo, val) => setMineOres(prev => ({ ...prev, [nome]: { ...prev[nome], [campo]: val } }));
   const setGem = (nome, campo, val) => setMineGems(prev => ({ ...prev, [nome]: { ...prev[nome], [campo]: val } }));
 
-  // Multiplicadores de período
-  const periodoLabel = { minuto: "minuto", hora: "hora", dia: "dia" };
-  const periodoParaHora = { minuto: 60, hora: 1, dia: 1/24 };
-  const periodoParaSemana = { minuto: 60 * 7 * 24, hora: 7 * 24, dia: 7 };
-  const periodoParaMes = { minuto: 60 * 30 * 24, hora: 30 * 24, dia: 30 };
-
-  // Totais hunt
-  const huntSilverPeriodo = (huntAddonQtd * huntAddonPreco) + (huntInfusionQtd * huntInfusionPreco) + huntNPC;
-  const huntSilverHora = huntSilverPeriodo * periodoParaHora[huntPeriodo];
-
-  // Totais mineração
-  const mineSilverPeriodo = Object.values(mineOres).reduce((a, v) => a + v.qtd * v.preco, 0)
+  // Totais base (1 hora)
+  const huntSilverHora = (huntAddonQtd * huntAddonPreco) + (huntInfusionQtd * huntInfusionPreco) + huntNPC;
+  const mineSilverHora = Object.values(mineOres).reduce((a, v) => a + v.qtd * v.preco, 0)
     + Object.values(mineGems).reduce((a, v) => a + v.qtd * v.preco, 0);
-  const mineSilverHora = mineSilverPeriodo * periodoParaHora[huntPeriodo];
 
-  // Projeções (em silver)
-  const proj = (silverHora, mult) => silverHora * mult;
+  // Projeções baseadas nas horas/dia configuradas
+  const huntSilverDia = huntSilverHora * huntHorasDia;
+  const huntSilverMes = huntSilverDia * 30;
+  const mineSilverDia = mineSilverHora * mineHorasDia;
+  const mineSilverMes = mineSilverDia * 30;
+
   const toUSD = (silver) => (silver / questToSilver) * questUSD;
 
   // MATERIAIS
@@ -434,12 +429,13 @@ export default function App() {
         if (s.custoCert !== undefined) setCustoCert(s.custoCert);
         if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
         if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
-        if (s.huntPeriodo !== undefined) setHuntPeriodo(s.huntPeriodo);
+        if (s.huntHorasDia !== undefined) setHuntHorasDia(s.huntHorasDia);
         if (s.huntAddonQtd !== undefined) setHuntAddonQtd(s.huntAddonQtd);
         if (s.huntAddonPreco !== undefined) setHuntAddonPreco(s.huntAddonPreco);
         if (s.huntInfusionQtd !== undefined) setHuntInfusionQtd(s.huntInfusionQtd);
         if (s.huntInfusionPreco !== undefined) setHuntInfusionPreco(s.huntInfusionPreco);
         if (s.huntNPC !== undefined) setHuntNPC(s.huntNPC);
+        if (s.mineHorasDia !== undefined) setMineHorasDia(s.mineHorasDia);
         if (s.mineOres !== undefined) setMineOres(s.mineOres);
         if (s.mineGems !== undefined) setMineGems(s.mineGems);
       }
@@ -462,9 +458,9 @@ export default function App() {
             imExpSemana, joiasTotal, packSelecionado,
             qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
             matsOverride, matsQUEST,
-            huntPeriodo, huntAddonQtd, huntAddonPreco,
+            huntHorasDia, huntAddonQtd, huntAddonPreco,
             huntInfusionQtd, huntInfusionPreco, huntNPC,
-            mineOres, mineGems,
+            mineHorasDia, mineOres, mineGems,
           },
           updated_at: new Date().toISOString(),
         });
@@ -478,8 +474,8 @@ export default function App() {
   }, [poolRate, questUSD, questToSilver, calQUEST, imExpSemana, joiasTotal,
     packSelecionado, qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
     matsOverride, matsQUEST,
-    huntPeriodo, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
-    mineOres, mineGems]);
+    huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
+    mineHorasDia, mineOres, mineGems]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -868,91 +864,69 @@ export default function App() {
       {/* TAB: HUNT */}
       {tab === "comparativo" && (
         <div>
-          {/* Seletor de período */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <span style={{ color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>Período medido:</span>
-            {["minuto", "hora", "dia"].map(p => (
-              <button key={p} onClick={() => setHuntPeriodo(p)} style={{
-                background: huntPeriodo === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : "rgba(0,0,0,0.4)",
-                border: `1px solid ${huntPeriodo === p ? gold : "rgba(196,160,80,0.3)"}`,
-                borderRadius: 8, color: huntPeriodo === p ? "#000" : dim,
-                padding: "6px 16px", cursor: "pointer", fontFamily: "'Space Mono', monospace",
-                fontSize: 12, fontWeight: huntPeriodo === p ? "bold" : "normal", textTransform: "uppercase"
-              }}>
-                1 {p}
-              </button>
-            ))}
-            <span style={{ color: "#404050", fontSize: 10, marginLeft: 4 }}>
-              — insira o que você coletou nesse período
-            </span>
-          </div>
-
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
 
             {/* HUNT / CAÇA */}
             <div>
               <Section title="🏹 Caça (Hunt)" icon="⚔️" borderColor="rgba(248,113,113,0.3)">
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
-                  Itens coletados em 1 {periodoLabel[huntPeriodo]}
+
+                {/* Instrução */}
+                <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+                  📌 Insira a quantidade de itens coletados em <strong style={{ color: red }}>1 hora</strong> de caça.
                 </div>
 
-                {/* Tabela Hunt */}
+                {/* Itens */}
+                <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Item</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Qtd / hora</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Preço Mkt</span>
+                </div>
+
                 {[
                   { label: "Addon", qtd: huntAddonQtd, preco: huntAddonPreco, setQtd: setHuntAddonQtd, setPreco: setHuntAddonPreco },
                   { label: "Infusion", qtd: huntInfusionQtd, preco: huntInfusionPreco, setQtd: setHuntInfusionQtd, setPreco: setHuntInfusionPreco },
                 ].map((item, i) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 10 }}>
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: 8, alignItems: "center", marginBottom: 10 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 12 }}>{item.label}</span>
-                    <div>
-                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Qtd</label>
-                      <input type="number" value={item.qtd} onChange={e => item.setQtd(parseFloat(e.target.value) || 0)} min={0}
-                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    </div>
-                    <div>
-                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Preço Mkt</label>
-                      <input type="number" value={item.preco} onChange={e => item.setPreco(parseFloat(e.target.value) || 0)} min={0}
-                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Total</label>
-                      <span style={{ color: green, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(item.qtd * item.preco)}</span>
-                    </div>
+                    <input type="number" value={item.qtd} onChange={e => item.setQtd(parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <input type="number" value={item.preco} onChange={e => item.setPreco(parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   </div>
                 ))}
 
                 {/* NPC */}
-                <div style={{ display: "grid", gridTemplateColumns: "100px 1fr auto", gap: 8, alignItems: "center", marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: 8, alignItems: "center", marginBottom: 16 }}>
                   <span style={{ color: "#c0c0d0", fontSize: 12 }}>NPC</span>
-                  <div>
-                    <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Silver direto</label>
-                    <input type="number" value={huntNPC} onChange={e => setHuntNPC(parseFloat(e.target.value) || 0)} min={0}
-                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Total</label>
-                    <span style={{ color: green, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(huntNPC)}</span>
-                  </div>
+                  <input type="number" value={huntNPC} onChange={e => setHuntNPC(parseFloat(e.target.value) || 0)} min={0}
+                    placeholder="Silver direto/hora"
+                    style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                 </div>
 
-                {/* Total Hunt */}
-                <div style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, padding: "12px 14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ color: red, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total / {periodoLabel[huntPeriodo]}</span>
-                    <span style={{ color: red, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(huntSilverPeriodo)}</span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}>
-                    {[
-                      { label: "/hora", val: huntSilverHora },
-                      { label: "/dia", val: huntSilverHora * 24 },
-                      { label: "/semana", val: huntSilverHora * 24 * 7 },
-                    ].map((p, i) => (
-                      <div key={i} style={{ textAlign: "center", background: "rgba(0,0,0,0.2)", borderRadius: 6, padding: "8px 6px" }}>
-                        <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", marginBottom: 4 }}>{p.label}</div>
-                        <div style={{ color: "#f0e6c8", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.val)}</div>
-                        <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>{fmtUSD(toUSD(p.val))}</div>
-                      </div>
-                    ))}
-                  </div>
+                <Divider label="Projeção" />
+
+                {/* Horas por dia */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
+                  <input type="number" value={huntHorasDia} onChange={e => setHuntHorasDia(Math.max(1, Math.min(24, parseFloat(e.target.value) || 1)))} min={1} max={24} step={0.5}
+                    style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${red}55`, borderRadius: 6, color: red, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
+                  <span style={{ color: "#404050", fontSize: 10 }}>horas de hunt por dia</span>
+                </div>
+
+                {/* Cards de projeção hunt */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  {[
+                    { label: "1 hora", silver: huntSilverHora, highlight: false },
+                    { label: `${huntHorasDia}h / dia`, silver: huntSilverDia, highlight: true },
+                    { label: "mensal", silver: huntSilverMes, highlight: false },
+                  ].map((p, i) => (
+                    <div key={i} style={{ background: p.highlight ? "rgba(248,113,113,0.08)" : "rgba(0,0,0,0.25)", border: `1px solid ${p.highlight ? "rgba(248,113,113,0.35)" : "rgba(255,255,255,0.05)"}`, borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{p.label}</div>
+                      <div style={{ color: red, fontSize: 13, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(p.silver)}</div>
+                      <div style={{ color: "#555565", fontSize: 9, marginTop: 4 }}>silver</div>
+                      <div style={{ color: red, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver))}</div>
+                    </div>
+                  ))}
                 </div>
               </Section>
             </div>
@@ -960,79 +934,89 @@ export default function App() {
             {/* MINERAÇÃO */}
             <div>
               <Section title="⛏️ Mineração" icon="🪨" borderColor="rgba(96,165,250,0.3)">
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
-                  Itens coletados em 1 {periodoLabel[huntPeriodo]}
+
+                <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+                  📌 Insira a quantidade de itens coletados em <strong style={{ color: blue }}>1 hora</strong> de mineração.
+                </div>
+
+                {/* Headers */}
+                <div style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 4, marginBottom: 6 }}>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Item</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Qtd / hora</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Preço Mkt</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Total/h</span>
                 </div>
 
                 {/* Ores */}
-                <div style={{ color: gold, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>⛏ Minérios</div>
                 {Object.entries(mineOres).map(([nome, v], i) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 6, alignItems: "center", marginBottom: 6 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
-                    <div>
-                      {i === 0 && <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Qtd</label>}
-                      <input type="number" value={v.qtd} onChange={e => setOre(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
-                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    </div>
-                    <div>
-                      {i === 0 && <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Preço Mkt</label>}
-                      <input type="number" value={v.preco} onChange={e => setOre(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
-                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    </div>
-                    <span style={{ color: green, fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                    <input type="number" value={v.qtd} onChange={e => setOre(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <input type="number" value={v.preco} onChange={e => setOre(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
                 ))}
 
-                {/* Gems */}
                 <Divider label="💎 Gemas" />
+
                 {Object.entries(mineGems).map(([nome, v], i) => (
-                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 6, alignItems: "center", marginBottom: 6 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
                     <input type="number" value={v.qtd} onChange={e => setGem(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
-                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                     <input type="number" value={v.preco} onChange={e => setGem(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
-                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 6, color: purple, padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <span style={{ color: green, fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 6, color: purple, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
                 ))}
 
-                {/* Total Mineração */}
-                <div style={{ background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 8, padding: "12px 14px", marginTop: 8 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ color: blue, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total / {periodoLabel[huntPeriodo]}</span>
-                    <span style={{ color: blue, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(mineSilverPeriodo)}</span>
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}>
-                    {[
-                      { label: "/hora", val: mineSilverHora },
-                      { label: "/dia", val: mineSilverHora * 24 },
-                      { label: "/semana", val: mineSilverHora * 24 * 7 },
-                    ].map((p, i) => (
-                      <div key={i} style={{ textAlign: "center", background: "rgba(0,0,0,0.2)", borderRadius: 6, padding: "8px 6px" }}>
-                        <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", marginBottom: 4 }}>{p.label}</div>
-                        <div style={{ color: "#f0e6c8", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.val)}</div>
-                        <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>{fmtUSD(toUSD(p.val))}</div>
-                      </div>
-                    ))}
-                  </div>
+                <Divider label="Projeção" />
+
+                {/* Horas por dia mine */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
+                  <input type="number" value={mineHorasDia} onChange={e => setMineHorasDia(Math.max(1, Math.min(24, parseFloat(e.target.value) || 1)))} min={1} max={24} step={0.5}
+                    style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${blue}55`, borderRadius: 6, color: blue, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
+                  <span style={{ color: "#404050", fontSize: 10 }}>horas de mineração por dia</span>
+                </div>
+
+                {/* Cards projeção mine */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                  {[
+                    { label: "1 hora", silver: mineSilverHora, highlight: false },
+                    { label: `${mineHorasDia}h / dia`, silver: mineSilverDia, highlight: true },
+                    { label: "mensal", silver: mineSilverMes, highlight: false },
+                  ].map((p, i) => (
+                    <div key={i} style={{ background: p.highlight ? "rgba(96,165,250,0.08)" : "rgba(0,0,0,0.25)", border: `1px solid ${p.highlight ? "rgba(96,165,250,0.35)" : "rgba(255,255,255,0.05)"}`, borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{p.label}</div>
+                      <div style={{ color: blue, fontSize: 13, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(p.silver)}</div>
+                      <div style={{ color: "#555565", fontSize: 9, marginTop: 4 }}>silver</div>
+                      <div style={{ color: blue, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver))}</div>
+                    </div>
+                  ))}
                 </div>
               </Section>
             </div>
           </div>
 
-          {/* Comparativo final Hunt vs Tradepack */}
-          <Section title="📊 Hunt vs Tradepack" icon="⚖️" accent>
+          {/* Comparativo Hunt vs Tradepack */}
+          <Section title="📊 Hunt vs Tradepack — Comparativo Mensal" icon="⚖️" accent>
+            <div style={{ color: dim, fontSize: 10, marginBottom: 14, lineHeight: 1.6 }}>
+              Baseado em {huntHorasDia}h/dia de hunt · {mineHorasDia}h/dia de mineração · {qtdPacks} packs/semana de tradepack
+            </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               {[
-                { label: "🏹 Hunt (caça)", silver: huntSilverHora, color: red },
-                { label: "⛏️ Mineração", silver: mineSilverHora, color: blue },
-                { label: "📦 Tradepack Prime", silver: r.totalUSD_sem / 7 / 24 * questToSilver / questUSD, color: gold },
+                { label: "🏹 Hunt", mes: huntSilverMes, dia: huntSilverDia, hora: huntSilverHora, color: red },
+                { label: "⛏️ Mineração", mes: mineSilverMes, dia: mineSilverDia, hora: mineSilverHora, color: blue },
+                { label: "📦 Tradepack Prime", mes: r.totalUSD_mes / questUSD * questToSilver, dia: r.totalUSD_mes / 30 / questUSD * questToSilver, hora: r.totalUSD_mes / 30 / 24 / questUSD * questToSilver, color: gold },
               ].map((a, i) => (
                 <div key={i} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 16, textAlign: "center" }}>
                   <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{a.label}</div>
-                  <div style={{ color: a.color, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(a.silver)}<span style={{ fontSize: 10 }}> silver/h</span></div>
-                  <div style={{ color: a.color, fontSize: 11, marginTop: 4 }}>{fmtInt(a.silver * 24)}<span style={{ fontSize: 9 }}> /dia</span></div>
-                  <div style={{ color: dim, fontSize: 10, marginTop: 6 }}>{fmtUSD(toUSD(a.silver * 24 * 30))}<span style={{ fontSize: 9 }}>/mês</span></div>
+                  <div style={{ color: a.color, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtUSD(toUSD(a.mes))}<span style={{ fontSize: 10 }}>/mês</span></div>
+                  <div style={{ color: a.color, fontSize: 12, marginTop: 4 }}>{fmtUSD(toUSD(a.dia))}<span style={{ fontSize: 9 }}>/dia</span></div>
+                  <div style={{ color: "#404050", fontSize: 10, marginTop: 4 }}>{fmtUSD(toUSD(a.hora))}<span style={{ fontSize: 9 }}>/hora</span></div>
                 </div>
               ))}
             </div>
