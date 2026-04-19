@@ -340,10 +340,56 @@ export default function App() {
   const [qtdPlunder, setQtdPlunder] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
 
-  // ATIVIDADES COMPARATIVAS
-  const [silverHoraCaca, setSilverHoraCaca] = useState(4830102);
-  const [silverHoraMineracao, setSilverHoraMineracao] = useState(4516250);
-  const [horasPorSemana, setHorasPorSemana] = useState(10);
+  // HUNT — itens coletados por período
+  const [huntPeriodo, setHuntPeriodo] = useState("hora"); // "minuto" | "hora" | "dia"
+  const [huntAddonQtd, setHuntAddonQtd] = useState(0);
+  const [huntAddonPreco, setHuntAddonPreco] = useState(0);
+  const [huntInfusionQtd, setHuntInfusionQtd] = useState(0);
+  const [huntInfusionPreco, setHuntInfusionPreco] = useState(0);
+  const [huntNPC, setHuntNPC] = useState(0);
+
+  // MINERAÇÃO — ores
+  const [mineOres, setMineOres] = useState({
+    "Copper Ore":   { qtd: 0, preco: 0 },
+    "Tin Ore":      { qtd: 0, preco: 0 },
+    "Iron Ore":     { qtd: 0, preco: 0 },
+    "Stone":        { qtd: 0, preco: 0 },
+    "Salt":         { qtd: 0, preco: 0 },
+    "Cobalt Ore":   { qtd: 0, preco: 0 },
+    "Titanium Ore": { qtd: 0, preco: 0 },
+  });
+
+  // GEMAS
+  const [mineGems, setMineGems] = useState({
+    "Ruby":      { qtd: 0, preco: 0 },
+    "Ametista":  { qtd: 0, preco: 0 },
+    "Esmeralda": { qtd: 0, preco: 0 },
+    "Citrine":   { qtd: 0, preco: 0 },
+    "Safira":    { qtd: 0, preco: 0 },
+    "Topaz":     { qtd: 0, preco: 0 },
+  });
+
+  const setOre = (nome, campo, val) => setMineOres(prev => ({ ...prev, [nome]: { ...prev[nome], [campo]: val } }));
+  const setGem = (nome, campo, val) => setMineGems(prev => ({ ...prev, [nome]: { ...prev[nome], [campo]: val } }));
+
+  // Multiplicadores de período
+  const periodoLabel = { minuto: "minuto", hora: "hora", dia: "dia" };
+  const periodoParaHora = { minuto: 60, hora: 1, dia: 1/24 };
+  const periodoParaSemana = { minuto: 60 * 7 * 24, hora: 7 * 24, dia: 7 };
+  const periodoParaMes = { minuto: 60 * 30 * 24, hora: 30 * 24, dia: 30 };
+
+  // Totais hunt
+  const huntSilverPeriodo = (huntAddonQtd * huntAddonPreco) + (huntInfusionQtd * huntInfusionPreco) + huntNPC;
+  const huntSilverHora = huntSilverPeriodo * periodoParaHora[huntPeriodo];
+
+  // Totais mineração
+  const mineSilverPeriodo = Object.values(mineOres).reduce((a, v) => a + v.qtd * v.preco, 0)
+    + Object.values(mineGems).reduce((a, v) => a + v.qtd * v.preco, 0);
+  const mineSilverHora = mineSilverPeriodo * periodoParaHora[huntPeriodo];
+
+  // Projeções (em silver)
+  const proj = (silverHora, mult) => silverHora * mult;
+  const toUSD = (silver) => (silver / questToSilver) * questUSD;
 
   // MATERIAIS
   const packAtual = PACKS[packSelecionado];
@@ -386,11 +432,16 @@ export default function App() {
         if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
         if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
         if (s.custoCert !== undefined) setCustoCert(s.custoCert);
-        if (s.silverHoraCaca !== undefined) setSilverHoraCaca(s.silverHoraCaca);
-        if (s.silverHoraMineracao !== undefined) setSilverHoraMineracao(s.silverHoraMineracao);
-        if (s.horasPorSemana !== undefined) setHorasPorSemana(s.horasPorSemana);
         if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
         if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
+        if (s.huntPeriodo !== undefined) setHuntPeriodo(s.huntPeriodo);
+        if (s.huntAddonQtd !== undefined) setHuntAddonQtd(s.huntAddonQtd);
+        if (s.huntAddonPreco !== undefined) setHuntAddonPreco(s.huntAddonPreco);
+        if (s.huntInfusionQtd !== undefined) setHuntInfusionQtd(s.huntInfusionQtd);
+        if (s.huntInfusionPreco !== undefined) setHuntInfusionPreco(s.huntInfusionPreco);
+        if (s.huntNPC !== undefined) setHuntNPC(s.huntNPC);
+        if (s.mineOres !== undefined) setMineOres(s.mineOres);
+        if (s.mineGems !== undefined) setMineGems(s.mineGems);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -410,8 +461,10 @@ export default function App() {
             poolRate, questUSD, questToSilver, calQUEST,
             imExpSemana, joiasTotal, packSelecionado,
             qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
-            silverHoraCaca, silverHoraMineracao, horasPorSemana,
             matsOverride, matsQUEST,
+            huntPeriodo, huntAddonQtd, huntAddonPreco,
+            huntInfusionQtd, huntInfusionPreco, huntNPC,
+            mineOres, mineGems,
           },
           updated_at: new Date().toISOString(),
         });
@@ -424,7 +477,9 @@ export default function App() {
     return () => { clearTimeout(timeout); setSaving(false); };
   }, [poolRate, questUSD, questToSilver, calQUEST, imExpSemana, joiasTotal,
     packSelecionado, qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
-    silverHoraCaca, silverHoraMineracao, horasPorSemana, matsOverride, matsQUEST]);
+    matsOverride, matsQUEST,
+    huntPeriodo, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
+    mineOres, mineGems]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -491,13 +546,7 @@ export default function App() {
     const totalUSD_sem = totalQUEST_sem * questUSD;
     const totalUSD_mes = totalQUEST_mes * questUSD;
 
-    // Comparativo atividades — semanal e mensal
-    const silverCaca_sem = silverHoraCaca * horasPorSemana;
-    const silverMin_sem = silverHoraMineracao * horasPorSemana;
-    const usdCaca_sem = (silverCaca_sem / questToSilver) * questUSD;
-    const usdMin_sem = (silverMin_sem / questToSilver) * questUSD;
-    const usdCaca_mes = usdCaca_sem * MES;
-    const usdMin_mes = usdMin_sem * MES;
+    // Comparativo atividades — removido, agora na aba Hunt com detalhamento por item
 
     // Estratégias — semanal e mensal
     const lucroVenderMkt_sem = packsSemanais * lucroVendaMkt;
@@ -522,14 +571,13 @@ export default function App() {
       imBreakeven, imBreaakevenEnhanced, questNecessarioPorPack,
       expIM, expQUEST_sem, expQUEST_mes, expUSD_sem, expUSD_mes,
       totalIM, totalQUEST_sem, totalQUEST_mes, totalUSD_sem, totalUSD_mes,
-      silverCaca_sem, silverMin_sem, usdCaca_sem, usdMin_sem, usdCaca_mes, usdMin_mes,
       lucroVenderMkt_sem, lucroVenderMkt_mes,
       profitReal_sem, profitReal_mes, profitAlt_sem, profitAlt_mes,
       diferenca_sem, diferenca_mes,
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
-    matsOverride, matsQUEST, silverHoraCaca, silverHoraMineracao, horasPorSemana]);
+    matsOverride, matsQUEST]);
 
   if (initialLoading) return (
     <div style={{ minHeight: "100vh", background: "#080810", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
@@ -551,7 +599,7 @@ export default function App() {
 
   const tabs = [
     { id: "tradepack", label: "📦 Tradepack" },
-    { id: "comparativo", label: "⚔️ Comparativo" },
+    { id: "comparativo", label: "🏹 Hunt" },
     { id: "mercado", label: "💰 Materiais" },
     { id: "calibracao", label: "📐 Calibração" },
   ];
@@ -817,55 +865,176 @@ export default function App() {
         </div>
       )}
 
-      {/* TAB: COMPARATIVO */}
+      {/* TAB: HUNT */}
       {tab === "comparativo" && (
         <div>
-          <Section title="Comparativo de Atividades" icon="⚔️" accent>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
-              <Field label="Silver/hora — Caça Infusion" value={silverHoraCaca} onChange={setSilverHoraCaca} step={10000} suffix="silver" hint="Seu dado real: 4.830.102" />
-              <Field label="Silver/hora — Mineração" value={silverHoraMineracao} onChange={setSilverHoraMineracao} step={10000} suffix="silver" hint="Seu dado real: 4.516.250" />
-              <Field label="⏱️ Horas farmando/semana" value={horasPorSemana} onChange={setHorasPorSemana} step={1} suffix="h" hint="Horas reais que você fica farmando" />
+          {/* Seletor de período */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <span style={{ color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>Período medido:</span>
+            {["minuto", "hora", "dia"].map(p => (
+              <button key={p} onClick={() => setHuntPeriodo(p)} style={{
+                background: huntPeriodo === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : "rgba(0,0,0,0.4)",
+                border: `1px solid ${huntPeriodo === p ? gold : "rgba(196,160,80,0.3)"}`,
+                borderRadius: 8, color: huntPeriodo === p ? "#000" : dim,
+                padding: "6px 16px", cursor: "pointer", fontFamily: "'Space Mono', monospace",
+                fontSize: 12, fontWeight: huntPeriodo === p ? "bold" : "normal", textTransform: "uppercase"
+              }}>
+                1 {p}
+              </button>
+            ))}
+            <span style={{ color: "#404050", fontSize: 10, marginLeft: 4 }}>
+              — insira o que você coletou nesse período
+            </span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+
+            {/* HUNT / CAÇA */}
+            <div>
+              <Section title="🏹 Caça (Hunt)" icon="⚔️" borderColor="rgba(248,113,113,0.3)">
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
+                  Itens coletados em 1 {periodoLabel[huntPeriodo]}
+                </div>
+
+                {/* Tabela Hunt */}
+                {[
+                  { label: "Addon", qtd: huntAddonQtd, preco: huntAddonPreco, setQtd: setHuntAddonQtd, setPreco: setHuntAddonPreco },
+                  { label: "Infusion", qtd: huntInfusionQtd, preco: huntInfusionPreco, setQtd: setHuntInfusionQtd, setPreco: setHuntInfusionPreco },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "100px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 10 }}>
+                    <span style={{ color: "#c0c0d0", fontSize: 12 }}>{item.label}</span>
+                    <div>
+                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Qtd</label>
+                      <input type="number" value={item.qtd} onChange={e => item.setQtd(parseFloat(e.target.value) || 0)} min={0}
+                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    </div>
+                    <div>
+                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Preço Mkt</label>
+                      <input type="number" value={item.preco} onChange={e => item.setPreco(parseFloat(e.target.value) || 0)} min={0}
+                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Total</label>
+                      <span style={{ color: green, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(item.qtd * item.preco)}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* NPC */}
+                <div style={{ display: "grid", gridTemplateColumns: "100px 1fr auto", gap: 8, alignItems: "center", marginBottom: 14 }}>
+                  <span style={{ color: "#c0c0d0", fontSize: 12 }}>NPC</span>
+                  <div>
+                    <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Silver direto</label>
+                    <input type="number" value={huntNPC} onChange={e => setHuntNPC(parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Total</label>
+                    <span style={{ color: green, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(huntNPC)}</span>
+                  </div>
+                </div>
+
+                {/* Total Hunt */}
+                <div style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, padding: "12px 14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ color: red, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total / {periodoLabel[huntPeriodo]}</span>
+                    <span style={{ color: red, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(huntSilverPeriodo)}</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}>
+                    {[
+                      { label: "/hora", val: huntSilverHora },
+                      { label: "/dia", val: huntSilverHora * 24 },
+                      { label: "/semana", val: huntSilverHora * 24 * 7 },
+                    ].map((p, i) => (
+                      <div key={i} style={{ textAlign: "center", background: "rgba(0,0,0,0.2)", borderRadius: 6, padding: "8px 6px" }}>
+                        <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", marginBottom: 4 }}>{p.label}</div>
+                        <div style={{ color: "#f0e6c8", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.val)}</div>
+                        <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>{fmtUSD(toUSD(p.val))}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Section>
             </div>
-            <Divider label="Resultado Semanal e Mensal" />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
+
+            {/* MINERAÇÃO */}
+            <div>
+              <Section title="⛏️ Mineração" icon="🪨" borderColor="rgba(96,165,250,0.3)">
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
+                  Itens coletados em 1 {periodoLabel[huntPeriodo]}
+                </div>
+
+                {/* Ores */}
+                <div style={{ color: gold, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>⛏ Minérios</div>
+                {Object.entries(mineOres).map(([nome, v], i) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
+                    <div>
+                      {i === 0 && <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Qtd</label>}
+                      <input type="number" value={v.qtd} onChange={e => setOre(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
+                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    </div>
+                    <div>
+                      {i === 0 && <label style={{ color: dim, fontSize: 9, textTransform: "uppercase", display: "block", marginBottom: 3 }}>Preço Mkt</label>}
+                      <input type="number" value={v.preco} onChange={e => setOre(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
+                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    </div>
+                    <span style={{ color: green, fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                  </div>
+                ))}
+
+                {/* Gems */}
+                <Divider label="💎 Gemas" />
+                {Object.entries(mineGems).map(([nome, v], i) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr auto", gap: 8, alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
+                    <input type="number" value={v.qtd} onChange={e => setGem(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <input type="number" value={v.preco} onChange={e => setGem(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
+                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 6, color: purple, padding: "5px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                    <span style={{ color: green, fontSize: 11, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                  </div>
+                ))}
+
+                {/* Total Mineração */}
+                <div style={{ background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 8, padding: "12px 14px", marginTop: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ color: blue, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total / {periodoLabel[huntPeriodo]}</span>
+                    <span style={{ color: blue, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(mineSilverPeriodo)}</span>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}>
+                    {[
+                      { label: "/hora", val: mineSilverHora },
+                      { label: "/dia", val: mineSilverHora * 24 },
+                      { label: "/semana", val: mineSilverHora * 24 * 7 },
+                    ].map((p, i) => (
+                      <div key={i} style={{ textAlign: "center", background: "rgba(0,0,0,0.2)", borderRadius: 6, padding: "8px 6px" }}>
+                        <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", marginBottom: 4 }}>{p.label}</div>
+                        <div style={{ color: "#f0e6c8", fontSize: 12, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.val)}</div>
+                        <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>{fmtUSD(toUSD(p.val))}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Section>
+            </div>
+          </div>
+
+          {/* Comparativo final Hunt vs Tradepack */}
+          <Section title="📊 Hunt vs Tradepack" icon="⚖️" accent>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               {[
-                { label: "🏹 Caça Infusion", sem: fmtUSD(r.usdCaca_sem), mes: fmtUSD(r.usdCaca_mes), sub: `${fmtInt(r.silverCaca_sem)} silver/sem`, color: red },
-                { label: "⛏️ Mineração", sem: fmtUSD(r.usdMin_sem), mes: fmtUSD(r.usdMin_mes), sub: `${fmtInt(r.silverMin_sem)} silver/sem`, color: blue },
-                { label: "📦 Tradepack Prime", sem: fmtUSD(r.totalUSD_sem), mes: fmtUSD(r.totalUSD_mes), sub: "exp + packs", color: gold },
+                { label: "🏹 Hunt (caça)", silver: huntSilverHora, color: red },
+                { label: "⛏️ Mineração", silver: mineSilverHora, color: blue },
+                { label: "📦 Tradepack Prime", silver: r.totalUSD_sem / 7 / 24 * questToSilver / questUSD, color: gold },
               ].map((a, i) => (
                 <div key={i} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 16, textAlign: "center" }}>
-                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{a.label}</div>
-                  <div style={{ color: a.color, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>+{a.mes}<span style={{ fontSize: 11 }}>/mês</span></div>
-                  <div style={{ color: a.color, fontSize: 14, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{a.sem}<span style={{ fontSize: 11 }}>/sem</span></div>
-                  <div style={{ color: "#555565", fontSize: 11, marginTop: 4 }}>{a.sub}</div>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{a.label}</div>
+                  <div style={{ color: a.color, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(a.silver)}<span style={{ fontSize: 10 }}> silver/h</span></div>
+                  <div style={{ color: a.color, fontSize: 11, marginTop: 4 }}>{fmtInt(a.silver * 24)}<span style={{ fontSize: 9 }}> /dia</span></div>
+                  <div style={{ color: dim, fontSize: 10, marginTop: 6 }}>{fmtUSD(toUSD(a.silver * 24 * 30))}<span style={{ fontSize: 9 }}>/mês</span></div>
                 </div>
               ))}
-            </div>
-            <Divider label="Pack vs Vender Materiais" />
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 12, padding: 16, textAlign: "center" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📦 Fazer {r.packsSemanais} packs prime</div>
-                <div style={{ color: green, fontSize: 16, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.silverPacks_sem)} silver/sem</div>
-                <div style={{ color: green, fontSize: 13, marginTop: 2 }}>{fmtInt(r.silverPacks_mes)} silver/mês</div>
-                <div style={{ color: purple, fontSize: 12, marginTop: 6 }}>+ {fmt(r.questLiq_sem)} Q/sem · {fmt(r.questLiq_mes)} Q/mês</div>
-                <div style={{ color: "#555565", fontSize: 10, marginTop: 4 }}>custo certs: -{fmt(r.questCerts_sem)} Q/sem</div>
-              </div>
-              <div style={{ background: "rgba(251,146,60,0.05)", border: "1px solid rgba(251,146,60,0.25)", borderRadius: 12, padding: 16, textAlign: "center" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>💰 Vender materiais no mercado</div>
-                <div style={{ color: orange, fontSize: 16, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.lucroVenderMkt_sem)} silver/sem</div>
-                <div style={{ color: orange, fontSize: 13, marginTop: 2 }}>{fmtInt(r.lucroVenderMkt_mes)} silver/mês</div>
-                <div style={{ color: "#555565", fontSize: 12, marginTop: 6 }}>{fmtUSD(r.profitAlt_sem)}/sem · {fmtUSD(r.profitAlt_mes)}/mês</div>
-                <div style={{ color: "#555565", fontSize: 10, marginTop: 4 }}>sem custo de certificados</div>
-              </div>
-            </div>
-            <div style={{ marginTop: 14, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "14px 18px" }}>
-              <div style={{ color: gold, fontFamily: "'Cinzel', serif", fontSize: 12, marginBottom: 8, letterSpacing: "0.08em" }}>💡 RECOMENDAÇÃO ATUAL</div>
-              <div style={{ color: dim, fontSize: 12, lineHeight: 1.8 }}>
-                {r.deltaQUEST < 0
-                  ? `Vender os materiais é mais lucrativo em ${fmtInt(Math.abs(r.deltaQUEST) * questToSilver)} silver/pack. Pack prime só compensa com Enhanced ativo — e mesmo assim a margem é pequena. Com Cobalt a ${fmtInt(getMat("Cobalt Ore", "precoMkt"))}/unidade no mercado, vender os materiais é a melhor estratégia.`
-                  : `O pack prime compensa! Com os bônus atuais você gera +${fmt(r.deltaQUEST)} QUEST/pack a mais do que vendendo os materiais.`
-                }
-              </div>
             </div>
           </Section>
         </div>
