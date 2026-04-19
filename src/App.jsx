@@ -322,7 +322,7 @@ export default function App() {
   // MERCADO
   const [poolRate, setPoolRate] = useState(0.0000264);
   const [questUSD, setQuestUSD] = useState(0.0042);
-  const [questToSilver, setQuestToSilver] = useState(50650);
+  const [questToSilver, setQuestToSilver] = useState(65018);
 
   // CALIBRAÇÃO
   const [calQUEST, setCalQUEST] = useState(386);
@@ -852,9 +852,32 @@ export default function App() {
                   <span style={{ color: "#404050", fontSize: 10 }}>QUEST ÷ IM Total · atualize via aba Calibração</span>
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="QUEST (USD)" value={questUSD} onChange={setQuestUSD} step="0.0001" suffix="USD" />
-                <Field label="QUEST → Silver" value={questToSilver} onChange={setQuestToSilver} step="100" suffix="silver" />
+
+              {/* QUEST USD */}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Preço do QUEST em USD</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input type="number" value={questUSD} onChange={e => setQuestUSD(parseFloat(e.target.value) || 0)} step="0.0001" min={0}
+                    style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                  <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>USD</span>
+                </div>
+                <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, padding: "8px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.7 }}>
+                  📍 Onde encontrar: <strong style={{ color: blue }}>CoinGecko</strong> ou <strong style={{ color: blue }}>CoinMarketCap</strong> → pesquise "RavenQuest QUEST" → copie o preço atual em USD
+                </div>
+              </div>
+
+              {/* QUEST → Silver */}
+              <div>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Taxa de Câmbio: 1 QUEST → Silver</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input type="number" value={questToSilver} onChange={e => setQuestToSilver(parseFloat(e.target.value) || 0)} step="100" min={0}
+                    style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+                  <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>silver</span>
+                </div>
+                <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.15)", borderRadius: 6, padding: "10px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.8 }}>
+                  📍 Onde encontrar: No jogo → <strong style={{ color: gold }}>Mercado de Moedas</strong> → aba <strong style={{ color: gold }}>Mercado</strong> → selecione <strong style={{ color: gold }}>Silver</strong><br/>
+                  Use o valor de <strong style={{ color: green }}>"Melhor Oferta Atual de Compra"</strong> (ex: 65.018) — é o que você recebe em silver ao vender 1 QUEST
+                </div>
               </div>
             </Section>
           </div>
