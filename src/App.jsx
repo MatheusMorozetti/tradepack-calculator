@@ -11,7 +11,38 @@ const tabId = (() => {
   return id;
 })();
 
-// ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
+// Helper para inputs numéricos inline (fora do componente Field)
+// Mesmo comportamento: digita livremente, converte no onBlur
+function NumInput({ value, onChange, min = 0, max, style, placeholder }) {
+  const [local, setLocal] = React.useState(String(value));
+  const [focused, setFocused] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!focused) setLocal(String(value));
+  }, [value, focused]);
+
+  const commit = (raw) => {
+    const parsed = parseFloat(String(raw).replace(",", "."));
+    let final = isNaN(parsed) ? (min ?? 0) : parsed;
+    if (max !== undefined) final = Math.min(final, max);
+    if (min !== undefined) final = Math.max(final, min);
+    onChange(final);
+    setLocal(String(final));
+  };
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      placeholder={placeholder}
+      value={focused ? local : String(value)}
+      onChange={e => { setLocal(e.target.value); const p = parseFloat(e.target.value.replace(",",".")); if (!isNaN(p)) onChange(p); }}
+      onFocus={() => { setFocused(true); setLocal(String(value)); }}
+      onBlur={() => { setFocused(false); commit(local); }}
+      style={style}
+    />
+  );
+}
 function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -210,12 +241,43 @@ const PACKS = {
 };
 
 function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, color }) {
+  const [localValue, setLocalValue] = React.useState(String(value));
+  const [focused, setFocused] = React.useState(false);
+
+  // Sincroniza valor externo quando não está em foco
+  React.useEffect(() => {
+    if (!focused) setLocalValue(String(value));
+  }, [value, focused]);
+
+  const handleChange = (e) => {
+    // Permite digitar livremente: números, ponto, vírgula, sinal negativo
+    const raw = e.target.value.replace(",", ".");
+    setLocalValue(e.target.value);
+    const parsed = parseFloat(raw);
+    if (!isNaN(parsed)) onChange(parsed);
+  };
+
+  const handleBlur = () => {
+    setFocused(false);
+    const parsed = parseFloat(localValue.replace(",", "."));
+    const final = isNaN(parsed) ? (min ?? 0) : parsed;
+    onChange(final);
+    setLocalValue(String(final));
+  };
+
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <input type="number" value={value} onChange={e => onChange(parseFloat(e.target.value) || 0)} min={min} step={step}
-          style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${color ? color + "55" : "rgba(196,160,80,0.3)"}`, borderRadius: 6, color: color || "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
+        <input
+          type="text"
+          inputMode="decimal"
+          value={focused ? localValue : String(value)}
+          onChange={handleChange}
+          onFocus={() => { setFocused(true); setLocalValue(String(value)); }}
+          onBlur={handleBlur}
+          style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${color ? color + "55" : "rgba(196,160,80,0.3)"}`, borderRadius: 6, color: color || "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }}
+        />
         {suffix && <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>{suffix}</span>}
       </div>
       {hint && <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{hint}</div>}
@@ -988,7 +1050,7 @@ export default function App() {
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Preço do QUEST em USD</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input type="number" value={questUSD} onChange={e => setQuestUSD(parseFloat(e.target.value) || 0)} step="0.0001" min={0}
+                  <NumInput value={questUSD} onChange={v => setQuestUSD(v)} min={0}
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>USD</span>
                 </div>
@@ -1001,7 +1063,7 @@ export default function App() {
               <div>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Taxa de Câmbio: 1 QUEST → Silver</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input type="number" value={questToSilver} onChange={e => setQuestToSilver(parseFloat(e.target.value) || 0)} step="100" min={0}
+                  <NumInput value={questToSilver} onChange={v => setQuestToSilver(v)} min={0}
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>silver</span>
                 </div>
@@ -1042,9 +1104,9 @@ export default function App() {
                 ].map((item, i) => (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: 8, alignItems: "center", marginBottom: 10 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 12 }}>{item.label}</span>
-                    <input type="number" value={item.qtd} onChange={e => item.setQtd(parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={item.qtd} onChange={v => item.setQtd(v)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <input type="number" value={item.preco} onChange={e => item.setPreco(parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={item.preco} onChange={v => item.setPreco(v)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   </div>
                 ))}
@@ -1052,7 +1114,7 @@ export default function App() {
                 {/* NPC */}
                 <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: 8, alignItems: "center", marginBottom: 16 }}>
                   <span style={{ color: "#c0c0d0", fontSize: 12 }}>NPC</span>
-                  <input type="number" value={huntNPC} onChange={e => setHuntNPC(parseFloat(e.target.value) || 0)} min={0}
+                  <NumInput value={huntNPC} onChange={v => setHuntNPC(v)} min={0}
                     placeholder="Silver direto/hora"
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                 </div>
@@ -1062,7 +1124,7 @@ export default function App() {
                 {/* Horas por dia */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                   <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
-                  <input type="number" value={huntHorasDia} onChange={e => setHuntHorasDia(Math.max(1, Math.min(24, parseFloat(e.target.value) || 1)))} min={1} max={24} step={0.5}
+                  <NumInput value={huntHorasDia} onChange={v => setHuntHorasDia(v)} min={1} max={24}
                     style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${red}55`, borderRadius: 6, color: red, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
                   <span style={{ color: "#404050", fontSize: 10 }}>horas de hunt por dia</span>
                 </div>
@@ -1105,9 +1167,9 @@ export default function App() {
                 {Object.entries(mineOres).map(([nome, v], i) => (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 6, alignItems: "center", marginBottom: 6 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
-                    <input type="number" value={v.qtd} onChange={e => setOre(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={v.qtd} onChange={val => setOre(nome, "qtd", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <input type="number" value={v.preco} onChange={e => setOre(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={v.preco} onChange={val => setOre(nome, "preco", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                     <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
@@ -1118,9 +1180,9 @@ export default function App() {
                 {Object.entries(mineGems).map(([nome, v], i) => (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 6, alignItems: "center", marginBottom: 6 }}>
                     <span style={{ color: "#c0c0d0", fontSize: 11 }}>{nome}</span>
-                    <input type="number" value={v.qtd} onChange={e => setGem(nome, "qtd", parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={v.qtd} onChange={val => setGem(nome, "qtd", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <input type="number" value={v.preco} onChange={e => setGem(nome, "preco", parseFloat(e.target.value) || 0)} min={0}
+                    <NumInput value={v.preco} onChange={val => setGem(nome, "preco", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 6, color: purple, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                     <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
@@ -1131,7 +1193,7 @@ export default function App() {
                 {/* Horas por dia mine */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                   <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
-                  <input type="number" value={mineHorasDia} onChange={e => setMineHorasDia(Math.max(1, Math.min(24, parseFloat(e.target.value) || 1)))} min={1} max={24} step={0.5}
+                  <NumInput value={mineHorasDia} onChange={v => setMineHorasDia(v)} min={1} max={24}
                     style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${blue}55`, borderRadius: 6, color: blue, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
                   <span style={{ color: "#404050", fontSize: 10 }}>horas de mineração por dia</span>
                 </div>
@@ -1209,7 +1271,7 @@ export default function App() {
                       <td style={{ padding: "8px 10px", color: comQUEST ? purple : "#c0c0d0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{m.qtd}</td>
                       <td style={{ padding: "4px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        <input type="number" value={cp} onChange={e => setMat(m.nome, "custoProducao", parseFloat(e.target.value) || 0)}
+                        <NumInput value={cp} onChange={v => setMat(m.nome, "custoProducao", v)}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 4, color: "#f0e6c8", padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -1227,7 +1289,7 @@ export default function App() {
                         {fmtInt(custoReal)}{comQUEST && <span style={{ fontSize: 9, marginLeft: 4, color: green }}>-20%</span>}
                       </td>
                       <td style={{ padding: "4px 10px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        <input type="number" value={pm} onChange={e => setMat(m.nome, "precoMkt", parseFloat(e.target.value) || 0)}
+                        <NumInput value={pm} onChange={v => setMat(m.nome, "precoMkt", v)}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "right" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: comQUEST ? green : red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(m.qtd * custoReal)}</td>
@@ -1338,7 +1400,7 @@ export default function App() {
             {/* Target EXP */}
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
               <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>EXP necessário:</label>
-              <input type="number" value={infusionTargetEXP} onChange={e => setInfusionTargetEXP(parseFloat(e.target.value) || 0)} min={0} step={1000}
+              <NumInput value={infusionTargetEXP} onChange={v => setInfusionTargetEXP(v)} min={0}
                 style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${gold}55`, borderRadius: 6, color: gold, padding: "8px 14px", fontSize: 16, width: 160, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
               <span style={{ color: "#404050", fontSize: 10 }}>EXP para infundir no item</span>
             </div>
@@ -1383,7 +1445,7 @@ export default function App() {
                       <td style={{ padding: "8px 10px", textAlign: "center", color: purple, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
                       <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 && <div style={{ color: orange, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
-                        <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                        <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.35)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -1424,7 +1486,7 @@ export default function App() {
                       <td style={{ padding: "8px 10px", textAlign: "center", color: blue, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.exp}</td>
                       <td style={{ padding: "6px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 && <div style={{ color: blue, fontSize: 11, fontFamily: "'Space Mono', monospace", marginBottom: 4 }}>{fmtInt(inf.preco)}</div>}
-                        <input type="number" value={inf.preco} onChange={e => setInfusionPreco(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                        <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.35)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
@@ -1468,7 +1530,7 @@ export default function App() {
                       <td style={{ padding: "8px 10px", textAlign: "center", color: inf.tipo === "mar" ? blue : gold, fontSize: 10, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.tipo === "mar" ? "🌊 Mar" : "⚔️ Terra"}</td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: preco > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{preco > 0 ? fmtInt(preco) : "—"}</td>
                       <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        <input type="number" value={qtd} onChange={e => setInfusionQtd(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                        <NumInput value={qtd} onChange={v => setInfusionQtd(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 4, color: red, padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : (silverH > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtInt(silverH) : "—"}</td>
@@ -1499,7 +1561,7 @@ export default function App() {
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
               <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Taxa do mercado:</label>
-              <input type="number" value={taxaMkt} onChange={e => setTaxaMkt(parseFloat(e.target.value) || 0)} min={0} max={100} step={0.5}
+              <NumInput value={taxaMkt} onChange={v => setTaxaMkt(v)} min={0} max={100}
                 style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, color: green, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
               <span style={{ color: green, fontSize: 13 }}>%</span>
               <span style={{ color: "#404050", fontSize: 10 }}>desconto do marketplace na venda</span>
@@ -1523,7 +1585,7 @@ export default function App() {
                       <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{lucro > 0 ? `#${rank + 1}` : "—"}</td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
                       <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                        <input type="number" value={compra} onChange={e => setInfusionBuy(inf.nome, parseFloat(e.target.value) || 0)} min={0}
+                        <NumInput value={compra} onChange={v => setInfusionBuy(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: 100, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: venda > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{venda > 0 ? fmtInt(venda) : "—"}</td>
