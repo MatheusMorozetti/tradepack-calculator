@@ -314,7 +314,7 @@ const tabId = (() => {
 
 // Helper para inputs numéricos inline (fora do componente Field)
 // Mesmo comportamento: digita livremente, converte no onBlur
-function NumInput({ value, onChange, min = 0, max, style, placeholder, format }) {
+function NumInput({ value, onChange, min = 0, max, style, placeholder, format, decimals }) {
   const [local, setLocal] = useState(String(value));
   const [focused, setFocused] = useState(false);
 
@@ -322,8 +322,23 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format })
     if (!focused) setLocal(String(value));
   }, [value, focused]);
 
+  // Parser robusto para formato BR (65.100 = 65100, 0,0042 = 0.0042)
+  const parseBR = (raw) => {
+    const str = String(raw).trim();
+    if (str.includes(',')) {
+      // vírgula = separador decimal → remove pontos (milhar), troca vírgula por ponto
+      return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+    }
+    // sem vírgula: verifica se ponto é separador de milhar
+    const parts = str.split('.');
+    if (parts.length === 2 && parts[1].length === 3 && parts[0].length > 0 && !str.startsWith('0.')) {
+      return parseFloat(str.replace(/\./g, ''));
+    }
+    return parseFloat(str);
+  };
+
   const commit = (raw) => {
-    const parsed = parseFloat(String(raw).replace(",", "."));
+    const parsed = parseBR(raw);
     let final = isNaN(parsed) ? (min ?? 0) : parsed;
     if (max !== undefined) final = Math.min(final, max);
     if (min !== undefined) final = Math.max(final, min);
@@ -331,10 +346,18 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format })
     setLocal(String(final));
   };
 
-  // Mostra valor formatado quando não está em foco
+  // Display: usa formato customizado ou detecta decimais automaticamente
   const displayValue = focused
     ? local
-    : (format ? format(value) : (value === 0 ? "0" : fmtInt(value)));
+    : (format
+        ? format(value)
+        : value === 0
+          ? "0"
+          : value < 0.01 && value > 0
+            ? value.toFixed(decimals ?? 8)
+            : value < 1 && value > 0
+              ? value.toFixed(decimals ?? 4)
+              : fmtInt(value));
 
   return (
     <input
@@ -342,7 +365,7 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format })
       inputMode="decimal"
       placeholder={placeholder || "0"}
       value={displayValue}
-      onChange={e => { setLocal(e.target.value); const p = parseFloat(e.target.value.replace(",",".")); if (!isNaN(p)) onChange(p); }}
+      onChange={e => { setLocal(e.target.value); const p = parseBR(e.target.value); if (!isNaN(p)) onChange(p); }}
       onFocus={() => { setFocused(true); setLocal(String(value)); }}
       onBlur={() => { setFocused(false); commit(local); }}
       style={style}
@@ -872,32 +895,49 @@ const PACKS = {
   ]},
 };
 
-function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, color }) {
+function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, color, decimals }) {
   const [localValue, setLocalValue] = useState(String(value));
   const [focused, setFocused] = useState(false);
 
-  // Sincroniza valor externo quando não está em foco
   useEffect(() => {
     if (!focused) setLocalValue(String(value));
   }, [value, focused]);
 
+  // Parser robusto para formato BR
+  const parseBR = (raw) => {
+    const str = String(raw).trim();
+    if (str.includes(',')) return parseFloat(str.replace(/\./g, '').replace(',', '.'));
+    const parts = str.split('.');
+    if (parts.length === 2 && parts[1].length === 3 && parts[0].length > 0 && !str.startsWith('0.')) {
+      return parseFloat(str.replace(/\./g, ''));
+    }
+    return parseFloat(str);
+  };
+
   const handleChange = (e) => {
-    // Permite digitar livremente: números, ponto, vírgula, sinal negativo
-    const raw = e.target.value.replace(",", ".");
     setLocalValue(e.target.value);
-    const parsed = parseFloat(raw);
+    const parsed = parseBR(e.target.value);
     if (!isNaN(parsed)) onChange(parsed);
   };
 
   const handleBlur = () => {
     setFocused(false);
-    const parsed = parseFloat(localValue.replace(",", "."));
+    const parsed = parseBR(localValue);
     const final = isNaN(parsed) ? (min ?? 0) : parsed;
     onChange(final);
     setLocalValue(String(final));
   };
 
-  const displayValue = focused ? localValue : fmtInt(value);
+  // Display inteligente: mais casas decimais para valores pequenos
+  const displayValue = focused
+    ? localValue
+    : value === 0
+      ? "0"
+      : value < 0.01 && value > 0
+        ? value.toFixed(decimals ?? 8)
+        : value < 1 && value > 0
+          ? value.toFixed(decimals ?? 4)
+          : fmtInt(value);
 
   return (
     <div style={{ marginBottom: 14 }}>
@@ -1771,28 +1811,47 @@ export default function App() {
 
               {/* QUEST USD */}
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Preço do QUEST em USD</label>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{lang==="en"?"QUEST Price (USD)":"Preço do QUEST em USD"}</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <NumInput value={questUSD} onChange={v => setQuestUSD(v)} min={0}
+                  <NumInput value={questUSD} onChange={v => setQuestUSD(v)} min={0} decimals={6}
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>USD</span>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=ravenquest&vs_currencies=usd");
+                        const data = await res.json();
+                        const price = data?.ravenquest?.usd;
+                        if (price) { setQuestUSD(price); }
+                        else { alert(lang==="en"?"Token not found on CoinGecko. Enter manually.":"Token não encontrado na CoinGecko. Insira manualmente."); }
+                      } catch {
+                        alert(lang==="en"?"CoinGecko unavailable. Enter manually.":"CoinGecko indisponível. Insira manualmente.");
+                      }
+                    }}
+                    style={{ background: "rgba(96,165,250,0.15)", border: "1px solid rgba(96,165,250,0.3)", borderRadius: 6, color: blue, padding: "8px 12px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, whiteSpace: "nowrap", letterSpacing: "0.06em" }}
+                    title="Buscar preço atual na CoinGecko">
+                    ⟳ CoinGecko
+                  </button>
                 </div>
                 <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, padding: "8px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.7 }}>
-                  {lang==="en"?'📍 Where to find: ':"📍 Onde encontrar: "}<strong style={{ color: blue }}>CoinGecko</strong>{lang==="en"?' or ':" ou "}<strong style={{ color: blue }}>CoinMarketCap</strong>{lang==="en"?' → search "RavenQuest QUEST" → copy the current USD price':' → pesquise "RavenQuest QUEST" → copie o preço atual em USD'}
+                  {lang==="en"
+                    ? <>📍 Click <strong style={{ color: blue }}>⟳ CoinGecko</strong> to fetch automatically, or enter manually from <strong style={{ color: blue }}>CoinGecko</strong> / <strong style={{ color: blue }}>CoinMarketCap</strong> — search "RavenQuest QUEST"</>
+                    : <>📍 Clique em <strong style={{ color: blue }}>⟳ CoinGecko</strong> para buscar automaticamente, ou insira manualmente via <strong style={{ color: blue }}>CoinGecko</strong> / <strong style={{ color: blue }}>CoinMarketCap</strong> — pesquise "RavenQuest QUEST"</>}
                 </div>
               </div>
 
               {/* QUEST → Silver */}
               <div>
-                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Taxa de Câmbio: 1 QUEST → Silver</label>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{lang==="en"?"Exchange Rate: 1 QUEST → Silver":"Taxa de Câmbio: 1 QUEST → Silver"}</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <NumInput value={questToSilver} onChange={v => setQuestToSilver(v)} min={0}
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: "#f0e6c8", padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>silver</span>
                 </div>
                 <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.15)", borderRadius: 6, padding: "10px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.8 }}>
-                  📍 Onde encontrar: {lang==="en"?"In-game → Currency Market → Market tab → select Silver":"No jogo → Mercado de Moedas → aba Mercado → selecione Silver"}<br/>
-                  Use o valor de <strong style={{ color: green }}>"Melhor Oferta Atual de Compra"</strong> (ex: 65.018) — é o que você recebe em silver ao vender 1 QUEST
+                  {lang==="en"
+                    ? <>📍 In-game → Currency Market → Market tab → select Silver<br/>Use <strong style={{ color: green }}>"Best Current Buy Offer"</strong> value (e.g. 65018) — silver received per 1 QUEST sold<br/><strong style={{ color: gold }}>⚠️ Type without periods: 65018, not 65.018</strong></>
+                    : <>📍 No jogo → Mercado de Moedas → aba Mercado → selecione Silver<br/>Use o valor de <strong style={{ color: green }}>"Melhor Oferta Atual de Compra"</strong> (ex: 65018) — silver recebido ao vender 1 QUEST<br/><strong style={{ color: gold }}>⚠️ Digite sem ponto separador: 65018, não 65.018</strong></>}
                 </div>
               </div>
             </Section>
