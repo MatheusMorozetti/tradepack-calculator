@@ -229,6 +229,7 @@ function LandingPage({ onEnter }) {
 
 // ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
 function LoginScreen({ onLogin, onBack }) {
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [loading, setLoading] = useState(false);
