@@ -1,9 +1,5 @@
-import { useState, useMemo, useEffect, createContext, useContext } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "./supabase";
-
-// ── i18n ───────────────────────────────────────────────────────────────────
-const LangContext = createContext("ptBR");
-const useLang = () => useContext(LangContext);
 
 const TR = {
   ptBR: {
@@ -1470,21 +1466,21 @@ export default function App() {
 
       {/* RESULTADO PRINCIPAL — 3 CENÁRIOS */}
       <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 16, padding: "20px 24px", marginBottom: 20 }}>
-        <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>💰 Comparativo de Estratégias</div>
+        <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>{TR[lang].secComparativo2}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
           {/* Fazendo os packs */}
           <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
-            <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📦 Fazendo os Packs Prime</div>
+            <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secFazendoPacks2}</div>
             <div style={{ color: green, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: green, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + silver + QUEST ✅</div>
+            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + silver + QUEST ✅":"Expedição + silver + QUEST ✅"}</div>
           </div>
           {/* Vendendo materiais */}
           <div style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
-            <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>💰 Vendendo os Materiais</div>
+            <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secVendendo2}</div>
             <div style={{ color: orange, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: orange, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>Expedição + venda no mkt ✅</div>
+            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + market sale ✅":"Expedição + venda no mkt ✅"}</div>
           </div>
           {/* Diferença */}
           <div style={{ background: r.diferenca_mes >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferenca_mes >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
@@ -1492,7 +1488,7 @@ export default function App() {
             <div style={{ color: pc(r.diferenca_mes), fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.diferenca_mes >= 0 ? "+" : ""}{fmtUSD(r.diferenca_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: pc(r.diferenca_sem), fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>{r.diferenca_sem >= 0 ? "+" : ""}{fmtUSD(r.diferenca_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
             <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>
-              {r.diferenca_mes >= 0 ? "Pack compensa ✅" : "Vender mat. é melhor ❌"}
+              {r.diferenca_mes >= 0 ? lang==="en"?"Pack worthwhile ✅":"Pack compensa ✅" : lang==="en"?"Selling mats is better ❌":"Vender mat. é melhor ❌"}
             </div>
           </div>
         </div>
@@ -1519,16 +1515,16 @@ export default function App() {
           <div>
             <Section title={TR[lang].packConfig} icon="📦">
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack Selecionado</label>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{TR[lang].packSelected}</label>
                 <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
                   style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }}>
                   {Object.keys(PACKS).map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="Packs por semana" value={qtdPacks} onChange={setQtdPacks} step={1} />
+                <Field label={TR[lang].packsPerWeek} value={qtdPacks} onChange={setQtdPacks} step={1} />
                 <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint={TR[lang].silverHint} />
-                <Field label="Custo certificado" value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
+                <Field label={TR[lang].certCost} value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
                 <div>
                   <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
                   <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px" }}>
@@ -1546,10 +1542,10 @@ export default function App() {
 
               {/* Breakdown */}
               <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px", marginTop: 4 }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Breakdown dos {qtdPacks} packs</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{`${TR[lang].breakdown} ${qtdPacks} ${TR[lang].packs}`}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 5, fontSize: 11 }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "#c0c0d0" }}>📦 Normais</span>
+                    <span style={{ color: "#c0c0d0" }}>{`📦 ${TR[lang].normal}`}</span>
                     <span style={{ color: "#c0c0d0", fontFamily: "'Space Mono', monospace" }}>{r.packsNormais} × {fmtInt(r.imBase)} = {fmtInt(r.imNormalTotal)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1561,7 +1557,7 @@ export default function App() {
                     <span style={{ color: qtdPlunder > 0 ? red : "#404050", fontFamily: "'Space Mono', monospace" }}>{r.plunderVal} packs → +{fmtInt(r.imPlunderTotal)} bônus</span>
                   </div>
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 6, display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: gold, fontWeight: "bold" }}>Total IM packs/sem</span>
+                    <span style={{ color: gold, fontWeight: "bold" }}>{TR[lang].totalIM}</span>
                     <span style={{ color: gold, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(r.imTotal_semana)}</span>
                   </div>
                 </div>
@@ -1586,14 +1582,14 @@ export default function App() {
                 ℹ️ <strong style={{ color: gold }}>IM base/pack</strong> é calculada automaticamente como <strong style={{ color: gold }}>silver × 10</strong> (multiplicador Prime do patch 1.0.7.1). O Bartering já está embutido no silver recebido. Enhanced (×2) e Plunder (+15%) são aplicados sobre esse valor.
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
-                <Stat label="Silver/pack" value={fmtInt(silverPorPack)} sub="valor entregue" color={blue} />
+                <Stat label="Silver/pack" value={fmtInt(silverPorPack)} sub={lang==="en"?"delivered value":"valor entregue"} color={blue} />
                 <Stat label="IM Média/Pack efetiva" value={fmtInt(r.imEfetiva)} sub="com Enhanced + Plunder" color={gold} />
               </div>
             </Section>
           </div>
 
           <div>
-            <Section title="Análise de Break-even" icon="⚖️" borderColor={r.deltaQUEST >= 0 ? "rgba(74,222,128,0.4)" : "rgba(248,113,113,0.4)"}>
+            <Section title={TR[lang].breakEvenTitle} icon="⚖️" borderColor={r.deltaQUEST >= 0 ? "rgba(74,222,128,0.4)" : "rgba(248,113,113,0.4)"}>
               <div style={{ background: r.deltaQUEST >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.deltaQUEST >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 10, padding: 16, marginBottom: 14, textAlign: "center" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{TR[lang].resultVsSell}</div>
                 <div style={{ color: pc(r.deltaQUEST), fontSize: 24, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{r.deltaQUEST >= 0 ? "✅ COMPENSA" : "❌ NÃO COMPENSA"}</div>
@@ -1619,18 +1615,18 @@ export default function App() {
                   color={dim}
                 />
                 <Stat
-                  label="Margem (base vs necessária)"
+                  label={TR[lang].marginBase}
                   value={`${r.imBase >= r.imBreakeven ? "+" : ""}${fmtInt(r.imBase - r.imBreakeven)}`}
                   sub={`sem Enhanced · ${r.imBase >= r.imBreakeven ? "compensa" : "não compensa"}`}
                   color={pc(r.imBase - r.imBreakeven)}
                 />
               </div>
-              <Divider label="Por pack · comparativo" />
+              <Divider label={TR[lang].perPackComp} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <Stat label="Fazer pack (silver liq.)" value={fmtInt(r.silverLiqPorPack)} sub="pós custo produção" color={blue} />
-                <Stat label="Vender materiais" value={fmtInt(r.lucroVendaMkt)} sub="pós custo produção" color={orange} />
+                <Stat label={TR[lang].makePackSilver} value={fmtInt(r.silverLiqPorPack)} sub={TR[lang].byProdCost} color={blue} />
+                <Stat label={TR[lang].sellMaterials} value={fmtInt(r.lucroVendaMkt)} sub={TR[lang].byProdCost} color={orange} />
                 <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub={TR[lang].perPack} color={purple} />
-                <Stat label="Custo cert" value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
+                <Stat label={TR[lang].certCostLabel} value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
                 <Stat label="QUEST IM líq./sem" value={`${fmt(r.questLiq_sem)} Q`} sub={`${fmtUSD(r.questLiq_sem * questUSD)}/sem`} color={pc(r.questLiq_sem)} />
                 <Stat label="QUEST IM líq./mês" value={`${fmt(r.questLiq_mes)} Q`} sub={`${fmtUSD(r.questLiq_mes * questUSD)}/mês`} color={pc(r.questLiq_mes)} highlight />
               </div>
@@ -1643,8 +1639,8 @@ export default function App() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                 <Stat label={TR[lang].imExpWeek} value={fmtInt(r.expIM)} />
-                <Stat label="QUEST/sem" value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
-                <Stat label="USD/mês" value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
+                <Stat label={lang==="en"?"QUEST/week":"QUEST/sem"} value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
+                <Stat label={lang==="en"?"USD/month":"USD/mês"} value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
               </div>
             </Section>
 
@@ -1679,7 +1675,7 @@ export default function App() {
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>silver</span>
                 </div>
                 <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.15)", borderRadius: 6, padding: "10px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.8 }}>
-                  📍 Onde encontrar: No jogo → <strong style={{ color: gold }}>Mercado de Moedas</strong> → aba <strong style={{ color: gold }}>Mercado</strong> → selecione <strong style={{ color: gold }}>Silver</strong><br/>
+                  📍 Onde encontrar: {lang==="en"?"In-game → Currency Market → Market tab → select Silver":"No jogo → Mercado de Moedas → aba Mercado → selecione Silver"}<br/>
                   Use o valor de <strong style={{ color: green }}>"Melhor Oferta Atual de Compra"</strong> (ex: 65.018) — é o que você recebe em silver ao vender 1 QUEST
                 </div>
               </div>
@@ -1695,7 +1691,7 @@ export default function App() {
 
             {/* HUNT / CAÇA */}
             <div>
-              <Section title="🏹 Caça (Hunt)" icon="⚔️" borderColor="rgba(248,113,113,0.3)">
+              <Section title={`🏹 ${lang==="en"?"Hunting (Hunt)":"Caça (Hunt)"}`} icon="⚔️" borderColor="rgba(248,113,113,0.3)">
 
                 {/* Instrução */}
                 <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
@@ -1706,7 +1702,7 @@ export default function App() {
                 <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Item</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Qtd / hora</span>
-                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Preço Mkt</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>{TR[lang].matsMkt}</span>
                 </div>
 
                 {[
@@ -1726,11 +1722,11 @@ export default function App() {
                 <div style={{ display: "grid", gridTemplateColumns: "80px 1fr", gap: 8, alignItems: "center", marginBottom: 16 }}>
                   <span style={{ color: "#c0c0d0", fontSize: 12 }}>NPC</span>
                   <NumInput value={huntNPC} onChange={v => setHuntNPC(v)} min={0}
-                    placeholder="Silver direto/hora"
+                    placeholder={lang==="en"?"Direct silver/hour":"Silver direto/hora"}
                     style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                 </div>
 
-                <Divider label="Projeção" />
+                <Divider label={lang==="en"?"Projection":"Projeção"} />
 
                 {/* Horas por dia */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
@@ -1760,7 +1756,7 @@ export default function App() {
 
             {/* MINERAÇÃO */}
             <div>
-              <Section title="⛏️ Mineração" icon="🪨" borderColor="rgba(96,165,250,0.3)">
+              <Section title={`⛏️ ${TR[lang].miningTitle}`} icon="🪨" borderColor="rgba(96,165,250,0.3)">
 
                 <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
                   📌 Insira a quantidade de itens coletados em <strong style={{ color: blue }}>1 hora</strong> de mineração.
@@ -1770,7 +1766,7 @@ export default function App() {
                 <div style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 4, marginBottom: 6 }}>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Item</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Qtd / hora</span>
-                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Preço Mkt</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>{TR[lang].matsMkt}</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Total/h</span>
                 </div>
 
@@ -1799,7 +1795,7 @@ export default function App() {
                   </div>
                 ))}
 
-                <Divider label="Projeção" />
+                <Divider label={lang==="en"?"Projection":"Projeção"} />
 
                 {/* Horas por dia mine */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
@@ -1829,14 +1825,14 @@ export default function App() {
           </div>
 
           {/* Comparativo Hunt vs Tradepack */}
-          <Section title="📊 Hunt vs Tradepack — Comparativo Mensal" icon="⚖️" accent>
+          <Section title={`📊 ${lang==="en"?"Hunt vs Tradepack — Monthly Comparison":"Hunt vs Tradepack — Comparativo Mensal"}`} icon="⚖️" accent>
             <div style={{ color: dim, fontSize: 10, marginBottom: 14, lineHeight: 1.6 }}>
               Baseado em {huntHorasDia}h/dia de hunt · {mineHorasDia}h/dia de mineração · {qtdPacks} packs/semana de tradepack
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               {[
                 { label: "🏹 Hunt", mes: huntSilverMes, dia: huntSilverDia, hora: huntSilverHora, color: red },
-                { label: "⛏️ Mineração", mes: mineSilverMes, dia: mineSilverDia, hora: mineSilverHora, color: blue },
+                { label: `⛏️ ${TR[lang].miningTitle}`, mes: mineSilverMes, dia: mineSilverDia, hora: mineSilverHora, color: blue },
                 { label: "📦 Tradepack Prime", mes: r.totalUSD_mes / questUSD * questToSilver, dia: r.totalUSD_mes / 30 / questUSD * questToSilver, hora: r.totalUSD_mes / 30 / 24 / questUSD * questToSilver, color: gold },
               ].map((a, i) => (
                 <div key={i} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 16, textAlign: "center" }}>
@@ -1854,7 +1850,7 @@ export default function App() {
       {/* TAB: MATERIAIS */}
       {tab === "mercado" && (
         <div>
-          <Section title={`Receita & Mercado — ${packSelecionado}`} icon="💰" accent>
+          <Section title={`${lang==="en"?"Revenue & Market":"Receita & Mercado"} — ${packSelecionado}`} icon="💰" accent>
             <div style={{ marginBottom: 14 }}>
               <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack</label>
               <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
@@ -1867,7 +1863,7 @@ export default function App() {
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 16 }}>
               <thead>
-                <tr>{["Material", "Qtd", "Custo Prod./un", "🌱 QUEST (-20%)", "Custo Real/un", "Preço Mkt/un", "Custo Total", "Valor Mkt"].map(h => (
+                <tr>{["Material", "Qtd", lang==="en"?"Prod. Cost/un":"Custo Prod./un", "🌱 QUEST (-20%)", "Custo Real/un", "Preço Mkt/un", lang==="en"?"Total Cost":"Custo Total", "Valor Mkt"].map(h => (
                   <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "right", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
                 ))}</tr>
               </thead>
@@ -1911,21 +1907,21 @@ export default function App() {
               </tbody>
             </table>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
-              <Stat label="Custo Produção/pack" value={fmtInt(r.custoProducaoTotal)} sub="silver" color={red} warn />
-              <Stat label="Valor Mercado/pack" value={fmtInt(r.valorMktTotal)} sub="silver" color={orange} />
+              <Stat label={lang==="en"?"Production Cost/pack":"Custo Produção/pack"} value={fmtInt(r.custoProducaoTotal)} sub="silver" color={red} warn />
+              <Stat label={lang==="en"?"Market Value/pack":"Valor Mercado/pack"} value={fmtInt(r.valorMktTotal)} sub="silver" color={orange} />
               <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub={TR[lang].perPack} color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
             </div>
-            <Divider label="Por pack — Fazer vs Vender" />
+            <Divider label={TR[lang].perPackComp} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 14, border: "1px solid rgba(255,255,255,0.06)" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📦 Fazer Pack Prime</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{`📦 ${TR[lang].makePackSilver}`}</div>
                 <div style={{ color: blue, fontSize: 16, fontWeight: "bold" }}>{fmtInt(r.silverLiqPorPack)} silver</div>
                 <div style={{ color: purple, fontSize: 12, marginTop: 4 }}>+ {fmt(r.imEfetiva * poolRate)} QUEST de IM</div>
                 <div style={{ color: red, fontSize: 11, marginTop: 4 }}>- {fmt(r.certCusto_Q)} QUEST (certs)</div>
                 <div style={{ color: pc(r.questPack), fontSize: 12, marginTop: 6, fontWeight: "bold" }}>= {fmt(r.questPack)} QUEST total</div>
               </div>
               <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 14, border: "1px solid rgba(251,146,60,0.2)" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>💰 Vender Materiais</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{`💰 ${TR[lang].sellMaterials}`}</div>
                 <div style={{ color: orange, fontSize: 16, fontWeight: "bold" }}>{fmtInt(r.lucroVendaMkt)} silver</div>
                 <div style={{ color: "#555565", fontSize: 12, marginTop: 4 }}>sem custo de certs</div>
                 <div style={{ color: orange, fontSize: 12, marginTop: 4 }}>= {fmt(r.questVendaMkt)} QUEST equiv.</div>
@@ -2071,7 +2067,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {["Nv", "Item", "Qtd", "Custo Mat.", `Tax (+${extraTaxPct}%)`, "Custo Total", "Preço Venda (un)", "Receita", "Margem", "Margem %", "Silver/EXP", "Crafts → OS", "Profit até OS", "Crafts → MAX", "Profit até MAX"].map(h => (
+                      {["Nv", "Item", "Qtd", lang==="en"?"Mat. Cost":"Custo Mat.", `Tax (+${extraTaxPct}%)`, lang==="en"?"Total Cost":"Custo Total", lang==="en"?"Sell Price (un)":"Preço Venda (un)", lang==="en"?"Revenue":"Receita", lang==="en"?"Margin":"Margem", lang==="en"?"Margin %":"Margem %", "Silver/EXP", "Crafts → OS", lang==="en"?"Profit to OS":"Profit até OS", "Crafts → MAX", lang==="en"?"Profit to MAX":"Profit até MAX"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
@@ -2168,11 +2164,11 @@ export default function App() {
         <div>
           <Section title={TR[lang].calTitle} icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-              Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder).
+              {lang==="en"?"Enter the QUEST received from the Friday chest. Total IM is calculated automatically (Expedition + Packs with Enhanced and Plunder).":"Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder)."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <Field label="QUEST recebido" value={calQUEST} onChange={setCalQUEST} step={1} suffix="QUEST" hint="Chest de sexta-feira" />
+              <Field label={TR[lang].calQUEST} value={calQUEST} onChange={setCalQUEST} step={1} suffix="QUEST" hint={TR[lang].calQUESTHint} />
             </div>
 
             {/* IM Total automática */}
@@ -2198,7 +2194,7 @@ export default function App() {
             <div style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 8, padding: "14px 16px", marginBottom: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>Pool Rate calculado</div>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>{`${TR[lang].poolRate} ${lang==="en"?"calculated":"calculado"}`}</div>
                   <div style={{ color: "#505060", fontSize: 10 }}>{calQUEST} QUEST ÷ {fmtInt(imExpSemana + r.imTotal_semana)} IM</div>
                 </div>
                 <div style={{ color: green, fontSize: 22, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}</div>
@@ -2230,7 +2226,7 @@ export default function App() {
       {tab === "infusion" && (
         <div>
           {/* Target EXP */}
-          <Section title="✨ Calculadora de Infusion" icon="⚗️" accent>
+          <Section title={`✨ ${lang==="en"?"Infusion Calculator":"Calculadora de Infusion"}`} icon="⚗️" accent>
             <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               💡 Insira o <strong style={{ color: purple }}>preço de mercado</strong> de cada Infusion e o <strong style={{ color: gold }}>EXP que você precisa ganhar</strong>. A calculadora mostra qual comprar e quanto vai custar.
             </div>
@@ -2264,7 +2260,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 20 }}>
               <thead>
                 <tr>
-                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, lang==="en"?"Total Cost":"Custo Total"].map(h => (
                     <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
                   ))}
                 </tr>
@@ -2305,7 +2301,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr>
-                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, lang==="en"?"Total Cost":"Custo Total"].map(h => (
                     <th key={h} style={{ color: blue, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>{h}</th>
                   ))}
                 </tr>
@@ -2342,7 +2338,7 @@ export default function App() {
           </Section>
 
           {/* MELHOR PARA CAÇAR */}
-          <Section title="🏹 Melhor para Caçar" icon="⚔️" borderColor="rgba(248,113,113,0.3)">
+          <Section title={`🏹 ${lang==="en"?"Best for Hunting":TR[lang].infHunt}`} icon="⚔️" borderColor="rgba(248,113,113,0.3)">
             <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               📌 Insira a <strong style={{ color: red }}>quantidade dropada por hora</strong> para cada infusion. O ranking mostra qual gera mais silver/hora ao caçar.
             </div>
@@ -2391,7 +2387,7 @@ export default function App() {
           </Section>
 
           {/* MELHOR PARA REVENDER */}
-          <Section title="💸 Melhor para Revender (Flip)" icon="📈" borderColor="rgba(74,222,128,0.3)">
+          <Section title={`💸 ${lang==="en"?"Best for Flip":"Melhor para Revender (Flip)"}`} icon="📈" borderColor="rgba(74,222,128,0.3)">
             <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               📌 Insira o <strong style={{ color: blue }}>preço de compra</strong> (oferta mais barata no mkt) e o <strong style={{ color: orange }}>preço de venda</strong> (campo Preço Mkt na tabela acima). O ranking mostra qual tem maior margem.
             </div>
@@ -2404,7 +2400,7 @@ export default function App() {
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
               <thead>
-                <tr>{["#", "Infusion", "Comprar por", "Vender por", "Lucro / un", "Margem %"].map(h => (
+                <tr>{["#", "Infusion", "Comprar por", "Vender por", "Lucro / un", lang==="en"?"Margin %":"Margem %"].map(h => (
                   <th key={h} style={{ color: green, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(74,222,128,0.2)" }}>{h}</th>
                 ))}</tr>
               </thead>
