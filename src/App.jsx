@@ -120,6 +120,40 @@ const TR = {
     infTargetEXP: "EXP necessário",
     infMarketFee: "Taxa do mercado (%)",
     infBestNow: "✅ Melhor custo-benefício atual",
+
+    // TRADEPACK CONTEÚDO
+    packConfig: "Configuração do Pack", packSelected: "Pack Selecionado",
+    packsPerWeek: "Packs por Semana", silverPerPack: "Silver/Pack Entregue",
+    silverHint: "Varia por demanda/rota", imBaseAuto: "IM Base/Pack (Automático)",
+    certCost: "Custo Certificado", specialPacks: "Packs Especiais",
+    packsEnhanced: "Packs com Enhanced", packsPlunder: "Packs no Plunder",
+    breakdown: "Breakdown dos", packs: "packs", normal: "Normais",
+    totalIM: "Total IM packs/sem", activeBonuses: "Bônus Ativos",
+    embeddedIM: "embutido no IM/pack observado", appliedIM: "aplicado sobre o IM observado",
+    inactive: "inativo", breakEvenTitle: "Análise de Break-Even",
+    resultVsSell: "Resultado vs Vender Materiais",
+    worthIt: "COMPENSA", notWorthIt: "NÃO COMPENSA",
+    imBaseRequired: "IM Base Necessária (sem Enhanced)", imBaseRequiredEnh: "IM Base Necessária (com Enhanced)",
+    imBaseActual: "IM Base/Pack Atual", marginBase: "Margem (Base vs Necessária)",
+    perPackComp: "Por Pack — Comparativo", makePackSilver: "Fazer Pack (Silver Líq.)",
+    byProdCost: "por custo produção", questPerIM: "QUEST do Pack/IM",
+    perPack: "por pack", questNetWeek: "QUEST IM Líq./sem",
+    certCostLabel: "Custo Cert", sellMaterials: "Vender Materiais",
+    questIMMonth: "QUEST IM Líq./mês", expedition: "Expedição",
+    gemsAccum: "Joias Acumuladas", imExpWeek: "IM Expedição/Semana",
+    marketPool: "Mercado & Pool", questPrice: "Preço do QUEST",
+    silverPerQUEST: "Silver por QUEST", poolRate: "Pool Rate",
+    weeklyCalib: "Calibração Semanal",
+    huntConfig: "Configuração de Hunt", huntTitle: "Hunt & Mineração",
+    huntHours: "Horas/dia", huntAddon: "Addon", huntInfusion: "Infusion",
+    huntNPC: "Silver NPC/hora", huntProjections: "Projeções",
+    miningTitle: "Mineração", comparison: "Comparativo Final",
+    matsTitle: "Materiais do Pack", matsProd: "Custo Produção",
+    matsMkt: "Preço Mkt", matsQuest: "Usar QUEST (-20%)",
+    lastCalib: "Última Calibração Aplicada", calibApplied: "Calibração aplicada em",
+    secComparativo2: "💰 Comparativo de Estratégias",
+    secFazendoPacks2: "📦 Fazendo os Packs Prime", secVendendo2: "💰 Vendendo os Materiais",
+    secDiferenca2: "📊 Diferença de Estratégia",
   },
   en: {
     // NAV / GENERAL
@@ -235,6 +269,40 @@ const TR = {
     infTargetEXP: "Required EXP",
     infMarketFee: "Market fee (%)",
     infBestNow: "✅ Best value right now",
+
+    // TRADEPACK CONTENT
+    packConfig: "Pack Configuration", packSelected: "Selected Pack",
+    packsPerWeek: "Packs per Week", silverPerPack: "Silver/Pack Delivered",
+    silverHint: "Varies by demand/route", imBaseAuto: "Base IM/Pack (Automatic)",
+    certCost: "Certificate Cost", specialPacks: "Special Packs",
+    packsEnhanced: "Packs with Enhanced", packsPlunder: "Packs in Plunder",
+    breakdown: "Breakdown of", packs: "packs", normal: "Normal",
+    totalIM: "Total IM packs/week", activeBonuses: "Active Bonuses",
+    embeddedIM: "embedded in observed IM/pack", appliedIM: "applied over observed IM",
+    inactive: "inactive", breakEvenTitle: "Break-Even Analysis",
+    resultVsSell: "Result vs Selling Materials",
+    worthIt: "WORTHWHILE", notWorthIt: "NOT WORTHWHILE",
+    imBaseRequired: "Base IM Required (no Enhanced)", imBaseRequiredEnh: "Base IM Required (with Enhanced)",
+    imBaseActual: "Current Base IM/Pack", marginBase: "Margin (Base vs Required)",
+    perPackComp: "Per Pack — Comparison", makePackSilver: "Craft Pack (Net Silver)",
+    byProdCost: "by production cost", questPerIM: "QUEST per Pack/IM",
+    perPack: "per pack", questNetWeek: "Net QUEST IM/week",
+    certCostLabel: "Cert Cost", sellMaterials: "Sell Materials",
+    questIMMonth: "Net QUEST IM/month", expedition: "Expedition",
+    gemsAccum: "Accumulated Gems", imExpWeek: "Expedition IM/Week",
+    marketPool: "Market & Pool", questPrice: "QUEST Price",
+    silverPerQUEST: "Silver per QUEST", poolRate: "Pool Rate",
+    weeklyCalib: "Weekly Calibration",
+    huntConfig: "Hunt Configuration", huntTitle: "Hunt & Mining",
+    huntHours: "Hours/day", huntAddon: "Addon", huntInfusion: "Infusion",
+    huntNPC: "NPC Silver/hour", huntProjections: "Projections",
+    miningTitle: "Mining", comparison: "Final Comparison",
+    matsTitle: "Pack Materials", matsProd: "Production Cost",
+    matsMkt: "Market Price", matsQuest: "Use QUEST (-20%)",
+    lastCalib: "Last Applied Calibration", calibApplied: "Calibration applied on",
+    secComparativo2: "💰 Strategy Comparison",
+    secFazendoPacks2: "📦 Crafting Prime Packs", secVendendo2: "💰 Selling Materials",
+    secDiferenca2: "📊 Strategy Difference",
   }
 };
 
@@ -1328,7 +1396,6 @@ export default function App() {
           <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 44, height: 44, objectFit: "contain" }} />
           <div>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 12, fontWeight: 700, color: TEXT_PRIM, letterSpacing: "0.15em", textTransform: "uppercase" }}>RavenLab</div>
-            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.2em", textTransform: "uppercase" }}>RavenQuest · Economy Intelligence</div>
           </div>
         </div>
 
@@ -1430,10 +1497,10 @@ export default function App() {
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          <Stat label="Expedição" value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
+          <Stat label=TR[lang].expedition value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
           <Stat label="IM Packs/sem" value={fmtInt(r.imTotal_semana)} sub={`${r.packsSemanais} packs`} color={gold} />
           <Stat label="QUEST IM líq." value={`${fmt(r.questLiq_sem)}/sem`} sub={`${fmt(r.questLiq_mes)}/mês · -${fmt(r.questCerts_sem)} Q certs`} color={pc(r.questLiq_sem)} />
-          <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub="por pack" color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
+          <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub=TR[lang].perPack color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
         </div>
       </div>
 
@@ -1450,7 +1517,7 @@ export default function App() {
       {tab === "tradepack" && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           <div>
-            <Section title="Configuração do Pack" icon="📦">
+            <Section title=TR[lang].packConfig icon="📦">
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack Selecionado</label>
                 <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
@@ -1460,7 +1527,7 @@ export default function App() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="Packs por semana" value={qtdPacks} onChange={setQtdPacks} step={1} />
-                <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint="Varia por demanda/rota" />
+                <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint=TR[lang].silverHint />
                 <Field label="Custo certificado" value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
                 <div>
                   <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
@@ -1471,7 +1538,7 @@ export default function App() {
                 </div>
               </div>
 
-              <Divider label="Packs Especiais" />
+              <Divider label=TR[lang].specialPacks />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="🔮 Packs com Enhanced" value={qtdEnhanced} onChange={v => setQtdEnhanced(Math.min(v, qtdPacks))} step={1} suffix="packs" hint={`×2 IM · máx ${qtdPacks}`} color={qtdEnhanced > 0 ? gold : undefined} />
                 <Field label="⚔️ Packs no Plunder" value={qtdPlunder} onChange={v => setQtdPlunder(Math.min(v, qtdPacks))} step={1} suffix="packs" hint="+15% IM · dom→seg" color={qtdPlunder > 0 ? red : undefined} />
@@ -1501,13 +1568,13 @@ export default function App() {
               </div>
             </Section>
 
-            <Section title="Bônus Ativos" icon="⚡" borderColor="rgba(196,160,80,0.4)">
+            <Section title=TR[lang].activeBonuses icon="⚡" borderColor="rgba(196,160,80,0.4)">
               <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
                 {[
-                  { label: "✅ Bartering I (+5%)", sub: "embutido no IM/pack observado", color: green },
-                  { label: "✅ Bartering II (+10%)", sub: "embutido no IM/pack observado", color: green },
-                  { label: `${qtdEnhanced > 0 ? "🔮" : "⬜"} Enhanced (×2 IM)`, sub: qtdEnhanced > 0 ? `${qtdEnhanced} packs · aplicado sobre o IM observado` : "inativo", color: qtdEnhanced > 0 ? gold : dim },
-                  { label: `${qtdPlunder > 0 ? "⚔️" : "⬜"} Plunder (+15%)`, sub: qtdPlunder > 0 ? `${qtdPlunder} packs · dom→seg` : "inativo", color: qtdPlunder > 0 ? red : dim },
+                  { label: "✅ Bartering I (+5%)", sub: TR[lang].embeddedIM, color: green },
+                  { label: "✅ Bartering II (+10%)", sub: TR[lang].embeddedIM, color: green },
+                  { label: `${qtdEnhanced > 0 ? "🔮" : "⬜"} Enhanced (×2 IM)`, sub: qtdEnhanced > 0 ? `${qtdEnhanced} packs · aplicado sobre o IM observado` : TR[lang].inactive, color: qtdEnhanced > 0 ? gold : dim },
+                  { label: `${qtdPlunder > 0 ? "⚔️" : "⬜"} Plunder (+15%)`, sub: qtdPlunder > 0 ? `${qtdPlunder} packs · dom→seg` : TR[lang].inactive, color: qtdPlunder > 0 ? red : dim },
                 ].map((b, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < 3 ? 6 : 0 }}>
                     <span style={{ color: b.color, fontSize: 12 }}>{b.label}</span>
@@ -1528,7 +1595,7 @@ export default function App() {
           <div>
             <Section title="Análise de Break-even" icon="⚖️" borderColor={r.deltaQUEST >= 0 ? "rgba(74,222,128,0.4)" : "rgba(248,113,113,0.4)"}>
               <div style={{ background: r.deltaQUEST >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.deltaQUEST >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 10, padding: 16, marginBottom: 14, textAlign: "center" }}>
-                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Resultado vs Vender Materiais</div>
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{TR[lang].resultVsSell}</div>
                 <div style={{ color: pc(r.deltaQUEST), fontSize: 24, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{r.deltaQUEST >= 0 ? "✅ COMPENSA" : "❌ NÃO COMPENSA"}</div>
                 <div style={{ color: pc(r.deltaQUEST), fontSize: 14, marginTop: 4 }}>{r.deltaQUEST >= 0 ? "+" : ""}{fmt(r.deltaQUEST)} QUEST/pack vs vender</div>
               </div>
@@ -1562,28 +1629,28 @@ export default function App() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Stat label="Fazer pack (silver liq.)" value={fmtInt(r.silverLiqPorPack)} sub="pós custo produção" color={blue} />
                 <Stat label="Vender materiais" value={fmtInt(r.lucroVendaMkt)} sub="pós custo produção" color={orange} />
-                <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub="por pack" color={purple} />
+                <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub=TR[lang].perPack color={purple} />
                 <Stat label="Custo cert" value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
                 <Stat label="QUEST IM líq./sem" value={`${fmt(r.questLiq_sem)} Q`} sub={`${fmtUSD(r.questLiq_sem * questUSD)}/sem`} color={pc(r.questLiq_sem)} />
                 <Stat label="QUEST IM líq./mês" value={`${fmt(r.questLiq_mes)} Q`} sub={`${fmtUSD(r.questLiq_mes * questUSD)}/mês`} color={pc(r.questLiq_mes)} highlight />
               </div>
             </Section>
 
-            <Section title="Expedição" icon="⚔️">
+            <Section title=TR[lang].expedition icon="⚔️">
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label="💎 Joias Acumuladas" value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint="Total acumulado (não reseta)" />
-                <Field label="IM Expedição/Semana" value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint="Seu dado real: 4.312.920" color={green} />
+                <Field label=`💎 ${TR[lang].gemsAccum}` value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint=lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)" />
+                <Field label=TR[lang].imExpWeek value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint=lang === "en" ? "Your real data: 4,312,920" : "Seu dado real: 4.312.920" color={green} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                <Stat label="IM Expedição/sem" value={fmtInt(r.expIM)} />
+                <Stat label=TR[lang].imExpWeek value={fmtInt(r.expIM)} />
                 <Stat label="QUEST/sem" value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
                 <Stat label="USD/mês" value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
               </div>
             </Section>
 
-            <Section title="Mercado & Pool" icon="📊">
+            <Section title=TR[lang].marketPool icon="📊">
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pool Rate (calculado via calibração)</label>
+                <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{TR[lang].poolRate} ({lang === "en" ? "calculated via calibration" : "calculado via calibração"})</label>
                 <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ color: green, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{poolRate.toFixed(8)}</span>
                   <span style={{ color: "#404050", fontSize: 10 }}>QUEST ÷ IM Total · atualize via aba Calibração</span>
@@ -1846,7 +1913,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
               <Stat label="Custo Produção/pack" value={fmtInt(r.custoProducaoTotal)} sub="silver" color={red} warn />
               <Stat label="Valor Mercado/pack" value={fmtInt(r.valorMktTotal)} sub="silver" color={orange} />
-              <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub="por pack" color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
+              <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub=TR[lang].perPack color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
             </div>
             <Divider label="Por pack — Fazer vs Vender" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -1929,7 +1996,7 @@ export default function App() {
                   <NumInput value={craftOversupply} onChange={v => setCraftOversupply(Math.max(0, Math.min(500, v)))} min={0} max={500}
                     style={{ background: BG_CARD, border: `1px solid ${craftOversupply >= 200 ? "rgba(248,113,113,0.5)" : craftOversupply >= 100 ? "rgba(251,146,60,0.5)" : "rgba(74,222,128,0.4)"}`, borderRadius: 6, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
                   <div style={{ fontSize: 10, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, marginTop: 4 }}>
-                    Tax extra: +{extraTaxPct}% {craftOversupply === 0 ? "✅ Sem penalidade" : craftOversupply >= 500 ? "🔴 MAX" : ""}
+                    Tax extra: +{extraTaxPct}% {craftOversupply === 0 ? TR[lang].osPenalty : craftOversupply >= 500 ? "🔴 MAX" : ""}
                   </div>
                 </div>
                 <div>
@@ -1999,7 +2066,7 @@ export default function App() {
               </div>
 
               {/* TABELA DE RECEITAS */}
-              <Divider label="Receitas e margens calculadas" />
+              <Divider label=TR[lang].osRecipes />
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
@@ -2099,7 +2166,7 @@ export default function App() {
 
       {tab === "calibracao" && (
         <div>
-          <Section title="Calibração com Dados Reais" icon="📐" borderColor="rgba(74,222,128,0.4)">
+          <Section title=TR[lang].calTitle icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder).
             </div>
@@ -2140,18 +2207,18 @@ export default function App() {
 
             <button onClick={() => setPoolRate(parseFloat((calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(9)))}
               style={{ width: "100%", background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.08))", border: "1px solid rgba(74,222,128,0.4)", borderRadius: 8, color: green, padding: "11px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: "0.06em" }}>
-              ✅ Aplicar Pool Rate: {(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}
+              ${lang === "en" ? "✅ Apply Pool Rate:" : "✅ Aplicar Pool Rate:"} {(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}
             </button>
           </Section>
 
-          <Section title="Última Calibração Aplicada" icon="📅">
+          <Section title=TR[lang].lastCalib icon="📅">
             <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 14, fontSize: 11, color: dim, lineHeight: 1.8 }}>
               <div style={{ color: gold, marginBottom: 8, fontFamily: "'Cinzel', serif", fontSize: 12 }}>Dados ativos no modelo</div>
               <div>IM Expedição/sem: <span style={{ color: blue }}>{fmtInt(imExpSemana)}</span></div>
               <div>IM Packs/sem: <span style={{ color: gold }}>{fmtInt(r.imTotal_semana)}</span></div>
               <div>IM Total: <span style={{ color: green }}>{fmtInt(imExpSemana + r.imTotal_semana)}</span></div>
               <div>QUEST recebido: <span style={{ color: green }}>{fmtInt(calQUEST)}</span></div>
-              <div>Pool Rate ativo: <span style={{ color: green }}>{poolRate.toFixed(8)}</span></div>
+              <div>${lang === "en" ? "Active Pool Rate:" : "Pool Rate ativo:"} <span style={{ color: green }}>{poolRate.toFixed(8)}</span></div>
               <div>IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span></div>
               <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar.</div>
             </div>
@@ -2197,7 +2264,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 20 }}>
               <thead>
                 <tr>
-                  {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
                     <th key={h} style={{ color: gold, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)" }}>{h}</th>
                   ))}
                 </tr>
@@ -2238,7 +2305,7 @@ export default function App() {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>
                 <tr>
-                  {["#", "Infusion", "EXP/un", "Preço Mkt", "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
+                  {["#", "Infusion", "EXP/un", TR[lang].matsMkt, "Silver/EXP", `Qtd p/ ${fmtInt(infusionTargetEXP)} EXP`, "Custo Total"].map(h => (
                     <th key={h} style={{ color: blue, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(96,165,250,0.2)" }}>{h}</th>
                   ))}
                 </tr>
@@ -2281,7 +2348,7 @@ export default function App() {
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
               <thead>
-                <tr>{["#", "Infusion", "Tipo", "Preço Mkt", "Qtd / hora", "Silver / hora", "USD / hora"].map(h => (
+                <tr>{["#", "Infusion", "Tipo", TR[lang].matsMkt, "Qtd / hora", "Silver / hora", "USD / hora"].map(h => (
                   <th key={h} style={{ color: red, padding: "8px 10px", textAlign: "center", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(248,113,113,0.2)" }}>{h}</th>
                 ))}</tr>
               </thead>
@@ -2389,7 +2456,7 @@ export default function App() {
       <div style={{ textAlign: "center", marginTop: 20, paddingTop: 16, borderTop: "1px solid rgba(96,165,250,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
           <div style={{ height: 1, width: 40, background: "linear-gradient(to right, transparent, rgba(96,165,250,0.15))" }} />
-          <span style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>ToilZero · RavenLab · RavenQuest Economy Intelligence</span>
+          <span style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase" }}>ToilZero · RavenLab</span>
           <div style={{ height: 1, width: 40, background: "linear-gradient(to left, transparent, rgba(96,165,250,0.15))" }} />
         </div>
       </div>
