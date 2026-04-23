@@ -1638,7 +1638,7 @@ export default function App() {
 
             <Section title={TR[lang].expedition} icon="⚔️">
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label=`💎 ${TR[lang].gemsAccum}` value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint={lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)" />
+                <Field label={`💎 ${TR[lang].gemsAccum}`} value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint={lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)"} />
                 <Field label={TR[lang].imExpWeek} value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint={lang === "en" ? "Your real data: 4,312,920" : "Seu dado real: 4.312.920"} color={green} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
