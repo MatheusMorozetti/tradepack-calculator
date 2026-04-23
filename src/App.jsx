@@ -231,6 +231,102 @@ const BG_ACCENT  = "#1e3a5f";
 const TEXT_PRIM  = "#e0eaf8";
 const TEXT_DIM   = "#8fa0b8";
 
+// ── CRAFTING DATABASE (ravenquest.wiki/crafting) ───────────────────────────
+const CRAFTING_DB = {
+  Alchemy: [
+    { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   totalCost: 895,   exp: 187,  qty: 3 },
+    { nome: "Lesser Strengthening Tonic", nivel: 5,  baseTax: 66,   totalCost: 1240,  exp: 275,  qty: 3 },
+    { nome: "Lesser Enlightenment Tonic", nivel: 6,  baseTax: 59,   totalCost: 1049,  exp: 243,  qty: 3 },
+    { nome: "Lesser Rejuvenation Tonic",  nivel: 7,  baseTax: 90,   totalCost: 1632,  exp: 375,  qty: 3 },
+    { nome: "Lesser Wellspring Tonic",    nivel: 8,  baseTax: 68,   totalCost: 1278,  exp: 281,  qty: 3 },
+    { nome: "Lesser Mountainheart Tonic", nivel: 9,  baseTax: 105,  totalCost: 1519,  exp: 437,  qty: 3 },
+    { nome: "Lesser Arcana Tonic",        nivel: 11, baseTax: 87,   totalCost: 1587,  exp: 362,  qty: 3 },
+    { nome: "Lesser Champion's Tonic",    nivel: 14, baseTax: 122,  totalCost: 2076,  exp: 506,  qty: 3 },
+    { nome: "Arcane Energy Tonic",        nivel: 16, baseTax: 150,  totalCost: 2762,  exp: 625,  qty: 3 },
+    { nome: "Strengthening Tonic",        nivel: 17, baseTax: 150,  totalCost: 2415,  exp: 625,  qty: 3 },
+    { nome: "Enlightenment Tonic",        nivel: 19, baseTax: 168,  totalCost: 2294,  exp: 700,  qty: 3 },
+    { nome: "Rejuvenation Tonic",         nivel: 21, baseTax: 198,  totalCost: 3006,  exp: 825,  qty: 3 },
+    { nome: "Wellspring Tonic",           nivel: 22, baseTax: 203,  totalCost: 3213,  exp: 843,  qty: 3 },
+    { nome: "Mountainheart Tonic",        nivel: 24, baseTax: 213,  totalCost: 3337,  exp: 887,  qty: 3 },
+    { nome: "Arcana Tonic",               nivel: 27, baseTax: 300,  totalCost: 4429,  exp: 1250, qty: 3 },
+    { nome: "Champion's Tonic",           nivel: 28, baseTax: 315,  totalCost: 4781,  exp: 1312, qty: 3 },
+    { nome: "Mana Surge Tonic",           nivel: 35, baseTax: 324,  totalCost: 3795,  exp: 1350, qty: 3 },
+    { nome: "Nimble Grace Tonic",         nivel: 35, baseTax: 360,  totalCost: 4154,  exp: 1500, qty: 3 },
+    { nome: "Mighty Impact Tonic",        nivel: 37, baseTax: 408,  totalCost: 5542,  exp: 1700, qty: 3 },
+    { nome: "Iron Will Tonic",            nivel: 45, baseTax: 414,  totalCost: 5364,  exp: 1725, qty: 3 },
+    { nome: "Profound Insight Tonic",     nivel: 48, baseTax: 609,  totalCost: 4999,  exp: 2537, qty: 3 },
+    { nome: "Light of Dawn Tonic",        nivel: 51, baseTax: 567,  totalCost: 4407,  exp: 2362, qty: 3 },
+    { nome: "Arcane Mastery Tonic",       nivel: 55, baseTax: 684,  totalCost: 4605,  exp: 2850, qty: 3 },
+    { nome: "Dark Pact Tonic",            nivel: 57, baseTax: 585,  totalCost: 3401,  exp: 2437, qty: 3 },
+    { nome: "Chillguard Tonic",           nivel: 59, baseTax: 900,  totalCost: 12921, exp: 3750, qty: 3 },
+    { nome: "Burning Aegis Tonic",        nivel: 61, baseTax: 1008, totalCost: 11448, exp: 4200, qty: 3 },
+    { nome: "Wealthbringer's Tonic",      nivel: 70, baseTax: 1152, totalCost: 12852, exp: 4800, qty: 1 },
+    { nome: "Purifying Tonic",            nivel: 70, baseTax: 720,  totalCost: 5280,  exp: 3000, qty: 1 },
+    { nome: "Serendipity Draught",        nivel: 78, baseTax: 2334, totalCost: 7660,  exp: 9725, qty: 1 },
+  ],
+  Blacksmithing: [
+    { nome: "Copper Ingot",      nivel: 1,  baseTax: 29,  totalCost: 29,   exp: 120,  qty: 1 },
+    { nome: "Bronze Ingot",      nivel: 10, baseTax: 40,  totalCost: 40,   exp: 165,  qty: 1 },
+    { nome: "Iron Ingot",        nivel: 20, baseTax: 48,  totalCost: 48,   exp: 200,  qty: 1 },
+    { nome: "Steel Ingot",       nivel: 30, baseTax: 69,  totalCost: 69,   exp: 287,  qty: 1 },
+    { nome: "Cobalt Ingot",      nivel: 50, baseTax: 99,  totalCost: 99,   exp: 412,  qty: 1 },
+    { nome: "Titanium Ingot",    nivel: 70, baseTax: 156, totalCost: 156,  exp: 650,  qty: 1 },
+    { nome: "Glimmery Ingot",    nivel: 88, baseTax: 480, totalCost: 480,  exp: 2000, qty: 1 },
+    { nome: "Copper Whetstone",  nivel: 1,  baseTax: 38,  totalCost: 278,  exp: 157,  qty: 1 },
+    { nome: "Bronze Whetstone",  nivel: 10, baseTax: 75,  totalCost: 795,  exp: 312,  qty: 1 },
+    { nome: "Iron Whetstone",    nivel: 20, baseTax: 96,  totalCost: 816,  exp: 400,  qty: 1 },
+    { nome: "Steel Whetstone",   nivel: 30, baseTax: 146, totalCost: 1346, exp: 608,  qty: 1 },
+    { nome: "Dense Whetstone",   nivel: 50, baseTax: 197, totalCost: 1997, exp: 820,  qty: 1 },
+    { nome: "Fishing Hook T1",   nivel: 1,  baseTax: 15,  totalCost: 195,  exp: 62,   qty: 1 },
+    { nome: "Fishing Hook T2",   nivel: 20, baseTax: 53,  totalCost: 653,  exp: 220,  qty: 1 },
+    { nome: "Fishing Hook T3",   nivel: 40, baseTax: 98,  totalCost: 1298, exp: 408,  qty: 1 },
+  ],
+  Cooking: [
+    { nome: "Vodka",              nivel: 1,  baseTax: 30,   totalCost: 150,   exp: 125,  qty: 5 },
+    { nome: "Beer",               nivel: 5,  baseTax: 69,   totalCost: 357,   exp: 287,  qty: 5 },
+    { nome: "Landing Brandy",     nivel: 10, baseTax: 113,  totalCost: 443,   exp: 468,  qty: 5 },
+    { nome: "Wine",               nivel: 20, baseTax: 180,  totalCost: 756,   exp: 750,  qty: 5 },
+    { nome: "Whiskey",            nivel: 22, baseTax: 219,  totalCost: 1131,  exp: 912,  qty: 5 },
+    { nome: "Orange Liqueur",     nivel: 30, baseTax: 450,  totalCost: 1786,  exp: 1875, qty: 5 },
+    { nome: "Rum",                nivel: 32, baseTax: 399,  totalCost: 1389,  exp: 1662, qty: 5 },
+    { nome: "Blueberry Wine",     nivel: 40, baseTax: 578,  totalCost: 2738,  exp: 2406, qty: 5 },
+    { nome: "Boozemelon",         nivel: 42, baseTax: 612,  totalCost: 3372,  exp: 2550, qty: 5 },
+    { nome: "Spiced Rum",         nivel: 55, baseTax: 936,  totalCost: 3996,  exp: 3900, qty: 5 },
+    { nome: "Banana Vodka",       nivel: 57, baseTax: 981,  totalCost: 4251,  exp: 4087, qty: 5 },
+    { nome: "Strawberry Whiskey", nivel: 72, baseTax: 1890, totalCost: 10118, exp: 7875, qty: 5 },
+    { nome: "Fermented Liquor",   nivel: 78, baseTax: 2160, totalCost: 5760,  exp: 9000, qty: 5 },
+  ],
+  Carpentry: [
+    { nome: "Rough Plank",   nivel: 1,  baseTax: 53,  totalCost: 713,  exp: 220,  qty: 1 },
+    { nome: "Dense Plank",   nivel: 10, baseTax: 255, totalCost: 255,  exp: 1062, qty: 1 },
+    { nome: "Refined Plank", nivel: 10, baseTax: 96,  totalCost: 1296, exp: 400,  qty: 1 },
+    { nome: "Treated Plank", nivel: 25, baseTax: 165, totalCost: 2941, exp: 687,  qty: 1 },
+    { nome: "Heavy Plank",   nivel: 30, baseTax: 534, totalCost: 1510, exp: 2225, qty: 1 },
+    { nome: "Sturdy Plank",  nivel: 50, baseTax: 197, totalCost: 4149, exp: 818,  qty: 1 },
+    { nome: "Fishing Rod T1",nivel: 5,  baseTax: 107, totalCost: 1547, exp: 445,  qty: 1 },
+    { nome: "Fishing Rod T2",nivel: 25, baseTax: 197, totalCost: 3437, exp: 820,  qty: 1 },
+    { nome: "Fishing Rod T3",nivel: 45, baseTax: 380, totalCost: 7580, exp: 1583, qty: 1 },
+    { nome: "Short Bow",     nivel: 10, baseTax: 144, totalCost: 2064, exp: 600,  qty: 1 },
+    { nome: "Long Bow",      nivel: 30, baseTax: 285, totalCost: 5685, exp: 1187, qty: 1 },
+    { nome: "Arcane Staff",  nivel: 30, baseTax: 285, totalCost: 5085, exp: 1187, qty: 1 },
+  ],
+  Weaving: [
+    { nome: "Coarse Thread",  nivel: 1,  baseTax: 19,  totalCost: 199,  exp: 78,   qty: 1 },
+    { nome: "Linen Cloth",    nivel: 1,  baseTax: 53,  totalCost: 773,  exp: 220,  qty: 1 },
+    { nome: "Tanned Leather", nivel: 10, baseTax: 96,  totalCost: 1056, exp: 400,  qty: 1 },
+    { nome: "Thick Leather",  nivel: 25, baseTax: 165, totalCost: 1665, exp: 687,  qty: 1 },
+    { nome: "Bolted Cloth",   nivel: 25, baseTax: 165, totalCost: 2565, exp: 687,  qty: 1 },
+    { nome: "Silk",           nivel: 50, baseTax: 285, totalCost: 3285, exp: 1187, qty: 1 },
+    { nome: "Tanned Silk",    nivel: 50, baseTax: 285, totalCost: 4185, exp: 1187, qty: 1 },
+    { nome: "Light Armor T2", nivel: 20, baseTax: 210, totalCost: 3210, exp: 875,  qty: 1 },
+    { nome: "Light Armor T3", nivel: 40, baseTax: 405, totalCost: 7905, exp: 1687, qty: 1 },
+    { nome: "Moa Saddle T1",  nivel: 10, baseTax: 144, totalCost: 2544, exp: 600,  qty: 1 },
+    { nome: "Moa Saddle T2",  nivel: 30, baseTax: 285, totalCost: 5985, exp: 1187, qty: 1 },
+  ],
+};
+
+const PROF_ICONS = { Alchemy: "⚗️", Blacksmithing: "⚒️", Cooking: "🍳", Carpentry: "🪵", Weaving: "🧵" };
+
 const PACKS = {
   "Pickled Vegetables": { materiais: [
     { nome: "Cabbage", qtd: 238, custoProducao: 72, precoMkt: 2100 },
@@ -334,6 +430,12 @@ export default function App() {
   const [tab, setTab] = useState("tradepack");
   const [showTutorial, setShowTutorial] = useState(false);
   const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
+
+  // Estados de Crafting / Oversupply
+  const [craftPlayerLevel, setCraftPlayerLevel] = useState(50);
+  const [craftOversupply, setCraftOversupply]   = useState(0);
+  const [craftProfTab, setCraftProfTab]         = useState("Alchemy");
+  const [craftPrices, setCraftPrices]           = useState({});
 
   // Função de logout
   const handleLogout = async () => {
@@ -605,6 +707,9 @@ export default function App() {
         if (s.infusionQtdHora !== undefined) setInfusionQtdHora(s.infusionQtdHora);
         if (s.infusionCompra !== undefined) setInfusionCompra(s.infusionCompra);
         if (s.taxaMkt !== undefined) setTaxaMkt(s.taxaMkt);
+        if (s.craftPlayerLevel !== undefined) setCraftPlayerLevel(s.craftPlayerLevel);
+        if (s.craftOversupply !== undefined) setCraftOversupply(s.craftOversupply);
+        if (s.craftPrices !== undefined) setCraftPrices(s.craftPrices);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -629,6 +734,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
+            craftPlayerLevel, craftOversupply, craftPrices,
           },
           updated_at: new Date().toISOString(),
         });
@@ -644,7 +750,8 @@ export default function App() {
     matsOverride, matsQUEST,
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
-    infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt]);
+    infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
+    craftPlayerLevel, craftOversupply, craftPrices]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -764,10 +871,11 @@ export default function App() {
   }} />;
 
   const tabs = [
-    { id: "tradepack", label: "📦 Tradepack" },
-    { id: "comparativo", label: "🏹 Hunt" },
-    { id: "mercado", label: "💰 Materiais" },
-    { id: "infusion", label: "✨ Infusion" },
+    { id: "tradepack",  label: "📦 Tradepack" },
+    { id: "comparativo",label: "🏹 Hunt" },
+    { id: "mercado",    label: "💰 Materiais" },
+    { id: "infusion",   label: "✨ Infusion" },
+    { id: "crafting",   label: "⚒️ Crafting" },
     { id: "calibracao", label: "📐 Calibração" },
   ];
 
@@ -1333,6 +1441,152 @@ export default function App() {
       )}
 
       {/* TAB: CALIBRAÇÃO */}
+      {tab === "crafting" && (() => {
+        // ── Fórmula Oversupply ────────────────────────────────────────────
+        // threshold = 10.000 + 10.000 × playerLevel
+        // cada 10% acima do threshold = +2% de tax extra (max 100% extra em 500%)
+        const extraTaxPct = Math.min(100, Math.floor(craftOversupply / 10) * 2);
+
+        // calcula para cada item da profissão selecionada
+        const itens = CRAFTING_DB[craftProfTab] || [];
+        const setCraftPrice = (nome, val) => setCraftPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
+        const getCraftPrice = (nome) => craftPrices[craftProfTab + "|" + nome] || 0;
+
+        const calc = itens.map(item => {
+          const taxReal     = item.baseTax * (1 + extraTaxPct / 100);
+          const custoReal   = item.totalCost - item.baseTax + taxReal;
+          const precoVenda  = getCraftPrice(item.nome);
+          const receitaTotal= precoVenda * item.qty;
+          const margem      = precoVenda > 0 ? receitaTotal - custoReal : null;
+          const margemPct   = margem !== null && custoReal > 0 ? (margem / custoReal) * 100 : null;
+          const margemEXP   = margem !== null && item.exp > 0 ? margem / item.exp : null;
+          return { ...item, taxReal, custoReal, precoVenda, receitaTotal, margem, margemPct, margemEXP };
+        });
+
+        const comPreco   = calc.filter(i => i.precoVenda > 0);
+        const topMargem  = [...comPreco].sort((a,b) => b.margem  - a.margem).slice(0, 3);
+        const topPct     = [...comPreco].sort((a,b) => b.margemPct - a.margemPct).slice(0, 3);
+        const topEXP     = [...comPreco].sort((a,b) => b.margemEXP - a.margemEXP).slice(0, 3);
+
+        const cardStyle = (cor) => ({ background: `rgba(${cor},0.06)`, border: `1px solid rgba(${cor},0.3)`, borderRadius: 10, padding: "12px 16px", marginBottom: 8 });
+
+        return (
+          <div>
+            {/* CONFIG */}
+            <Section title="Oversupply Calculator" icon="⚒️" borderColor="rgba(196,160,80,0.4)">
+              <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 10, padding: "14px 18px", marginBottom: 20, fontSize: 11, color: TEXT_DIM, lineHeight: 1.8 }}>
+                📌 Preencha o <strong style={{ color: TEXT_PRIM }}>nível do player</strong> e a <strong style={{ color: TEXT_PRIM }}>% de oversupply atual</strong> da profissão. Em seguida insira o <strong style={{ color: gold }}>preço de venda</strong> de cada item no market para ver as margens calculadas com a tax ajustada.
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Nível do Player</div>
+                  <NumInput value={craftPlayerLevel} onChange={v => setCraftPlayerLevel(Math.max(1, Math.min(100, v)))} min={1} max={100}
+                    style={{ background: BG_CARD, border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: TEXT_PRIM, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                  <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 4 }}>Threshold: {fmtInt(10000 + 10000 * craftPlayerLevel)} EXP</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Oversupply Atual (%)</div>
+                  <NumInput value={craftOversupply} onChange={v => setCraftOversupply(Math.max(0, Math.min(500, v)))} min={0} max={500}
+                    style={{ background: BG_CARD, border: `1px solid ${craftOversupply >= 200 ? "rgba(248,113,113,0.5)" : craftOversupply >= 100 ? "rgba(251,146,60,0.5)" : "rgba(74,222,128,0.4)"}`, borderRadius: 6, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                  <div style={{ fontSize: 10, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, marginTop: 4 }}>
+                    Tax extra: +{extraTaxPct}% {craftOversupply === 0 ? "✅ Sem penalidade" : craftOversupply >= 500 ? "🔴 MAX" : ""}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Profissão</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {Object.keys(CRAFTING_DB).map(p => (
+                      <button key={p} onClick={() => setCraftProfTab(p)}
+                        style={{ background: craftProfTab === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : BG_CARD, border: `1px solid ${craftProfTab === p ? gold : "rgba(196,160,80,0.2)"}`, borderRadius: 6, color: craftProfTab === p ? "#000" : TEXT_DIM, padding: "5px 10px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: craftProfTab === p ? "bold" : "normal", textAlign: "left" }}>
+                        {PROF_ICONS[p]} {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* RANKINGS — só aparecem quando há preços preenchidos */}
+              {comPreco.length > 0 && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+                  <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ color: green, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>🏆 Maior Margem Líquida</div>
+                    {topMargem.map((i, idx) => (
+                      <div key={i.nome} style={{ marginBottom: 8 }}>
+                        <div style={{ color: idx === 0 ? green : TEXT_DIM, fontSize: 11, fontWeight: idx === 0 ? "bold" : "normal" }}>#{idx+1} {i.nome}</div>
+                        <div style={{ color: pc(i.margem), fontSize: 13, fontWeight: "bold" }}>{i.margem >= 0 ? "+" : ""}{fmtInt(i.margem)} silver</div>
+                        <div style={{ color: TEXT_DIM, fontSize: 10 }}>por craft ({i.qty}un)</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ background: "rgba(96,165,250,0.06)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ color: blue, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>📈 Maior Margem %</div>
+                    {topPct.map((i, idx) => (
+                      <div key={i.nome} style={{ marginBottom: 8 }}>
+                        <div style={{ color: idx === 0 ? blue : TEXT_DIM, fontSize: 11, fontWeight: idx === 0 ? "bold" : "normal" }}>#{idx+1} {i.nome}</div>
+                        <div style={{ color: pc(i.margemPct), fontSize: 13, fontWeight: "bold" }}>{i.margemPct >= 0 ? "+" : ""}{fmt(i.margemPct, 1)}%</div>
+                        <div style={{ color: TEXT_DIM, fontSize: 10 }}>sobre custo de produção</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 10, padding: "14px 16px" }}>
+                    <div style={{ color: purple, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>⚡ Melhor por EXP</div>
+                    {topEXP.map((i, idx) => (
+                      <div key={i.nome} style={{ marginBottom: 8 }}>
+                        <div style={{ color: idx === 0 ? purple : TEXT_DIM, fontSize: 11, fontWeight: idx === 0 ? "bold" : "normal" }}>#{idx+1} {i.nome}</div>
+                        <div style={{ color: idx === 0 ? purple : TEXT_DIM, fontSize: 13, fontWeight: "bold" }}>{fmt(i.margemEXP, 2)} silver/EXP</div>
+                        <div style={{ color: TEXT_DIM, fontSize: 10 }}>{i.exp} EXP por craft</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TABELA DE ITENS */}
+              <Divider label={`${PROF_ICONS[craftProfTab]} ${craftProfTab} — insira o preço de venda`} />
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                  <thead>
+                    <tr>
+                      {["Nv", "Item", "Custo Base", `Tax (+${extraTaxPct}%)`, "Custo Real", "Qtd", "Preço Venda (un)", "Receita Total", "Margem", "Margem %", "Silver/EXP"].map(h => (
+                        <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {calc.map((item) => {
+                      const isBest = topMargem[0]?.nome === item.nome;
+                      const rowBg  = isBest ? "rgba(74,222,128,0.05)" : "transparent";
+                      return (
+                        <tr key={item.nome} style={{ background: rowBg }}>
+                          <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.nivel}</td>
+                          <td style={{ padding: "7px 8px", color: isBest ? green : TEXT_PRIM, fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.nome}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{fmtInt(item.totalCost)}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: extraTaxPct > 0 ? red : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>+{fmtInt(item.taxReal - item.baseTax)}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: orange, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{fmtInt(item.custoReal)}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item.qty}x</td>
+                          <td style={{ padding: "6px 8px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                            <NumInput value={item.precoVenda} onChange={v => setCraftPrice(item.nome, v)} min={0}
+                              style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 4, color: gold, padding: "4px 8px", fontSize: 11, width: 90, fontFamily: "'Space Mono',monospace", outline: "none", textAlign: "right" }} />
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.precoVenda > 0 ? TEXT_PRIM : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.precoVenda > 0 ? fmtInt(item.receitaTotal) : "—"}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margem !== null ? pc(item.margem) : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margem !== null ? `${item.margem >= 0 ? "+" : ""}${fmtInt(item.margem)}` : "—"}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemPct !== null ? pc(item.margemPct) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margemPct !== null ? `${item.margemPct >= 0 ? "+" : ""}${fmt(item.margemPct, 1)}%` : "—"}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemEXP !== null ? (item.margemEXP > 0 ? purple : red) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margemEXP !== null ? fmt(item.margemEXP, 2) : "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 12, lineHeight: 1.7 }}>
+                💡 <strong style={{ color: TEXT_PRIM }}>Custo Base</strong> = materiais a preço de farming + tax base · <strong style={{ color: TEXT_PRIM }}>Tax extra</strong> calculada com {craftOversupply}% de oversupply · <strong style={{ color: TEXT_PRIM }}>Margem</strong> = Receita Total − Custo Real · Dados de <a href="https://ravenquest.wiki/crafting" target="_blank" style={{ color: blue }}>ravenquest.wiki/crafting</a>
+              </div>
+            </Section>
+          </div>
+        );
+      })()}
+
       {tab === "calibracao" && (
         <div>
           <Section title="Calibração com Dados Reais" icon="📐" borderColor="rgba(74,222,128,0.4)">
