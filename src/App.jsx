@@ -2592,7 +2592,7 @@ export default function App() {
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ color: red, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(huntDropRanking[0].silverHora)}<span style={{ fontSize: 11 }}> silver/h</span></div>
-                  <div style={{ color: dim, fontSize: 11 }}>{fmtUSD(toUSD(huntDropRanking[0].silverHora * huntHorasDia * 30, taxExchHunt, taxSaqueAtivo))}/{lang==="en"?"month":"mês"} <span style={{ color: "#404050", fontSize: 9 }}>({huntHorasDia}h/dia)</span></div>
+                  <div style={{ color: dim, fontSize: 11 }}>{fmtUSD(toUSD(huntDropRanking[0].silverHora * huntHorasDia * 30, taxExchHunt, taxSaqueAtivo))}/{lang==="en"?"month":"mês"} <span style={{ color: red, fontSize: 10, opacity: 0.7 }}>({huntHorasDia}h/{lang==="en"?"day":"dia"})</span></div>
                 </div>
               </div>
             )}
