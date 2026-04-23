@@ -2578,7 +2578,7 @@ export default function App() {
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 4, color: red, padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : (silverH > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtInt(silverH) : "—"}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: silverH > 0 ? dim : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtUSD(toUSD(silverH)) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: silverH > 0 ? dim : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtUSD(toUSD(silverH, taxExchHunt, taxSaqueAtivo)) : "—"}</td>
                     </tr>
                   );
                 })}
@@ -2592,7 +2592,7 @@ export default function App() {
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ color: red, fontSize: 20, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(huntDropRanking[0].silverHora)}<span style={{ fontSize: 11 }}> silver/h</span></div>
-                  <div style={{ color: dim, fontSize: 11 }}>{fmtUSD(toUSD(huntDropRanking[0].silverHora * 24 * 30))}/mês</div>
+                  <div style={{ color: dim, fontSize: 11 }}>{fmtUSD(toUSD(huntDropRanking[0].silverHora * 24 * 30, taxExchHunt, taxSaqueAtivo))}/{lang==="en"?"month":"mês"}</div>
                 </div>
               </div>
             )}
