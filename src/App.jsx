@@ -1208,6 +1208,7 @@ export default function App() {
     const taxaPaga_Q = taxavel * (taxSaquePct / 100);
     return quest - taxaPaga_Q;
   };
+  const packAtual = PACKS[packSelecionado];
   const [matsOverride, setMatsOverride] = useState({});
   const [matsQUEST, setMatsQUEST] = useState({});
   const getMat = (nome, campo) => (matsOverride[nome]?.[campo] !== undefined ? matsOverride[nome][campo] : packAtual.materiais.find(m => m.nome === nome)?.[campo] ?? 0);
