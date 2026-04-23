@@ -1497,10 +1497,10 @@ export default function App() {
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          <Stat label=TR[lang].expedition value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
+          <Stat label={TR[lang].expedition} value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
           <Stat label="IM Packs/sem" value={fmtInt(r.imTotal_semana)} sub={`${r.packsSemanais} packs`} color={gold} />
           <Stat label="QUEST IM líq." value={`${fmt(r.questLiq_sem)}/sem`} sub={`${fmt(r.questLiq_mes)}/mês · -${fmt(r.questCerts_sem)} Q certs`} color={pc(r.questLiq_sem)} />
-          <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub=TR[lang].perPack color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
+          <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub={TR[lang].perPack} color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
         </div>
       </div>
 
@@ -1517,7 +1517,7 @@ export default function App() {
       {tab === "tradepack" && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           <div>
-            <Section title=TR[lang].packConfig icon="📦">
+            <Section title={TR[lang].packConfig} icon="📦">
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>Pack Selecionado</label>
                 <select value={packSelecionado} onChange={e => { setPackSelecionado(e.target.value); setMatsOverride({}); setMatsQUEST({}); }}
@@ -1527,7 +1527,7 @@ export default function App() {
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="Packs por semana" value={qtdPacks} onChange={setQtdPacks} step={1} />
-                <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint=TR[lang].silverHint />
+                <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint={TR[lang].silverHint} />
                 <Field label="Custo certificado" value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
                 <div>
                   <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
@@ -1538,7 +1538,7 @@ export default function App() {
                 </div>
               </div>
 
-              <Divider label=TR[lang].specialPacks />
+              <Divider label={TR[lang].specialPacks} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label="🔮 Packs com Enhanced" value={qtdEnhanced} onChange={v => setQtdEnhanced(Math.min(v, qtdPacks))} step={1} suffix="packs" hint={`×2 IM · máx ${qtdPacks}`} color={qtdEnhanced > 0 ? gold : undefined} />
                 <Field label="⚔️ Packs no Plunder" value={qtdPlunder} onChange={v => setQtdPlunder(Math.min(v, qtdPacks))} step={1} suffix="packs" hint="+15% IM · dom→seg" color={qtdPlunder > 0 ? red : undefined} />
@@ -1568,7 +1568,7 @@ export default function App() {
               </div>
             </Section>
 
-            <Section title=TR[lang].activeBonuses icon="⚡" borderColor="rgba(196,160,80,0.4)">
+            <Section title={TR[lang].activeBonuses} icon="⚡" borderColor="rgba(196,160,80,0.4)">
               <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
                 {[
                   { label: "✅ Bartering I (+5%)", sub: TR[lang].embeddedIM, color: green },
@@ -1629,26 +1629,26 @@ export default function App() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 <Stat label="Fazer pack (silver liq.)" value={fmtInt(r.silverLiqPorPack)} sub="pós custo produção" color={blue} />
                 <Stat label="Vender materiais" value={fmtInt(r.lucroVendaMkt)} sub="pós custo produção" color={orange} />
-                <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub=TR[lang].perPack color={purple} />
+                <Stat label="QUEST do pack/IM" value={fmt(r.imEfetiva * poolRate)} sub={TR[lang].perPack} color={purple} />
                 <Stat label="Custo cert" value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
                 <Stat label="QUEST IM líq./sem" value={`${fmt(r.questLiq_sem)} Q`} sub={`${fmtUSD(r.questLiq_sem * questUSD)}/sem`} color={pc(r.questLiq_sem)} />
                 <Stat label="QUEST IM líq./mês" value={`${fmt(r.questLiq_mes)} Q`} sub={`${fmtUSD(r.questLiq_mes * questUSD)}/mês`} color={pc(r.questLiq_mes)} highlight />
               </div>
             </Section>
 
-            <Section title=TR[lang].expedition icon="⚔️">
+            <Section title={TR[lang].expedition} icon="⚔️">
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label=`💎 ${TR[lang].gemsAccum}` value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint=lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)" />
-                <Field label=TR[lang].imExpWeek value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint=lang === "en" ? "Your real data: 4,312,920" : "Seu dado real: 4.312.920" color={green} />
+                <Field label=`💎 ${TR[lang].gemsAccum}` value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint={lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)" />
+                <Field label={TR[lang].imExpWeek} value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint={lang === "en" ? "Your real data: 4,312,920" : "Seu dado real: 4.312.920"} color={green} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                <Stat label=TR[lang].imExpWeek value={fmtInt(r.expIM)} />
+                <Stat label={TR[lang].imExpWeek} value={fmtInt(r.expIM)} />
                 <Stat label="QUEST/sem" value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
                 <Stat label="USD/mês" value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
               </div>
             </Section>
 
-            <Section title=TR[lang].marketPool icon="📊">
+            <Section title={TR[lang].marketPool} icon="📊">
               <div style={{ marginBottom: 14 }}>
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{TR[lang].poolRate} ({lang === "en" ? "calculated via calibration" : "calculado via calibração"})</label>
                 <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1913,7 +1913,7 @@ export default function App() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 14 }}>
               <Stat label="Custo Produção/pack" value={fmtInt(r.custoProducaoTotal)} sub="silver" color={red} warn />
               <Stat label="Valor Mercado/pack" value={fmtInt(r.valorMktTotal)} sub="silver" color={orange} />
-              <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub=TR[lang].perPack color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
+              <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub={TR[lang].perPack} color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
             </div>
             <Divider label="Por pack — Fazer vs Vender" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -2066,7 +2066,7 @@ export default function App() {
               </div>
 
               {/* TABELA DE RECEITAS */}
-              <Divider label=TR[lang].osRecipes />
+              <Divider label={TR[lang].osRecipes} />
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
@@ -2166,7 +2166,7 @@ export default function App() {
 
       {tab === "calibracao" && (
         <div>
-          <Section title=TR[lang].calTitle icon="📐" borderColor="rgba(74,222,128,0.4)">
+          <Section title={TR[lang].calTitle} icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder).
             </div>
@@ -2211,7 +2211,7 @@ export default function App() {
             </button>
           </Section>
 
-          <Section title=TR[lang].lastCalib icon="📅">
+          <Section title={TR[lang].lastCalib} icon="📅">
             <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: 14, fontSize: 11, color: dim, lineHeight: 1.8 }}>
               <div style={{ color: gold, marginBottom: 8, fontFamily: "'Cinzel', serif", fontSize: 12 }}>Dados ativos no modelo</div>
               <div>IM Expedição/sem: <span style={{ color: blue }}>{fmtInt(imExpSemana)}</span></div>
