@@ -1624,7 +1624,7 @@ export default function App() {
         );
       })()}
 
-      {tab === "calibracao" && (      {tab === "calibracao" && (
+      {tab === "calibracao" && (
         <div>
           <Section title="Calibração com Dados Reais" icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
