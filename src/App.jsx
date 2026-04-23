@@ -531,6 +531,53 @@ function LandingPage({ onEnter, lang, setLang }) {
     </div>
   );
 }
+// ── TAX TOGGLE ────────────────────────────────────────────────────────────
+function TaxToggle({ label, active, onChange, detail }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: active ? "rgba(196,160,80,0.06)" : "rgba(0,0,0,0.2)", border: `1px solid ${active ? "rgba(196,160,80,0.25)" : "rgba(255,255,255,0.05)"}`, borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
+      <div>
+        <div style={{ fontSize: 11, color: active ? "#f0e6c8" : "#606070", fontFamily: "'Space Mono', monospace" }}>{label}</div>
+        {detail && <div style={{ fontSize: 10, color: active ? "rgba(196,160,80,0.6)" : "#404050", marginTop: 3 }}>{detail}</div>}
+      </div>
+      <div onClick={() => onChange(!active)} style={{ width: 36, height: 20, borderRadius: 10, background: active ? "#c4a050" : "#303040", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+        <div style={{ position: "absolute", top: 3, left: active ? 18 : 3, width: 14, height: 14, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
+      </div>
+    </div>
+  );
+}
+
+// ── PAINEL DE SAQUE (global, reutilizável) ─────────────────────────────────
+function SaquePanel({ taxSaqueAtivo, setTaxSaqueAtivo, taxSaquePct, setTaxSaquePct, feeCredit, setFeeCredit, lang }) {
+  const t = TR[lang];
+  return (
+    <div style={{ background: "rgba(248,113,113,0.04)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 10, padding: "14px 16px", marginTop: 12 }}>
+      <div style={{ fontSize: 10, color: "rgba(248,113,113,0.6)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>
+        {lang === "en" ? "Withdraw Fee" : "Taxa de Saque QUEST"}
+      </div>
+      <TaxToggle
+        label={lang === "en" ? `Withdraw tax (${taxSaquePct}%)` : `Taxa de saque (${taxSaquePct}%)`}
+        detail={lang === "en" ? "Paid in silver on total QUEST withdrawn" : "Paga em silver sobre o total sacado"}
+        active={taxSaqueAtivo} onChange={setTaxSaqueAtivo}
+      />
+      {taxSaqueAtivo && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 8 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#8fa0b8", marginBottom: 4 }}>{lang === "en" ? "Tax %" : "Taxa %"}</div>
+            <NumInput value={taxSaquePct} onChange={v => setTaxSaquePct(Math.max(0, Math.min(100, v)))} min={0} max={100}
+              style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(248,113,113,0.3)", borderRadius: 6, color: "#f87171", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: "#8fa0b8", marginBottom: 4 }}>Fee Credit (QUEST)</div>
+            <NumInput value={feeCredit} onChange={setFeeCredit} min={0}
+              style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, color: "#4ade80", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+            <div style={{ fontSize: 9, color: "#404050", marginTop: 3 }}>{lang === "en" ? "QUEST exempt from tax" : "QUEST isentos de taxa"}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
 function LoginScreen({ onLogin, onBack, lang }) {
   const t = TR[lang || "ptBR"];
@@ -1064,7 +1111,11 @@ export default function App() {
   const mineSilverDia = mineSilverHora * mineHorasDia;
   const mineSilverMes = mineSilverDia * 30;
 
-  const toUSD = (silver) => (silver / questToSilver) * questUSD;
+  const toUSD = (silver, exchAtivo = false, saqueAtivo = false) => {
+    const quest = applyExchQ(silver / questToSilver, exchAtivo);
+    const questLiq = saqueAtivo ? applySaque(quest) : quest;
+    return questLiq * questUSD;
+  };
 
   // ── INFUSIONS ─────────────────────────────────────────────────────────────
   const INFUSIONS = [
@@ -1091,7 +1142,6 @@ export default function App() {
   const [infusionCompra, setInfusionCompra] = useState(
     Object.fromEntries(INFUSIONS.map(i => [i.nome, 0]))
   );
-  const [taxaMkt, setTaxaMkt] = useState(5);
 
   const setInfusionPreco = (nome, val) =>
     setInfusionPrecos(prev => ({ ...prev, [nome]: val }));
@@ -1129,7 +1179,7 @@ export default function App() {
       const venda = infusionPrecos[inf.nome] || 0;
       const compra = infusionCompra[inf.nome] || 0;
       const lucroUnit = venda > 0 && compra > 0
-        ? venda * (1 - taxaMkt / 100) - compra : 0;
+        ? venda * (taxMktInfusion ? 0.96 : 1) - compra : 0;
       const margemPct = compra > 0 && lucroUnit > 0
         ? (lucroUnit / compra) * 100 : 0;
       return { ...inf, venda, compra, lucroUnit, margemPct };
@@ -1137,8 +1187,27 @@ export default function App() {
     .filter(i => i.lucroUnit > 0)
     .sort((a, b) => b.margemPct - a.margemPct);
 
-  // MATERIAIS
-  const packAtual = PACKS[packSelecionado];
+  // TAXAS
+  const [taxMktTradepack, setTaxMktTradepack]   = useState(false); // 4% venda mkt materiais
+  const [taxMktMateriais, setTaxMktMateriais]   = useState(true);  // 4% venda mkt materiais
+  const [taxMktCrafting, setTaxMktCrafting]     = useState(true);  // 4% venda mkt crafting
+  const [taxMktInfusion, setTaxMktInfusion]     = useState(true);  // 4% flip infusion (padrão ON)
+  const [taxExchTradepack, setTaxExchTradepack] = useState(true);  // 4% exchange silver→QUEST tradepack
+  const [taxExchHunt, setTaxExchHunt]           = useState(true);  // 4% exchange hunt
+  const [taxSaqueAtivo, setTaxSaqueAtivo]       = useState(true);  // 20% saque QUEST
+  const [taxSaquePct, setTaxSaquePct]           = useState(20);    // % saque (editável)
+  const [feeCredit, setFeeCredit]               = useState(0);     // QUEST isentos de saque
+
+  // Helpers de taxa
+  const applyMkt      = (silver, ativo) => ativo ? silver * 0.96 : silver;
+  const applyExch     = (silver, ativo) => ativo ? silver * 0.96 : silver;
+  const applyExchQ    = (quest, ativo)  => ativo ? quest  * 0.96 : quest;
+  const applySaque    = (quest)         => {
+    if (!taxSaqueAtivo) return quest;
+    const taxavel = Math.max(0, quest - feeCredit);
+    const taxaPaga_Q = taxavel * (taxSaquePct / 100);
+    return quest - taxaPaga_Q;
+  };
   const [matsOverride, setMatsOverride] = useState({});
   const [matsQUEST, setMatsQUEST] = useState({});
   const getMat = (nome, campo) => (matsOverride[nome]?.[campo] !== undefined ? matsOverride[nome][campo] : packAtual.materiais.find(m => m.nome === nome)?.[campo] ?? 0);
@@ -1193,11 +1262,19 @@ export default function App() {
         if (s.infusionTargetEXP !== undefined) setInfusionTargetEXP(s.infusionTargetEXP);
         if (s.infusionQtdHora !== undefined) setInfusionQtdHora(s.infusionQtdHora);
         if (s.infusionCompra !== undefined) setInfusionCompra(s.infusionCompra);
-        if (s.taxaMkt !== undefined) setTaxaMkt(s.taxaMkt);
         if (s.craftPlayerLevel !== undefined) setCraftPlayerLevel(s.craftPlayerLevel);
         if (s.craftOversupply !== undefined) setCraftOversupply(s.craftOversupply);
         if (s.craftPrices !== undefined) setCraftPrices(s.craftPrices);
         if (s.craftMaterialPrices !== undefined) setCraftMaterialPrices(s.craftMaterialPrices);
+        if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
+        if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
+        if (s.taxMktCrafting !== undefined) setTaxMktCrafting(s.taxMktCrafting);
+        if (s.taxMktInfusion !== undefined) setTaxMktInfusion(s.taxMktInfusion);
+        if (s.taxExchTradepack !== undefined) setTaxExchTradepack(s.taxExchTradepack);
+        if (s.taxExchHunt !== undefined) setTaxExchHunt(s.taxExchHunt);
+        if (s.taxSaqueAtivo !== undefined) setTaxSaqueAtivo(s.taxSaqueAtivo);
+        if (s.taxSaquePct !== undefined) setTaxSaquePct(s.taxSaquePct);
+        if (s.feeCredit !== undefined) setFeeCredit(s.feeCredit);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -1221,8 +1298,10 @@ export default function App() {
             huntHorasDia, huntAddonQtd, huntAddonPreco,
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
-            infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
+            infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
             craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices,
+            taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
+            taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
           updated_at: new Date().toISOString(),
         });
@@ -1238,8 +1317,10 @@ export default function App() {
     matsOverride, matsQUEST,
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
-    infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices]);
+    infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices,
+    taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
+    taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -1248,10 +1329,6 @@ export default function App() {
     const plunderVal = Math.min(qtdPlunder, packsSemanais);
     const packsNormais = packsSemanais - enhancedVal;
 
-    // IM por categoria
-    // IMPORTANTE: imPorPack já inclui o Bartering (calculado pelo jogo no silver_value)
-    // Fórmula real: IM = silver_value × 10 (prime) × bartering (já embutido no jogo)
-    // Enhanced = ×2 adicional | Plunder = +15% adicional sobre o imPorPack observado
     const imBase = imPorPack;
     const imNormalTotal = packsNormais * imBase;
     const imEnhancedTotal = enhancedVal * imBase * 2;
@@ -1259,73 +1336,95 @@ export default function App() {
     const imTotal_semana = imNormalTotal + imEnhancedTotal + imPlunderTotal;
     const imEfetiva = packsSemanais > 0 ? imTotal_semana / packsSemanais : imBase;
 
-    // Custos
+    // Custos de materiais
     const mats = packAtual.materiais;
     const custoProducaoTotal = mats.reduce((acc, m) => acc + m.qtd * getCustoReal(m.nome), 0);
-    const valorMktTotal = mats.reduce((acc, m) => acc + m.qtd * getMat(m.nome, "precoMkt"), 0);
+    // Valor de mercado após taxa 4% (venda no market)
+    const valorMktBruto = mats.reduce((acc, m) => acc + m.qtd * getMat(m.nome, "precoMkt"), 0);
+    const valorMktTotal = applyMkt(valorMktBruto, taxMktMateriais);
+
     const certCusto_Q = 10 * custoCert;
     const certCusto_S = certCusto_Q * questToSilver;
+
+    // Silver líquido por pack entregue
     const silverLiqPorPack = silverPorPack - custoProducaoTotal;
 
-    // QUEST dos packs — semanal e mensal
+    // ── QUEST dos packs via IM (pool rate) ──────────────────────────────────
     const questIM_sem = imTotal_semana * poolRate;
     const questCerts_sem = packsSemanais * certCusto_Q;
-    const questLiq_sem = questIM_sem - questCerts_sem;
-    const questIM_mes = questIM_sem * MES;
-    const questCerts_mes = questCerts_sem * MES;
-    const questLiq_mes = questLiq_sem * MES;
+    // QUEST líquido semanal antes do saque
+    const questLiq_sem_bruto = questIM_sem - questCerts_sem;
 
-    // Custo oportunidade
-    const lucroVendaMkt = valorMktTotal - custoProducaoTotal;
-    const questVendaMkt = lucroVendaMkt / questToSilver;
-    const questPack = (silverLiqPorPack / questToSilver) - certCusto_Q + (imEfetiva * poolRate);
-    const deltaQUEST = questPack - questVendaMkt;
+    // Silver dos packs (valor entregue − custo produção)
+    // Se vende no market: aplica 4% mkt. Se entrega: sem taxa.
+    const silverLiq_sem = packsSemanais * (taxMktTradepack
+      ? applyMkt(silverPorPack, true) - custoProducaoTotal
+      : silverLiqPorPack);
 
-    // Break-even
-    const questNecessarioPorPack = (lucroVendaMkt / questToSilver) + certCusto_Q - (silverLiqPorPack / questToSilver);
-    const imBreakeven = poolRate > 0 ? questNecessarioPorPack / poolRate : 0;
-    const imBreaakevenEnhanced = poolRate > 0 ? questNecessarioPorPack / (poolRate * 2) : 0;
+    // Silver → QUEST via exchange (4% exchange fee)
+    const questSilverPacks_sem = applyExchQ(silverLiq_sem / questToSilver, taxExchTradepack);
 
-    // Expedição — semanal e mensal
+    // Total QUEST semanal e mensal (bruto, antes do saque)
     const expIM = imExpSemana;
-    const expQUEST_sem = expIM * poolRate;
-    const expUSD_sem = expQUEST_sem * questUSD;
-    const expQUEST_mes = expQUEST_sem * MES;
-    const expUSD_mes = expQUEST_mes * questUSD;
+    const expQUEST_sem_bruto = expIM * poolRate;
 
-    // Silver dos packs — semanal e mensal
-    const silverPacks_sem = packsSemanais * silverLiqPorPack;
-    const silverPacks_mes = silverPacks_sem * MES;
-    const questSilverPacks_sem = silverPacks_sem / questToSilver;
-    const questSilverPacks_mes = silverPacks_mes / questToSilver;
+    const totalQUEST_sem_bruto = expQUEST_sem_bruto + questLiq_sem_bruto + questSilverPacks_sem;
+    const totalQUEST_mes_bruto = totalQUEST_sem_bruto * MES;
 
-    // Totais — semanal e mensal
-    const totalIM = expIM + imTotal_semana;
-    const totalQUEST_sem = expQUEST_sem + questLiq_sem + questSilverPacks_sem;
+    // Aplica taxa de saque
+    const totalQUEST_sem = applySaque(totalQUEST_sem_bruto);
     const totalQUEST_mes = totalQUEST_sem * MES;
+
+    // ── FIX DO BUG: USD = QUEST × questUSD (não silver × questUSD) ──────────
     const totalUSD_sem = totalQUEST_sem * questUSD;
     const totalUSD_mes = totalQUEST_mes * questUSD;
 
-    // Comparativo atividades — removido, agora na aba Hunt com detalhamento por item
+    // Expedição separada (para display)
+    const expQUEST_sem = applySaque(expQUEST_sem_bruto);
+    const expQUEST_mes = expQUEST_sem * MES;
+    const expUSD_sem   = expQUEST_sem * questUSD;
+    const expUSD_mes   = expQUEST_mes * questUSD;
 
-    // Estratégias — semanal e mensal
+    // QUEST líquido dos packs (IM + silver, com saque)
+    const questLiq_sem = applySaque(questLiq_sem_bruto + questSilverPacks_sem);
+    const questLiq_mes = questLiq_sem * MES;
+    const questIM_mes  = questIM_sem * MES;
+    const questCerts_mes = questCerts_sem * MES;
+
+    // Custo oportunidade — vender vs fazer pack
+    const lucroVendaMkt = valorMktTotal - custoProducaoTotal;
+    const questVendaMkt = applyExchQ(lucroVendaMkt / questToSilver, taxExchTradepack);
+    const questPack = (applyExchQ(silverLiqPorPack / questToSilver, taxExchTradepack)) - certCusto_Q + (imEfetiva * poolRate);
+    const deltaQUEST = questPack - questVendaMkt;
+
+    // Break-even
+    const questNecessarioPorPack = questVendaMkt + certCusto_Q - applyExchQ(silverLiqPorPack / questToSilver, taxExchTradepack);
+    const imBreakeven = poolRate > 0 ? questNecessarioPorPack / poolRate : 0;
+    const imBreaakevenEnhanced = poolRate > 0 ? questNecessarioPorPack / (poolRate * 2) : 0;
+
+    // Estratégias comparativas
+    const silverPacks_sem = packsSemanais * silverLiqPorPack;
+    const silverPacks_mes = silverPacks_sem * MES;
     const lucroVenderMkt_sem = packsSemanais * lucroVendaMkt;
     const lucroVenderMkt_mes = lucroVenderMkt_sem * MES;
 
     const profitReal_sem = totalUSD_sem;
     const profitReal_mes = totalUSD_mes;
 
-    const profitAlt_sem = expUSD_sem + (lucroVenderMkt_sem / questToSilver) * questUSD;
+    const questAlt_sem = applySaque(expQUEST_sem_bruto + applyExchQ(lucroVendaMkt / questToSilver, taxExchTradepack));
+    const profitAlt_sem = questAlt_sem * questUSD;
     const profitAlt_mes = profitAlt_sem * MES;
 
     const diferenca_sem = profitReal_sem - profitAlt_sem;
     const diferenca_mes = profitReal_mes - profitAlt_mes;
 
+    const totalIM = expIM + imTotal_semana;
+
     return {
       MES, packsSemanais, enhancedVal, plunderVal, packsNormais,
       imBase, imNormalTotal, imEnhancedTotal, imPlunderTotal, imTotal_semana, imEfetiva,
       custoProducaoTotal, valorMktTotal, certCusto_Q, certCusto_S,
-      silverLiqPorPack, silverPacks_sem, silverPacks_mes,
+      silverLiqPorPack, silverPacks_sem, silverPacks_mes: silverPacks_sem * MES,
       questIM_sem, questIM_mes, questCerts_sem, questCerts_mes, questLiq_sem, questLiq_mes,
       lucroVendaMkt, questVendaMkt, questPack, deltaQUEST,
       imBreakeven, imBreaakevenEnhanced, questNecessarioPorPack,
@@ -1337,7 +1436,8 @@ export default function App() {
     };
   }, [poolRate, questUSD, questToSilver, imExpSemana, packSelecionado,
     qtdPacks, silverPorPack, qtdEnhanced, qtdPlunder, custoCert,
-    matsOverride, matsQUEST]);
+    matsOverride, matsQUEST,
+    taxMktTradepack, taxMktMateriais, taxExchTradepack, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
   if (initialLoading) return (
     <div style={{ minHeight: "100vh", background: BG_DEEP, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Mono', monospace" }}>
@@ -1564,6 +1664,21 @@ export default function App() {
               </div>
             </Section>
 
+            {/* TAXAS — TRADEPACK */}
+            <Section title={lang === "en" ? "Fees & Taxes" : "Taxas"} icon="💸" borderColor="rgba(248,113,113,0.3)">
+              <TaxToggle
+                label={lang === "en" ? "Market tax 4% (selling materials)" : "Taxa mercado 4% (venda de materiais)"}
+                detail={lang === "en" ? "Applied when selling pack materials on market" : "Aplicada ao vender materiais do pack no market"}
+                active={taxMktTradepack} onChange={setTaxMktTradepack}
+              />
+              <TaxToggle
+                label={lang === "en" ? "Exchange fee 4% (silver → QUEST)" : "Taxa exchange 4% (silver → QUEST)"}
+                detail={lang === "en" ? "Applied when converting silver income to QUEST" : "Aplicada ao converter silver em QUEST"}
+                active={taxExchTradepack} onChange={setTaxExchTradepack}
+              />
+              <SaquePanel taxSaqueAtivo={taxSaqueAtivo} setTaxSaqueAtivo={setTaxSaqueAtivo} taxSaquePct={taxSaquePct} setTaxSaquePct={setTaxSaquePct} feeCredit={feeCredit} setFeeCredit={setFeeCredit} lang={lang} />
+            </Section>
+
             <Section title={TR[lang].activeBonuses} icon="⚡" borderColor="rgba(196,160,80,0.4)">
               <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px", marginBottom: 10 }}>
                 {[
@@ -1739,17 +1854,27 @@ export default function App() {
                 {/* Cards de projeção hunt */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                   {[
-                    { label: "1 hora", silver: huntSilverHora, highlight: false },
-                    { label: `${huntHorasDia}h / dia`, silver: huntSilverDia, highlight: true },
-                    { label: "mensal", silver: huntSilverMes, highlight: false },
+                    { label: lang==="en"?"1 hour":"1 hora", silver: huntSilverHora, highlight: false },
+                    { label: `${huntHorasDia}h / ${lang==="en"?"day":"dia"}`, silver: huntSilverDia, highlight: true },
+                    { label: lang==="en"?"monthly":"mensal", silver: huntSilverMes, highlight: false },
                   ].map((p, i) => (
                     <div key={i} style={{ background: p.highlight ? "rgba(248,113,113,0.08)" : "rgba(0,0,0,0.25)", border: `1px solid ${p.highlight ? "rgba(248,113,113,0.35)" : "rgba(255,255,255,0.05)"}`, borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
                       <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{p.label}</div>
                       <div style={{ color: red, fontSize: 13, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(p.silver)}</div>
                       <div style={{ color: "#555565", fontSize: 9, marginTop: 4 }}>silver</div>
-                      <div style={{ color: red, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver))}</div>
+                      <div style={{ color: red, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver, taxExchHunt, taxSaqueAtivo))}</div>
                     </div>
                   ))}
+                </div>
+
+                {/* Taxa Exchange Hunt */}
+                <div style={{ marginTop: 12 }}>
+                  <TaxToggle
+                    label={lang==="en"?"Exchange fee 4% (silver → QUEST)":"Taxa exchange 4% (silver → QUEST)"}
+                    detail={lang==="en"?"Applied when converting silver to QUEST":"Aplicada ao converter silver em QUEST"}
+                    active={taxExchHunt} onChange={setTaxExchHunt}
+                  />
+                  <SaquePanel taxSaqueAtivo={taxSaqueAtivo} setTaxSaqueAtivo={setTaxSaqueAtivo} taxSaquePct={taxSaquePct} setTaxSaquePct={setTaxSaquePct} feeCredit={feeCredit} setFeeCredit={setFeeCredit} lang={lang} />
                 </div>
               </Section>
             </div>
@@ -1799,24 +1924,24 @@ export default function App() {
 
                 {/* Horas por dia mine */}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                  <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
+                  <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{TR[lang].huntHours}:</span>
                   <NumInput value={mineHorasDia} onChange={v => setMineHorasDia(v)} min={1} max={24}
                     style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${blue}55`, borderRadius: 6, color: blue, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
-                  <span style={{ color: "#404050", fontSize: 10 }}>horas de mineração por dia</span>
+                  <span style={{ color: "#404050", fontSize: 10 }}>{lang==="en"?"hours of mining per day":"horas de mineração por dia"}</span>
                 </div>
 
-                {/* Cards projeção mine */}
+                {/* Cards projeção mine — usa mesmos toggles do Hunt */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                   {[
-                    { label: "1 hora", silver: mineSilverHora, highlight: false },
-                    { label: `${mineHorasDia}h / dia`, silver: mineSilverDia, highlight: true },
-                    { label: "mensal", silver: mineSilverMes, highlight: false },
+                    { label: lang==="en"?"1 hour":"1 hora", silver: mineSilverHora, highlight: false },
+                    { label: `${mineHorasDia}h / ${lang==="en"?"day":"dia"}`, silver: mineSilverDia, highlight: true },
+                    { label: lang==="en"?"monthly":"mensal", silver: mineSilverMes, highlight: false },
                   ].map((p, i) => (
                     <div key={i} style={{ background: p.highlight ? "rgba(96,165,250,0.08)" : "rgba(0,0,0,0.25)", border: `1px solid ${p.highlight ? "rgba(96,165,250,0.35)" : "rgba(255,255,255,0.05)"}`, borderRadius: 10, padding: "12px 10px", textAlign: "center" }}>
                       <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{p.label}</div>
                       <div style={{ color: blue, fontSize: 13, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(p.silver)}</div>
                       <div style={{ color: "#555565", fontSize: 9, marginTop: 4 }}>silver</div>
-                      <div style={{ color: blue, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver))}</div>
+                      <div style={{ color: blue, fontSize: 11, marginTop: 4, fontFamily: "'Space Mono', monospace" }}>{fmtUSD(toUSD(p.silver, taxExchHunt, taxSaqueAtivo))}</div>
                     </div>
                   ))}
                 </div>
@@ -1827,19 +1952,30 @@ export default function App() {
           {/* Comparativo Hunt vs Tradepack */}
           <Section title={`📊 ${lang==="en"?"Hunt vs Tradepack — Monthly Comparison":"Hunt vs Tradepack — Comparativo Mensal"}`} icon="⚖️" accent>
             <div style={{ color: dim, fontSize: 10, marginBottom: 14, lineHeight: 1.6 }}>
-              Baseado em {huntHorasDia}h/dia de hunt · {mineHorasDia}h/dia de mineração · {qtdPacks} packs/semana de tradepack
+              {lang==="en"
+                ? `Based on ${huntHorasDia}h/day hunting · ${mineHorasDia}h/day mining · ${qtdPacks} packs/week tradepack`
+                : `Baseado em ${huntHorasDia}h/dia de hunt · ${mineHorasDia}h/dia de mineração · ${qtdPacks} packs/semana de tradepack`}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
               {[
-                { label: "🏹 Hunt", mes: huntSilverMes, dia: huntSilverDia, hora: huntSilverHora, color: red },
-                { label: `⛏️ ${TR[lang].miningTitle}`, mes: mineSilverMes, dia: mineSilverDia, hora: mineSilverHora, color: blue },
-                { label: "📦 Tradepack Prime", mes: r.totalUSD_mes / questUSD * questToSilver, dia: r.totalUSD_mes / 30 / questUSD * questToSilver, hora: r.totalUSD_mes / 30 / 24 / questUSD * questToSilver, color: gold },
+                { label: "🏹 Hunt", mes: huntSilverMes, dia: huntSilverDia, hora: huntSilverHora, color: red, exch: taxExchHunt },
+                { label: `⛏️ ${TR[lang].miningTitle}`, mes: mineSilverMes, dia: mineSilverDia, hora: mineSilverHora, color: blue, exch: taxExchHunt },
+                { label: "📦 Tradepack Prime", mes: r.totalUSD_mes, dia: r.totalUSD_mes / 30, hora: r.totalUSD_mes / 30 / 24, color: gold, isUSD: true },
               ].map((a, i) => (
                 <div key={i} style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 16, textAlign: "center" }}>
                   <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{a.label}</div>
-                  <div style={{ color: a.color, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtUSD(toUSD(a.mes))}<span style={{ fontSize: 10 }}>/mês</span></div>
-                  <div style={{ color: a.color, fontSize: 12, marginTop: 4 }}>{fmtUSD(toUSD(a.dia))}<span style={{ fontSize: 9 }}>/dia</span></div>
-                  <div style={{ color: "#404050", fontSize: 10, marginTop: 4 }}>{fmtUSD(toUSD(a.hora))}<span style={{ fontSize: 9 }}>/hora</span></div>
+                  <div style={{ color: a.color, fontSize: 18, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>
+                    {a.isUSD ? fmtUSD(a.mes) : fmtUSD(toUSD(a.mes, a.exch, taxSaqueAtivo))}
+                    <span style={{ fontSize: 10 }}>/{lang==="en"?"month":"mês"}</span>
+                  </div>
+                  <div style={{ color: a.color, fontSize: 12, marginTop: 4 }}>
+                    {a.isUSD ? fmtUSD(a.dia) : fmtUSD(toUSD(a.dia, a.exch, taxSaqueAtivo))}
+                    <span style={{ fontSize: 9 }}>/{lang==="en"?"day":"dia"}</span>
+                  </div>
+                  <div style={{ color: "#404050", fontSize: 10, marginTop: 4 }}>
+                    {a.isUSD ? fmtUSD(a.hora) : fmtUSD(toUSD(a.hora, a.exch, taxSaqueAtivo))}
+                    <span style={{ fontSize: 9 }}>/{lang==="en"?"hour":"hora"}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1911,6 +2047,15 @@ export default function App() {
               <Stat label={lang==="en"?"Market Value/pack":"Valor Mercado/pack"} value={fmtInt(r.valorMktTotal)} sub="silver" color={orange} />
               <Stat label="Margem Venda Mkt" value={fmtInt(r.lucroVendaMkt)} sub={TR[lang].perPack} color={pc(r.lucroVendaMkt)} highlight={r.lucroVendaMkt > 0} />
             </div>
+
+            {/* TAXAS — MATERIAIS */}
+            <div style={{ marginBottom: 16 }}>
+              <TaxToggle
+                label={lang==="en"?"Market tax 4% (selling materials)":"Taxa mercado 4% (venda de materiais)"}
+                detail={lang==="en"?"Deducted from market sell price":"Descontada do preço de venda no market"}
+                active={taxMktMateriais} onChange={setTaxMktMateriais}
+              />
+            </div>
             <Divider label={TR[lang].perPackComp} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: 14, border: "1px solid rgba(255,255,255,0.06)" }}>
@@ -1950,7 +2095,7 @@ export default function App() {
           const taxReal        = item.baseTax * (1 + extraTaxPct / 100);
           const custoTotal     = custoMateriais + taxReal;
           const precoVenda     = getCraftPrice(item.nome);
-          const receitaTotal   = precoVenda * item.qty;
+          const receitaTotal   = applyMkt(precoVenda * item.qty, taxMktCrafting);
           const temDados       = precoVenda > 0 && custoMateriais > 0;
           const margem         = temDados ? receitaTotal - custoTotal : null;
           const margemPct      = margem !== null && custoTotal > 0 ? (margem / custoTotal) * 100 : null;
@@ -2062,6 +2207,13 @@ export default function App() {
               </div>
 
               {/* TABELA DE RECEITAS */}
+              <div style={{ marginBottom: 12 }}>
+                <TaxToggle
+                  label={lang==="en"?"Market tax 4% (sell price)":"Taxa mercado 4% (preço de venda)"}
+                  detail={lang==="en"?"Applied to Revenue column — reduces margin":"Aplicada na coluna Receita — reduz a margem"}
+                  active={taxMktCrafting} onChange={setTaxMktCrafting}
+                />
+              </div>
               <Divider label={TR[lang].osRecipes} />
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
@@ -2153,7 +2305,7 @@ export default function App() {
                 </table>
               </div>
               <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 12, lineHeight: 1.7 }}>
-                💡 lang==="en"?<><strong style={{ color: TEXT_PRIM }}>Mat. Cost</strong> = sum of (qty × price) per material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = base tax adjusted by current oversupply · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = crafts needed to reach 100% oversupply · Rankings only appear when sell price and materials are filled.</>:<><strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de (qtd × preço) de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply atual · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = quantos crafts até atingir 100% de oversupply · Rankings só aparecem quando preço de venda e materiais estão preenchidos.</>
+                💡 {lang==="en"?<><strong style={{ color: TEXT_PRIM }}>Mat. Cost</strong> = sum of (qty × price) per material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = base tax adjusted by current oversupply · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = crafts needed to reach 100% oversupply · Rankings only appear when sell price and materials are filled.</>:<><strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de (qtd × preço) de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply atual · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = quantos crafts até atingir 100% de oversupply · Rankings só aparecem quando preço de venda e materiais estão preenchidos.</>}
               </div>
             </Section>
           </div>
@@ -2391,12 +2543,12 @@ export default function App() {
             <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 11, color: dim, lineHeight: 1.7 }}>
               📌 {lang==="en"?<>Enter the <strong style={{ color: blue }}>buy price</strong> (cheapest offer on the market) and the <strong style={{ color: orange }}>sell price</strong> (Market Price field in the table above). The ranking shows which has the highest margin.</>:<>Insira o <strong style={{ color: blue }}>preço de compra</strong> (oferta mais barata no mkt) e o <strong style={{ color: orange }}>preço de venda</strong> (campo Preço Mkt na tabela acima). O ranking mostra qual tem maior margem.</>}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-              <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Taxa do mercado:</label>
-              <NumInput value={taxaMkt} onChange={v => setTaxaMkt(v)} min={0} max={100}
-                style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, color: green, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
-              <span style={{ color: green, fontSize: 13 }}>%</span>
-              <span style={{ color: "#404050", fontSize: 10 }}>desconto do marketplace na venda</span>
+            <div style={{ marginBottom: 14 }}>
+              <TaxToggle
+                label={lang==="en"?"Market tax 4% on sell (flip)":"Taxa mercado 4% na venda (flip)"}
+                detail={lang==="en"?"Applied to sell price — reduces flip margin":"Aplicada ao preço de venda — reduz margem do flip"}
+                active={taxMktInfusion} onChange={setTaxMktInfusion}
+              />
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
               <thead>
@@ -2408,7 +2560,7 @@ export default function App() {
                 {INFUSIONS.map(inf => {
                   const venda = infusionPrecos[inf.nome] || 0;
                   const compra = infusionCompra[inf.nome] || 0;
-                  const lucro = venda > 0 && compra > 0 ? venda * (1 - taxaMkt / 100) - compra : 0;
+                  const lucro = venda > 0 && compra > 0 ? venda * (taxMktInfusion ? 0.96 : 1) - compra : 0;
                   const margem = compra > 0 && lucro > 0 ? (lucro / compra) * 100 : 0;
                   const rank = flipRanking.findIndex(r => r.nome === inf.nome);
                   const isBest = rank === 0 && lucro > 0;
