@@ -231,7 +231,7 @@ const BG_ACCENT  = "#1e3a5f";
 const TEXT_PRIM  = "#e0eaf8";
 const TEXT_DIM   = "#8fa0b8";
 
-// ── CRAFTING DATABASE (ravenquest.wiki/crafting) ───────────────────────────
+// ── CRAFTING DATABASE ─────────────────────────────────────────────────────
 const CRAFTING_DB = {
   Alchemy: [
     { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   exp: 187,  qty: 3, materiais: [{ nome: "Refreshing Leaf", qtd: 6 }, { nome: "Earthy Stem", qtd: 4 }, { nome: "Purified Alcohol", qtd: 1 }] },
@@ -1465,7 +1465,17 @@ export default function App() {
           const margem         = temDados ? receitaTotal - custoTotal : null;
           const margemPct      = margem !== null && custoTotal > 0 ? (margem / custoTotal) * 100 : null;
           const margemEXP      = margem !== null && item.exp > 0 ? margem / item.exp : null;
-          return { ...item, custoMateriais, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP };
+
+          // Crafts para atingir oversupply
+          const threshold      = 10000 + 10000 * craftPlayerLevel;
+          const expRestante100 = threshold * Math.max(0, (100 - craftOversupply) / 100);
+          const expRestanteMax = threshold * Math.max(0, (500 - craftOversupply) / 100);
+          const craftsParaOS   = item.exp > 0 ? Math.ceil(expRestante100 / item.exp) : null;
+          const craftsParaMax  = item.exp > 0 ? Math.ceil(expRestanteMax / item.exp) : null;
+          const profitAteOS    = margem !== null && craftsParaOS !== null ? margem * craftsParaOS : null;
+          const profitAteMax   = margem !== null && craftsParaMax !== null ? margem * craftsParaMax : null;
+
+          return { ...item, custoMateriais, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
         });
 
         const comDados  = calc.filter(i => i.temDados);
@@ -1567,7 +1577,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {["Nv", "Item", "Qtd", "Custo Mat.", `Tax (+${extraTaxPct}%)`, "Custo Total", "Preço Venda (un)", "Receita", "Margem", "Margem %", "Silver/EXP"].map(h => (
+                      {["Nv", "Item", "Qtd", "Custo Mat.", `Tax (+${extraTaxPct}%)`, "Custo Total", "Preço Venda (un)", "Receita", "Margem", "Margem %", "Silver/EXP", "Crafts → OS", "Profit até OS", "Crafts → MAX", "Profit até MAX"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
@@ -1610,6 +1620,42 @@ export default function App() {
                           <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemEXP !== null ? (item.margemEXP > 0 ? purple : red) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
                             {item.margemEXP !== null ? fmt(item.margemEXP, 2) : "—"}
                           </td>
+
+                          {/* Crafts → Oversupply (100%) */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 100
+                              ? <span style={{ color: red, fontSize: 10 }}>já em OS</span>
+                              : item.craftsParaOS !== null
+                                ? <span style={{ color: orange, fontWeight: "bold" }}>{fmtInt(item.craftsParaOS)}</span>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
+
+                          {/* Profit total até OS */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 100
+                              ? <span style={{ color: TEXT_DIM }}>—</span>
+                              : item.profitAteOS !== null
+                                ? <span style={{ color: pc(item.profitAteOS), fontWeight: "bold" }}>{item.profitAteOS >= 0 ? "+" : ""}{fmtInt(item.profitAteOS)}</span>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
+
+                          {/* Crafts → MAX (500%) */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 500
+                              ? <span style={{ color: red, fontSize: 10 }}>MAX</span>
+                              : item.craftsParaMax !== null
+                                ? <span style={{ color: TEXT_DIM }}>{fmtInt(item.craftsParaMax)}</span>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
+
+                          {/* Profit total até MAX */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 500
+                              ? <span style={{ color: TEXT_DIM }}>—</span>
+                              : item.profitAteMax !== null
+                                ? <span style={{ color: pc(item.profitAteMax) }}>{item.profitAteMax >= 0 ? "+" : ""}{fmtInt(item.profitAteMax)}</span>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
                         </tr>
                       );
                     })}
@@ -1617,7 +1663,7 @@ export default function App() {
                 </table>
               </div>
               <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 12, lineHeight: 1.7 }}>
-                💡 <strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de qtd × preço de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply · Rankings só aparecem quando preço de venda E materiais estão preenchidos · Dados de <a href="https://ravenquest.wiki/crafting" target="_blank" style={{ color: blue }}>ravenquest.wiki/crafting</a>
+                💡 <strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de (qtd × preço) de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply atual · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = quantos crafts até atingir 100% de oversupply a partir do nível atual · Rankings só aparecem quando preço de venda e materiais estão preenchidos.
               </div>
             </Section>
           </div>
