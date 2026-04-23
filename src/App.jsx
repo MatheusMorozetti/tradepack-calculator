@@ -62,9 +62,9 @@ function LandingPage({ onEnter }) {
   ];
 
   const plans = [
-    { nome: "Guild Pass", preco: "30kk", periodo: "silver/semana/membro", desc: "Para guildas que assinam mensalmente. Mínimo 5 membros.", destaque: false, cor: "#60a5fa" },
+    { nome: "Guild Pass", preco: "35kk", periodo: "silver/semana por membro", desc: "Para guildas que assinam mensalmente. Mínimo 5 membros. Valor por membro.", destaque: false, cor: "#60a5fa" },
     { nome: "Solo Pass", preco: "40kk", periodo: "silver/semana", desc: "Para qualquer player que queira acesso individual completo.", destaque: true, cor: "#c4a050" },
-    { nome: "Via Streamer", preco: "32kk", periodo: "silver/semana", desc: "Use o cupom do seu streamer favorito e economize 20%.", destaque: false, cor: "#a78bfa" },
+    { nome: "Via Streamer", preco: "36kk", periodo: "silver/semana", desc: "Use o cupom do seu streamer favorito e economize 10%.", destaque: false, cor: "#a78bfa" },
   ];
 
   return (
@@ -186,14 +186,14 @@ function LandingPage({ onEnter }) {
               <div style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.8, marginBottom: 28 }}>{p.desc}</div>
               <button onClick={onEnter}
                 style={{ background: p.destaque ? "linear-gradient(135deg, #c4a050, #8a6a20)" : "rgba(30,58,95,0.5)", border: p.destaque ? "none" : `1px solid ${p.cor}30`, borderRadius: 8, color: p.destaque ? "#000" : p.cor, padding: "10px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", letterSpacing: "0.08em", width: "100%" }}>
-                QUERO ACESSO →
+                ENTRE EM CONTATO COM O MATZ
               </button>
             </div>
           ))}
         </div>
 
         <div style={{ textAlign: "center", marginTop: 32, fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.1em", lineHeight: 1.8 }}>
-          Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis
+          Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis · Valor do Guild Pass é por membro
         </div>
       </section>
 
@@ -204,11 +204,11 @@ function LandingPage({ onEnter }) {
             Pronto para lucrar mais?
           </div>
           <p style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.9, marginBottom: 32 }}>
-            Entre em contato com um líder da sua guilda ou solicite acesso diretamente. O RavenLab paga seu custo na primeira semana de uso.
+            Entre em contato com o Matz para solicitar acesso. O RavenLab paga seu custo na primeira semana de uso.
           </p>
           <button onClick={onEnter}
             style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 36px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.1em" }}>
-            ACESSAR O RAVENLAB →
+            ENTRE EM CONTATO COM O MATZ →
           </button>
         </div>
       </section>
