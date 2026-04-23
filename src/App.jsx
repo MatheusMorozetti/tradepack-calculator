@@ -234,94 +234,94 @@ const TEXT_DIM   = "#8fa0b8";
 // ── CRAFTING DATABASE (ravenquest.wiki/crafting) ───────────────────────────
 const CRAFTING_DB = {
   Alchemy: [
-    { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   totalCost: 895,   exp: 187,  qty: 3 },
-    { nome: "Lesser Strengthening Tonic", nivel: 5,  baseTax: 66,   totalCost: 1240,  exp: 275,  qty: 3 },
-    { nome: "Lesser Enlightenment Tonic", nivel: 6,  baseTax: 59,   totalCost: 1049,  exp: 243,  qty: 3 },
-    { nome: "Lesser Rejuvenation Tonic",  nivel: 7,  baseTax: 90,   totalCost: 1632,  exp: 375,  qty: 3 },
-    { nome: "Lesser Wellspring Tonic",    nivel: 8,  baseTax: 68,   totalCost: 1278,  exp: 281,  qty: 3 },
-    { nome: "Lesser Mountainheart Tonic", nivel: 9,  baseTax: 105,  totalCost: 1519,  exp: 437,  qty: 3 },
-    { nome: "Lesser Arcana Tonic",        nivel: 11, baseTax: 87,   totalCost: 1587,  exp: 362,  qty: 3 },
-    { nome: "Lesser Champion's Tonic",    nivel: 14, baseTax: 122,  totalCost: 2076,  exp: 506,  qty: 3 },
-    { nome: "Arcane Energy Tonic",        nivel: 16, baseTax: 150,  totalCost: 2762,  exp: 625,  qty: 3 },
-    { nome: "Strengthening Tonic",        nivel: 17, baseTax: 150,  totalCost: 2415,  exp: 625,  qty: 3 },
-    { nome: "Enlightenment Tonic",        nivel: 19, baseTax: 168,  totalCost: 2294,  exp: 700,  qty: 3 },
-    { nome: "Rejuvenation Tonic",         nivel: 21, baseTax: 198,  totalCost: 3006,  exp: 825,  qty: 3 },
-    { nome: "Wellspring Tonic",           nivel: 22, baseTax: 203,  totalCost: 3213,  exp: 843,  qty: 3 },
-    { nome: "Mountainheart Tonic",        nivel: 24, baseTax: 213,  totalCost: 3337,  exp: 887,  qty: 3 },
-    { nome: "Arcana Tonic",               nivel: 27, baseTax: 300,  totalCost: 4429,  exp: 1250, qty: 3 },
-    { nome: "Champion's Tonic",           nivel: 28, baseTax: 315,  totalCost: 4781,  exp: 1312, qty: 3 },
-    { nome: "Mana Surge Tonic",           nivel: 35, baseTax: 324,  totalCost: 3795,  exp: 1350, qty: 3 },
-    { nome: "Nimble Grace Tonic",         nivel: 35, baseTax: 360,  totalCost: 4154,  exp: 1500, qty: 3 },
-    { nome: "Mighty Impact Tonic",        nivel: 37, baseTax: 408,  totalCost: 5542,  exp: 1700, qty: 3 },
-    { nome: "Iron Will Tonic",            nivel: 45, baseTax: 414,  totalCost: 5364,  exp: 1725, qty: 3 },
-    { nome: "Profound Insight Tonic",     nivel: 48, baseTax: 609,  totalCost: 4999,  exp: 2537, qty: 3 },
-    { nome: "Light of Dawn Tonic",        nivel: 51, baseTax: 567,  totalCost: 4407,  exp: 2362, qty: 3 },
-    { nome: "Arcane Mastery Tonic",       nivel: 55, baseTax: 684,  totalCost: 4605,  exp: 2850, qty: 3 },
-    { nome: "Dark Pact Tonic",            nivel: 57, baseTax: 585,  totalCost: 3401,  exp: 2437, qty: 3 },
-    { nome: "Chillguard Tonic",           nivel: 59, baseTax: 900,  totalCost: 12921, exp: 3750, qty: 3 },
-    { nome: "Burning Aegis Tonic",        nivel: 61, baseTax: 1008, totalCost: 11448, exp: 4200, qty: 3 },
-    { nome: "Wealthbringer's Tonic",      nivel: 70, baseTax: 1152, totalCost: 12852, exp: 4800, qty: 1 },
-    { nome: "Purifying Tonic",            nivel: 70, baseTax: 720,  totalCost: 5280,  exp: 3000, qty: 1 },
-    { nome: "Serendipity Draught",        nivel: 78, baseTax: 2334, totalCost: 7660,  exp: 9725, qty: 1 },
+    { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   exp: 187,  qty: 3, materiais: [{ nome: "Refreshing Leaf", qtd: 6 }, { nome: "Earthy Stem", qtd: 4 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Strengthening Tonic", nivel: 5,  baseTax: 66,   exp: 275,  qty: 3, materiais: [{ nome: "Refreshing Leaf", qtd: 8 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Enlightenment Tonic", nivel: 6,  baseTax: 59,   exp: 243,  qty: 3, materiais: [{ nome: "Cerulean Cap", qtd: 6 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Rejuvenation Tonic",  nivel: 7,  baseTax: 90,   exp: 375,  qty: 3, materiais: [{ nome: "Toadchew", qtd: 8 }, { nome: "Fungal Dust", qtd: 12 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Wellspring Tonic",    nivel: 8,  baseTax: 68,   exp: 281,  qty: 3, materiais: [{ nome: "Cerulean Cap", qtd: 8 }, { nome: "Fungal Dust", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Mountainheart Tonic", nivel: 9,  baseTax: 105,  exp: 437,  qty: 3, materiais: [{ nome: "Pirate's Bliss", qtd: 8 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Arcana Tonic",        nivel: 11, baseTax: 87,   exp: 362,  qty: 3, materiais: [{ nome: "Juicy Stem", qtd: 8 }, { nome: "Emerald Spores", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Champion's Tonic",   nivel: 14, baseTax: 122,  exp: 506,  qty: 3, materiais: [{ nome: "Brightday", qtd: 8 }, { nome: "Shimmering Spores", qtd: 10 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Arcane Energy Tonic",        nivel: 16, baseTax: 150,  exp: 625,  qty: 3, materiais: [{ nome: "Lesser Arcane Energy Tonic", qtd: 1 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 14 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Strengthening Tonic",        nivel: 17, baseTax: 150,  exp: 625,  qty: 3, materiais: [{ nome: "Lesser Strengthening Tonic", qtd: 1 }, { nome: "Shimmering Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Enlightenment Tonic",        nivel: 19, baseTax: 168,  exp: 700,  qty: 3, materiais: [{ nome: "Lesser Enlightenment Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 8 }, { nome: "Thorny Roots", qtd: 8 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Rejuvenation Tonic",         nivel: 21, baseTax: 198,  exp: 825,  qty: 3, materiais: [{ nome: "Lesser Rejuvenation Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Green Cap", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Wellspring Tonic",           nivel: 22, baseTax: 203,  exp: 843,  qty: 3, materiais: [{ nome: "Lesser Wellspring Tonic", qtd: 1 }, { nome: "Pirate's Cap", qtd: 14 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Mountainheart Tonic",        nivel: 24, baseTax: 213,  exp: 887,  qty: 3, materiais: [{ nome: "Lesser Mountainheart Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Arcana Tonic",               nivel: 27, baseTax: 300,  exp: 1250, qty: 3, materiais: [{ nome: "Lesser Arcana Tonic", qtd: 1 }, { nome: "Brightday", qtd: 24 }, { nome: "Fungal Dust", qtd: 30 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Champion's Tonic",          nivel: 28, baseTax: 315,  exp: 1312, qty: 3, materiais: [{ nome: "Lesser Champion's Tonic", qtd: 1 }, { nome: "Toadchew", qtd: 20 }, { nome: "Juicy Stem", qtd: 26 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Mana Surge Tonic",           nivel: 35, baseTax: 324,  exp: 1350, qty: 3, materiais: [{ nome: "Wellspring Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Dry Stem", qtd: 12 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Nimble Grace Tonic",         nivel: 35, baseTax: 360,  exp: 1500, qty: 3, materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Mighty Impact Tonic",        nivel: 37, baseTax: 408,  exp: 1700, qty: 3, materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Numbing Thorns", qtd: 12 }, { nome: "Juicy Stem", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Iron Will Tonic",            nivel: 45, baseTax: 414,  exp: 1725, qty: 3, materiais: [{ nome: "Strengthening Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Chest Warmer", qtd: 6 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Profound Insight Tonic",     nivel: 48, baseTax: 609,  exp: 2537, qty: 3, materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Rejuvenation Tonic", qtd: 1 }, { nome: "Lizard's Delight", qtd: 24 }, { nome: "Chest Warmer", qtd: 14 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Light of Dawn Tonic",        nivel: 51, baseTax: 567,  exp: 2362, qty: 3, materiais: [{ nome: "Enlightenment Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Hagthorn", qtd: 10 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Arcane Mastery Tonic",       nivel: 55, baseTax: 684,  exp: 2850, qty: 3, materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Twisted Flower", qtd: 10 }, { nome: "Hagthorn", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Dark Pact Tonic",            nivel: 57, baseTax: 585,  exp: 2437, qty: 3, materiais: [{ nome: "Light of Dawn Tonic", qtd: 1 }, { nome: "Catalytic Solution", qtd: 6 }, { nome: "Bloody Chalice", qtd: 20 }, { nome: "Acid", qtd: 4 }] },
+    { nome: "Chillguard Tonic",           nivel: 59, baseTax: 900,  exp: 3750, qty: 3, materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 20 }, { nome: "Cold Roots", qtd: 20 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Burning Aegis Tonic",        nivel: 61, baseTax: 1008, exp: 4200, qty: 3, materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 16 }, { nome: "Fire Cap", qtd: 18 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Wealthbringer's Tonic",     nivel: 70, baseTax: 1152, exp: 4800, qty: 1, materiais: [{ nome: "Brightday", qtd: 52 }, { nome: "Ambar Dust", qtd: 40 }, { nome: "Core Essence", qtd: 1 }] },
+    { nome: "Purifying Tonic",            nivel: 70, baseTax: 720,  exp: 3000, qty: 1, materiais: [{ nome: "Chest Warmer", qtd: 16 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Core Essence", qtd: 1 }] },
+    { nome: "Serendipity Draught",        nivel: 78, baseTax: 2334, exp: 9725, qty: 1, materiais: [{ nome: "Wealthbringer's Tonic", qtd: 1 }, { nome: "Tonic of Forbidden Knowledge", qtd: 1 }, { nome: "Mixing Agent", qtd: 2 }] },
   ],
   Blacksmithing: [
-    { nome: "Copper Ingot",      nivel: 1,  baseTax: 29,  totalCost: 29,   exp: 120,  qty: 1 },
-    { nome: "Bronze Ingot",      nivel: 10, baseTax: 40,  totalCost: 40,   exp: 165,  qty: 1 },
-    { nome: "Iron Ingot",        nivel: 20, baseTax: 48,  totalCost: 48,   exp: 200,  qty: 1 },
-    { nome: "Steel Ingot",       nivel: 30, baseTax: 69,  totalCost: 69,   exp: 287,  qty: 1 },
-    { nome: "Cobalt Ingot",      nivel: 50, baseTax: 99,  totalCost: 99,   exp: 412,  qty: 1 },
-    { nome: "Titanium Ingot",    nivel: 70, baseTax: 156, totalCost: 156,  exp: 650,  qty: 1 },
-    { nome: "Glimmery Ingot",    nivel: 88, baseTax: 480, totalCost: 480,  exp: 2000, qty: 1 },
-    { nome: "Copper Whetstone",  nivel: 1,  baseTax: 38,  totalCost: 278,  exp: 157,  qty: 1 },
-    { nome: "Bronze Whetstone",  nivel: 10, baseTax: 75,  totalCost: 795,  exp: 312,  qty: 1 },
-    { nome: "Iron Whetstone",    nivel: 20, baseTax: 96,  totalCost: 816,  exp: 400,  qty: 1 },
-    { nome: "Steel Whetstone",   nivel: 30, baseTax: 146, totalCost: 1346, exp: 608,  qty: 1 },
-    { nome: "Dense Whetstone",   nivel: 50, baseTax: 197, totalCost: 1997, exp: 820,  qty: 1 },
-    { nome: "Fishing Hook T1",   nivel: 1,  baseTax: 15,  totalCost: 195,  exp: 62,   qty: 1 },
-    { nome: "Fishing Hook T2",   nivel: 20, baseTax: 53,  totalCost: 653,  exp: 220,  qty: 1 },
-    { nome: "Fishing Hook T3",   nivel: 40, baseTax: 98,  totalCost: 1298, exp: 408,  qty: 1 },
+    { nome: "Copper Ingot",     nivel: 1,  baseTax: 29,  exp: 120,  qty: 1, materiais: [{ nome: "Copper Ore", qtd: 5 }] },
+    { nome: "Bronze Ingot",     nivel: 10, baseTax: 40,  exp: 165,  qty: 1, materiais: [{ nome: "Copper Ore", qtd: 2 }, { nome: "Tin Ore", qtd: 3 }] },
+    { nome: "Iron Ingot",       nivel: 20, baseTax: 48,  exp: 200,  qty: 1, materiais: [{ nome: "Iron Ore", qtd: 5 }] },
+    { nome: "Steel Ingot",      nivel: 30, baseTax: 69,  exp: 287,  qty: 1, materiais: [{ nome: "Iron Ore", qtd: 5 }, { nome: "Coal", qtd: 2 }] },
+    { nome: "Cobalt Ingot",     nivel: 50, baseTax: 99,  exp: 412,  qty: 1, materiais: [{ nome: "Cobalt Ore", qtd: 5 }, { nome: "Coal", qtd: 3 }] },
+    { nome: "Titanium Ingot",   nivel: 70, baseTax: 156, exp: 650,  qty: 1, materiais: [{ nome: "Titanium Ore", qtd: 5 }, { nome: "Coal", qtd: 4 }] },
+    { nome: "Glimmery Ingot",   nivel: 88, baseTax: 480, exp: 2000, qty: 1, materiais: [{ nome: "Titanium Ingot", qtd: 6 }, { nome: "Cobalt Ingot", qtd: 4 }, { nome: "Binding Aether", qtd: 1 }] },
+    { nome: "Copper Whetstone", nivel: 1,  baseTax: 38,  exp: 157,  qty: 1, materiais: [{ nome: "Copper Ingot", qtd: 2 }, { nome: "Small Log", qtd: 4 }] },
+    { nome: "Bronze Whetstone", nivel: 10, baseTax: 75,  exp: 312,  qty: 1, materiais: [{ nome: "Bronze Ingot", qtd: 2 }, { nome: "Rough Plank", qtd: 2 }] },
+    { nome: "Iron Whetstone",   nivel: 20, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Iron Ingot", qtd: 2 }, { nome: "Rough Plank", qtd: 3 }] },
+    { nome: "Steel Whetstone",  nivel: 30, baseTax: 146, exp: 608,  qty: 1, materiais: [{ nome: "Steel Ingot", qtd: 2 }, { nome: "Refined Plank", qtd: 2 }] },
+    { nome: "Dense Whetstone",  nivel: 50, baseTax: 197, exp: 820,  qty: 1, materiais: [{ nome: "Cobalt Ingot", qtd: 2 }, { nome: "Treated Plank", qtd: 2 }] },
+    { nome: "Fishing Hook T1",  nivel: 1,  baseTax: 15,  exp: 62,   qty: 1, materiais: [{ nome: "Copper Ingot", qtd: 1 }, { nome: "Small Log", qtd: 2 }] },
+    { nome: "Fishing Hook T2",  nivel: 20, baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Iron Ingot", qtd: 1 }, { nome: "Refined Plank", qtd: 1 }] },
+    { nome: "Fishing Hook T3",  nivel: 40, baseTax: 98,  exp: 408,  qty: 1, materiais: [{ nome: "Steel Ingot", qtd: 1 }, { nome: "Treated Plank", qtd: 1 }, { nome: "Coal", qtd: 2 }] },
   ],
   Cooking: [
-    { nome: "Vodka",              nivel: 1,  baseTax: 30,   totalCost: 150,   exp: 125,  qty: 5 },
-    { nome: "Beer",               nivel: 5,  baseTax: 69,   totalCost: 357,   exp: 287,  qty: 5 },
-    { nome: "Landing Brandy",     nivel: 10, baseTax: 113,  totalCost: 443,   exp: 468,  qty: 5 },
-    { nome: "Wine",               nivel: 20, baseTax: 180,  totalCost: 756,   exp: 750,  qty: 5 },
-    { nome: "Whiskey",            nivel: 22, baseTax: 219,  totalCost: 1131,  exp: 912,  qty: 5 },
-    { nome: "Orange Liqueur",     nivel: 30, baseTax: 450,  totalCost: 1786,  exp: 1875, qty: 5 },
-    { nome: "Rum",                nivel: 32, baseTax: 399,  totalCost: 1389,  exp: 1662, qty: 5 },
-    { nome: "Blueberry Wine",     nivel: 40, baseTax: 578,  totalCost: 2738,  exp: 2406, qty: 5 },
-    { nome: "Boozemelon",         nivel: 42, baseTax: 612,  totalCost: 3372,  exp: 2550, qty: 5 },
-    { nome: "Spiced Rum",         nivel: 55, baseTax: 936,  totalCost: 3996,  exp: 3900, qty: 5 },
-    { nome: "Banana Vodka",       nivel: 57, baseTax: 981,  totalCost: 4251,  exp: 4087, qty: 5 },
-    { nome: "Strawberry Whiskey", nivel: 72, baseTax: 1890, totalCost: 10118, exp: 7875, qty: 5 },
-    { nome: "Fermented Liquor",   nivel: 78, baseTax: 2160, totalCost: 5760,  exp: 9000, qty: 5 },
+    { nome: "Vodka",              nivel: 1,  baseTax: 30,   exp: 125,  qty: 5, materiais: [{ nome: "Potato", qtd: 10 }] },
+    { nome: "Beer",               nivel: 5,  baseTax: 69,   exp: 287,  qty: 5, materiais: [{ nome: "Wheat", qtd: 8 }] },
+    { nome: "Landing Brandy",     nivel: 10, baseTax: 113,  exp: 468,  qty: 5, materiais: [{ nome: "Apple", qtd: 2 }] },
+    { nome: "Wine",               nivel: 20, baseTax: 180,  exp: 750,  qty: 5, materiais: [{ nome: "Grape", qtd: 8 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Whiskey",            nivel: 22, baseTax: 219,  exp: 912,  qty: 5, materiais: [{ nome: "Corn", qtd: 12 }, { nome: "Brewer Yeast", qtd: 1 }] },
+    { nome: "Orange Liqueur",     nivel: 30, baseTax: 450,  exp: 1875, qty: 5, materiais: [{ nome: "Orange", qtd: 4 }, { nome: "Brewer Yeast", qtd: 1 }] },
+    { nome: "Rum",                nivel: 32, baseTax: 399,  exp: 1662, qty: 5, materiais: [{ nome: "Apple", qtd: 6 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Blueberry Wine",     nivel: 40, baseTax: 578,  exp: 2406, qty: 5, materiais: [{ nome: "Grape", qtd: 20 }, { nome: "Blueberry", qtd: 40 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Boozemelon",         nivel: 42, baseTax: 612,  exp: 2550, qty: 5, materiais: [{ nome: "Watermelon", qtd: 6 }, { nome: "Pumpkin", qtd: 2 }, { nome: "Brewer Yeast", qtd: 3 }] },
+    { nome: "Spiced Rum",         nivel: 55, baseTax: 936,  exp: 3900, qty: 5, materiais: [{ nome: "Apple", qtd: 12 }, { nome: "Pepper", qtd: 12 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Banana Vodka",       nivel: 57, baseTax: 981,  exp: 4087, qty: 5, materiais: [{ nome: "Potato", qtd: 50 }, { nome: "Banana", qtd: 10 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Strawberry Whiskey", nivel: 72, baseTax: 1890, exp: 7875, qty: 5, materiais: [{ nome: "Corn", qtd: 48 }, { nome: "Strawberry", qtd: 70 }, { nome: "Brewer Yeast", qtd: 7 }, { nome: "Honey", qtd: 20 }] },
+    { nome: "Fermented Liquor",   nivel: 78, baseTax: 2160, exp: 9000, qty: 5, materiais: [{ nome: "Herbal Alcohol", qtd: 1 }, { nome: "Watermelon", qtd: 10 }, { nome: "Brewer Yeast", qtd: 5 }] },
   ],
   Carpentry: [
-    { nome: "Rough Plank",   nivel: 1,  baseTax: 53,  totalCost: 713,  exp: 220,  qty: 1 },
-    { nome: "Dense Plank",   nivel: 10, baseTax: 255, totalCost: 255,  exp: 1062, qty: 1 },
-    { nome: "Refined Plank", nivel: 10, baseTax: 96,  totalCost: 1296, exp: 400,  qty: 1 },
-    { nome: "Treated Plank", nivel: 25, baseTax: 165, totalCost: 2941, exp: 687,  qty: 1 },
-    { nome: "Heavy Plank",   nivel: 30, baseTax: 534, totalCost: 1510, exp: 2225, qty: 1 },
-    { nome: "Sturdy Plank",  nivel: 50, baseTax: 197, totalCost: 4149, exp: 818,  qty: 1 },
-    { nome: "Fishing Rod T1",nivel: 5,  baseTax: 107, totalCost: 1547, exp: 445,  qty: 1 },
-    { nome: "Fishing Rod T2",nivel: 25, baseTax: 197, totalCost: 3437, exp: 820,  qty: 1 },
-    { nome: "Fishing Rod T3",nivel: 45, baseTax: 380, totalCost: 7580, exp: 1583, qty: 1 },
-    { nome: "Short Bow",     nivel: 10, baseTax: 144, totalCost: 2064, exp: 600,  qty: 1 },
-    { nome: "Long Bow",      nivel: 30, baseTax: 285, totalCost: 5685, exp: 1187, qty: 1 },
-    { nome: "Arcane Staff",  nivel: 30, baseTax: 285, totalCost: 5085, exp: 1187, qty: 1 },
+    { nome: "Rough Plank",   nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Small Log", qtd: 12 }] },
+    { nome: "Dense Plank",   nivel: 10, baseTax: 255, exp: 1062, qty: 1, materiais: [{ nome: "Dense Log", qtd: 8 }] },
+    { nome: "Refined Plank", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Heavy Log", qtd: 8 }] },
+    { nome: "Treated Plank", nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Heavy Log", qtd: 12 }, { nome: "Oil", qtd: 2 }] },
+    { nome: "Heavy Plank",   nivel: 30, baseTax: 534, exp: 2225, qty: 1, materiais: [{ nome: "Dense Log", qtd: 16 }, { nome: "Oil", qtd: 2 }] },
+    { nome: "Sturdy Plank",  nivel: 50, baseTax: 197, exp: 818,  qty: 1, materiais: [{ nome: "Sturdy Log", qtd: 10 }, { nome: "Oil", qtd: 4 }] },
+    { nome: "Fishing Rod T1",nivel: 5,  baseTax: 107, exp: 445,  qty: 1, materiais: [{ nome: "Rough Plank", qtd: 3 }, { nome: "Copper Ingot", qtd: 1 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Fishing Rod T2",nivel: 25, baseTax: 197, exp: 820,  qty: 1, materiais: [{ nome: "Refined Plank", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }, { nome: "Linen Cloth", qtd: 2 }] },
+    { nome: "Fishing Rod T3",nivel: 45, baseTax: 380, exp: 1583, qty: 1, materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Steel Ingot", qtd: 1 }, { nome: "Bolted Cloth", qtd: 2 }] },
+    { nome: "Short Bow",     nivel: 10, baseTax: 144, exp: 600,  qty: 1, materiais: [{ nome: "Rough Plank", qtd: 4 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Long Bow",      nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Refined Plank", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }] },
+    { nome: "Arcane Staff",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }, { nome: "Iron Ingot", qtd: 1 }] },
   ],
   Weaving: [
-    { nome: "Coarse Thread",  nivel: 1,  baseTax: 19,  totalCost: 199,  exp: 78,   qty: 1 },
-    { nome: "Linen Cloth",    nivel: 1,  baseTax: 53,  totalCost: 773,  exp: 220,  qty: 1 },
-    { nome: "Tanned Leather", nivel: 10, baseTax: 96,  totalCost: 1056, exp: 400,  qty: 1 },
-    { nome: "Thick Leather",  nivel: 25, baseTax: 165, totalCost: 1665, exp: 687,  qty: 1 },
-    { nome: "Bolted Cloth",   nivel: 25, baseTax: 165, totalCost: 2565, exp: 687,  qty: 1 },
-    { nome: "Silk",           nivel: 50, baseTax: 285, totalCost: 3285, exp: 1187, qty: 1 },
-    { nome: "Tanned Silk",    nivel: 50, baseTax: 285, totalCost: 4185, exp: 1187, qty: 1 },
-    { nome: "Light Armor T2", nivel: 20, baseTax: 210, totalCost: 3210, exp: 875,  qty: 1 },
-    { nome: "Light Armor T3", nivel: 40, baseTax: 405, totalCost: 7905, exp: 1687, qty: 1 },
-    { nome: "Moa Saddle T1",  nivel: 10, baseTax: 144, totalCost: 2544, exp: 600,  qty: 1 },
-    { nome: "Moa Saddle T2",  nivel: 30, baseTax: 285, totalCost: 5985, exp: 1187, qty: 1 },
+    { nome: "Coarse Thread",  nivel: 1,  baseTax: 19,  exp: 78,   qty: 1, materiais: [{ nome: "Cotton", qtd: 4 }] },
+    { nome: "Linen Cloth",    nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Cotton", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Tanned Leather", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Rawhide", qtd: 6 }] },
+    { nome: "Thick Leather",  nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 3 }, { nome: "Tallow", qtd: 2 }] },
+    { nome: "Bolted Cloth",   nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Silk",           nivel: 50, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Silkworm Cocoon", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Tanned Silk",    nivel: 50, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Silk", qtd: 2 }, { nome: "Tallow", qtd: 3 }] },
+    { nome: "Light Armor T2", nivel: 20, baseTax: 210, exp: 875,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Light Armor T3", nivel: 40, baseTax: 405, exp: 1687, qty: 1, materiais: [{ nome: "Thick Leather", qtd: 4 }, { nome: "Bolted Cloth", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }] },
+    { nome: "Moa Saddle T1",  nivel: 10, baseTax: 144, exp: 600,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 5 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Moa Saddle T2",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Thick Leather", qtd: 5 }, { nome: "Bolted Cloth", qtd: 2 }, { nome: "Linen Cloth", qtd: 2 }] },
   ],
 };
 
@@ -436,6 +436,7 @@ export default function App() {
   const [craftOversupply, setCraftOversupply]   = useState(0);
   const [craftProfTab, setCraftProfTab]         = useState("Alchemy");
   const [craftPrices, setCraftPrices]           = useState({});
+  const [craftMaterialPrices, setCraftMaterialPrices] = useState({});
 
   // Função de logout
   const handleLogout = async () => {
@@ -710,6 +711,7 @@ export default function App() {
         if (s.craftPlayerLevel !== undefined) setCraftPlayerLevel(s.craftPlayerLevel);
         if (s.craftOversupply !== undefined) setCraftOversupply(s.craftOversupply);
         if (s.craftPrices !== undefined) setCraftPrices(s.craftPrices);
+        if (s.craftMaterialPrices !== undefined) setCraftMaterialPrices(s.craftMaterialPrices);
       }
       setSettingsLoaded(true);
       setDataLoading(false);
@@ -734,7 +736,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
-            craftPlayerLevel, craftOversupply, craftPrices,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices,
           },
           updated_at: new Date().toISOString(),
         });
@@ -751,7 +753,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra, taxaMkt,
-    craftPlayerLevel, craftOversupply, craftPrices]);
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
@@ -1442,43 +1444,43 @@ export default function App() {
 
       {/* TAB: CALIBRAÇÃO */}
       {tab === "crafting" && (() => {
-        // ── Fórmula Oversupply ────────────────────────────────────────────
-        // threshold = 10.000 + 10.000 × playerLevel
-        // cada 10% acima do threshold = +2% de tax extra (max 100% extra em 500%)
         const extraTaxPct = Math.min(100, Math.floor(craftOversupply / 10) * 2);
-
-        // calcula para cada item da profissão selecionada
         const itens = CRAFTING_DB[craftProfTab] || [];
-        const setCraftPrice = (nome, val) => setCraftPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
+
+        // Extrai materiais únicos da profissão atual
+        const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.map(m => m.nome)))].sort();
+
+        const getMatPreco = (nome) => craftMaterialPrices[craftProfTab + "|" + nome] || 0;
+        const setMatPreco = (nome, val) => setCraftMaterialPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
         const getCraftPrice = (nome) => craftPrices[craftProfTab + "|" + nome] || 0;
+        const setCraftPrice = (nome, val) => setCraftPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
 
         const calc = itens.map(item => {
-          const taxReal     = item.baseTax * (1 + extraTaxPct / 100);
-          const custoReal   = item.totalCost - item.baseTax + taxReal;
-          const precoVenda  = getCraftPrice(item.nome);
-          const receitaTotal= precoVenda * item.qty;
-          const margem      = precoVenda > 0 ? receitaTotal - custoReal : null;
-          const margemPct   = margem !== null && custoReal > 0 ? (margem / custoReal) * 100 : null;
-          const margemEXP   = margem !== null && item.exp > 0 ? margem / item.exp : null;
-          return { ...item, taxReal, custoReal, precoVenda, receitaTotal, margem, margemPct, margemEXP };
+          const custoMateriais = item.materiais.reduce((acc, m) => acc + m.qtd * getMatPreco(m.nome), 0);
+          const taxReal        = item.baseTax * (1 + extraTaxPct / 100);
+          const custoTotal     = custoMateriais + taxReal;
+          const precoVenda     = getCraftPrice(item.nome);
+          const receitaTotal   = precoVenda * item.qty;
+          const temDados       = precoVenda > 0 && custoMateriais > 0;
+          const margem         = temDados ? receitaTotal - custoTotal : null;
+          const margemPct      = margem !== null && custoTotal > 0 ? (margem / custoTotal) * 100 : null;
+          const margemEXP      = margem !== null && item.exp > 0 ? margem / item.exp : null;
+          return { ...item, custoMateriais, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP };
         });
 
-        const comPreco   = calc.filter(i => i.precoVenda > 0);
-        const topMargem  = [...comPreco].sort((a,b) => b.margem  - a.margem).slice(0, 3);
-        const topPct     = [...comPreco].sort((a,b) => b.margemPct - a.margemPct).slice(0, 3);
-        const topEXP     = [...comPreco].sort((a,b) => b.margemEXP - a.margemEXP).slice(0, 3);
+        const comDados  = calc.filter(i => i.temDados);
+        const topMargem = [...comDados].sort((a,b) => b.margem - a.margem).slice(0, 3);
+        const topPct    = [...comDados].sort((a,b) => b.margemPct - a.margemPct).slice(0, 3);
+        const topEXP    = [...comDados].sort((a,b) => b.margemEXP - a.margemEXP).slice(0, 3);
 
-        const cardStyle = (cor) => ({ background: `rgba(${cor},0.06)`, border: `1px solid rgba(${cor},0.3)`, borderRadius: 10, padding: "12px 16px", marginBottom: 8 });
+        const allMatsFilled = matsUnicos.length > 0 && matsUnicos.every(m => getMatPreco(m) > 0);
 
         return (
           <div>
-            {/* CONFIG */}
-            <Section title="Oversupply Calculator" icon="⚒️" borderColor="rgba(196,160,80,0.4)">
-              <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 10, padding: "14px 18px", marginBottom: 20, fontSize: 11, color: TEXT_DIM, lineHeight: 1.8 }}>
-                📌 Preencha o <strong style={{ color: TEXT_PRIM }}>nível do player</strong> e a <strong style={{ color: TEXT_PRIM }}>% de oversupply atual</strong> da profissão. Em seguida insira o <strong style={{ color: gold }}>preço de venda</strong> de cada item no market para ver as margens calculadas com a tax ajustada.
-              </div>
+            <Section title="Crafting — Oversupply Calculator" icon="⚒️" borderColor="rgba(196,160,80,0.4)">
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, marginBottom: 20 }}>
+              {/* CONFIG TOPO */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 16, marginBottom: 20, alignItems: "start" }}>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Nível do Player</div>
                   <NumInput value={craftPlayerLevel} onChange={v => setCraftPlayerLevel(Math.max(1, Math.min(100, v)))} min={1} max={100}
@@ -1498,7 +1500,7 @@ export default function App() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     {Object.keys(CRAFTING_DB).map(p => (
                       <button key={p} onClick={() => setCraftProfTab(p)}
-                        style={{ background: craftProfTab === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : BG_CARD, border: `1px solid ${craftProfTab === p ? gold : "rgba(196,160,80,0.2)"}`, borderRadius: 6, color: craftProfTab === p ? "#000" : TEXT_DIM, padding: "5px 10px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: craftProfTab === p ? "bold" : "normal", textAlign: "left" }}>
+                        style={{ background: craftProfTab === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : BG_CARD, border: `1px solid ${craftProfTab === p ? gold : "rgba(196,160,80,0.2)"}`, borderRadius: 6, color: craftProfTab === p ? "#000" : TEXT_DIM, padding: "5px 12px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: craftProfTab === p ? "bold" : "normal", textAlign: "left", whiteSpace: "nowrap" }}>
                         {PROF_ICONS[p]} {p}
                       </button>
                     ))}
@@ -1506,8 +1508,8 @@ export default function App() {
                 </div>
               </div>
 
-              {/* RANKINGS — só aparecem quando há preços preenchidos */}
-              {comPreco.length > 0 && (
+              {/* RANKINGS */}
+              {comDados.length > 0 && (
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
                   <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.25)", borderRadius: 10, padding: "14px 16px" }}>
                     <div style={{ color: green, fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>🏆 Maior Margem Líquida</div>
@@ -1525,7 +1527,7 @@ export default function App() {
                       <div key={i.nome} style={{ marginBottom: 8 }}>
                         <div style={{ color: idx === 0 ? blue : TEXT_DIM, fontSize: 11, fontWeight: idx === 0 ? "bold" : "normal" }}>#{idx+1} {i.nome}</div>
                         <div style={{ color: pc(i.margemPct), fontSize: 13, fontWeight: "bold" }}>{i.margemPct >= 0 ? "+" : ""}{fmt(i.margemPct, 1)}%</div>
-                        <div style={{ color: TEXT_DIM, fontSize: 10 }}>sobre custo de produção</div>
+                        <div style={{ color: TEXT_DIM, fontSize: 10 }}>sobre custo total</div>
                       </div>
                     ))}
                   </div>
@@ -1542,13 +1544,30 @@ export default function App() {
                 </div>
               )}
 
-              {/* TABELA DE ITENS */}
-              <Divider label={`${PROF_ICONS[craftProfTab]} ${craftProfTab} — insira o preço de venda`} />
+              {/* PREÇOS DE MATERIAIS */}
+              <Divider label={`${PROF_ICONS[craftProfTab]} Preços de materiais — ${craftProfTab}`} />
+              <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
+                <div style={{ fontSize: 10, color: TEXT_DIM, marginBottom: 14, lineHeight: 1.7 }}>
+                  💡 Insira o preço de mercado de cada material. Os valores são aplicados automaticamente a todas as receitas que usam esse material.
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
+                  {matsUnicos.map(mat => (
+                    <div key={mat} style={{ display: "flex", alignItems: "center", gap: 8, background: BG_SURFACE, border: `1px solid ${getMatPreco(mat) > 0 ? "rgba(196,160,80,0.25)" : "rgba(255,255,255,0.05)"}`, borderRadius: 7, padding: "7px 10px" }}>
+                      <div style={{ flex: 1, fontSize: 11, color: getMatPreco(mat) > 0 ? TEXT_PRIM : TEXT_DIM, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={mat}>{mat}</div>
+                      <NumInput value={getMatPreco(mat)} onChange={v => setMatPreco(mat, v)} min={0}
+                        style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 4, color: gold, padding: "4px 8px", fontSize: 11, width: 80, fontFamily: "'Space Mono',monospace", outline: "none", textAlign: "right" }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* TABELA DE RECEITAS */}
+              <Divider label="Receitas e margens calculadas" />
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {["Nv", "Item", "Custo Base", `Tax (+${extraTaxPct}%)`, "Custo Real", "Qtd", "Preço Venda (un)", "Receita Total", "Margem", "Margem %", "Silver/EXP"].map(h => (
+                      {["Nv", "Item", "Qtd", "Custo Mat.", `Tax (+${extraTaxPct}%)`, "Custo Total", "Preço Venda (un)", "Receita", "Margem", "Margem %", "Silver/EXP"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
@@ -1556,23 +1575,41 @@ export default function App() {
                   <tbody>
                     {calc.map((item) => {
                       const isBest = topMargem[0]?.nome === item.nome;
-                      const rowBg  = isBest ? "rgba(74,222,128,0.05)" : "transparent";
                       return (
-                        <tr key={item.nome} style={{ background: rowBg }}>
-                          <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.nivel}</td>
-                          <td style={{ padding: "7px 8px", color: isBest ? green : TEXT_PRIM, fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.nome}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{fmtInt(item.totalCost)}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: extraTaxPct > 0 ? red : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>+{fmtInt(item.taxReal - item.baseTax)}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: orange, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{fmtInt(item.custoReal)}</td>
+                        <tr key={item.nome} style={{ background: isBest ? "rgba(74,222,128,0.05)" : "transparent" }}>
+                          <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item.nivel}</td>
+                          <td style={{ padding: "7px 8px", color: isBest ? green : TEXT_PRIM, fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.nome}
+                            <div style={{ fontSize: 9, color: TEXT_DIM, fontWeight: "normal", marginTop: 2 }}>
+                              {item.materiais.map(m => `${m.qtd}× ${m.nome}`).join(" · ")}
+                            </div>
+                          </td>
                           <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item.qty}x</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.custoMateriais > 0 ? TEXT_PRIM : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.custoMateriais > 0 ? fmtInt(item.custoMateriais) : "—"}
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: extraTaxPct > 0 ? red : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {fmtInt(item.taxReal)} <span style={{ fontSize: 9, color: TEXT_DIM }}>(+{fmtInt(item.taxReal - item.baseTax)})</span>
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.custoMateriais > 0 ? orange : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.custoMateriais > 0 ? fmtInt(item.custoTotal) : "—"}
+                          </td>
                           <td style={{ padding: "6px 8px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             <NumInput value={item.precoVenda} onChange={v => setCraftPrice(item.nome, v)} min={0}
                               style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.3)", borderRadius: 4, color: gold, padding: "4px 8px", fontSize: 11, width: 90, fontFamily: "'Space Mono',monospace", outline: "none", textAlign: "right" }} />
                           </td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.precoVenda > 0 ? TEXT_PRIM : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.precoVenda > 0 ? fmtInt(item.receitaTotal) : "—"}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margem !== null ? pc(item.margem) : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margem !== null ? `${item.margem >= 0 ? "+" : ""}${fmtInt(item.margem)}` : "—"}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemPct !== null ? pc(item.margemPct) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margemPct !== null ? `${item.margemPct >= 0 ? "+" : ""}${fmt(item.margemPct, 1)}%` : "—"}</td>
-                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemEXP !== null ? (item.margemEXP > 0 ? purple : red) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>{item.margemEXP !== null ? fmt(item.margemEXP, 2) : "—"}</td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.temDados ? TEXT_PRIM : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.temDados ? fmtInt(item.receitaTotal) : "—"}
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margem !== null ? pc(item.margem) : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.margem !== null ? `${item.margem >= 0 ? "+" : ""}${fmtInt(item.margem)}` : "—"}
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemPct !== null ? pc(item.margemPct) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.margemPct !== null ? `${item.margemPct >= 0 ? "+" : ""}${fmt(item.margemPct, 1)}%` : "—"}
+                          </td>
+                          <td style={{ padding: "7px 8px", textAlign: "right", color: item.margemEXP !== null ? (item.margemEXP > 0 ? purple : red) : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {item.margemEXP !== null ? fmt(item.margemEXP, 2) : "—"}
+                          </td>
                         </tr>
                       );
                     })}
@@ -1580,14 +1617,14 @@ export default function App() {
                 </table>
               </div>
               <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 12, lineHeight: 1.7 }}>
-                💡 <strong style={{ color: TEXT_PRIM }}>Custo Base</strong> = materiais a preço de farming + tax base · <strong style={{ color: TEXT_PRIM }}>Tax extra</strong> calculada com {craftOversupply}% de oversupply · <strong style={{ color: TEXT_PRIM }}>Margem</strong> = Receita Total − Custo Real · Dados de <a href="https://ravenquest.wiki/crafting" target="_blank" style={{ color: blue }}>ravenquest.wiki/crafting</a>
+                💡 <strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de qtd × preço de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply · Rankings só aparecem quando preço de venda E materiais estão preenchidos · Dados de <a href="https://ravenquest.wiki/crafting" target="_blank" style={{ color: blue }}>ravenquest.wiki/crafting</a>
               </div>
             </Section>
           </div>
         );
       })()}
 
-      {tab === "calibracao" && (
+      {tab === "calibracao" && (      {tab === "calibracao" && (
         <div>
           <Section title="Calibração com Dados Reais" icon="📐" borderColor="rgba(74,222,128,0.4)">
             <div style={{ background: "rgba(74,222,80,0.04)", border: "1px solid rgba(74,222,128,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
