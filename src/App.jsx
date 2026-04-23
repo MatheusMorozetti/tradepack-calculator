@@ -1,5 +1,242 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, createContext, useContext } from "react";
 import { supabase } from "./supabase";
+
+// ── i18n ───────────────────────────────────────────────────────────────────
+const LangContext = createContext("ptBR");
+const useLang = () => useContext(LangContext);
+
+const TR = {
+  ptBR: {
+    // NAV / GERAL
+    enter: "ENTRAR →",
+    tools: "Ferramentas",
+    plans: "Planos",
+    contactMatz: "ENTRE EM CONTATO COM O MATZ",
+    contactMatzArrow: "ENTRE EM CONTATO COM O MATZ →",
+    backToSite: "← Voltar ao site",
+    notAffiliated: "Não afiliado ao RavenQuest ou Tavernlight Games",
+    tagline: "RavenQuest · Economy Intelligence",
+
+    // HERO
+    heroSub: "O conjunto de ferramentas econômicas mais completo para jogadores de RavenQuest. Calcule margens, oversupply, infusions e muito mais.",
+    viewTools: "VER FERRAMENTAS",
+    accessNow: "ACESSAR AGORA →",
+    stat1: "Ferramentas", stat2: "Receitas de crafting", stat3: "Profissões", stat4: "Preços reais",
+
+    // FEATURES
+    featuresLabel: "Ferramentas",
+    featuresTitle: "Tudo que você precisa para lucrar",
+    f1t: "Tradepack Prime", f1d: "Calcule a margem real dos seus packs com suporte a Enhanced e Plunder. Break-even automático e comparativo de estratégias.",
+    f2t: "Hunt & Mineração", f2d: "Projete o silver/hora da sua caçada com addons e infusions. Compare Hunt vs Mineração vs Tradepack em tempo real.",
+    f3t: "Infusion Analyzer", f3d: "Ranking de custo por EXP, melhor infusion para caçar e cálculo de flip no mercado com taxa configurável.",
+    f4t: "Crafting & Oversupply", f4d: "Calcule a margem real por receita usando preços do seu servidor. Saiba exatamente quantos crafts até travar o oversupply.",
+    f5t: "Pool Rate Calibration", f5d: "Insira o QUEST recebido no chest de sexta e calibre o pool rate real do seu servidor para projeções precisas.",
+    f6t: "Materiais", f6d: "Tabela de materiais por pack com custo de produção vs preço de mercado. Toggle de desconto QUEST por material.",
+
+    // PRICING
+    pricingLabel: "Planos",
+    pricingTitle: "Pago em silver, direto no jogo",
+    pricingSub: "Sem cartão. Sem cadastro externo. Você paga o silver, ganha o acesso.",
+    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/semana por membro", p1d: "Para guildas que assinam mensalmente. Mínimo 5 membros. Valor por membro.",
+    p2n: "Solo Pass",  p2p: "40kk", p2per: "silver/semana", p2d: "Para qualquer player que queira acesso individual completo.", popular: "Mais popular",
+    p3n: "Via Streamer",p3p: "36kk", p3per: "silver/semana", p3d: "Use o cupom do seu streamer favorito e economize 10%.",
+    pricingNote: "Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis · Valor do Guild Pass é por membro",
+
+    // CTA FINAL
+    ctaTitle: "Pronto para lucrar mais?",
+    ctaDesc: "Entre em contato com o Matz para solicitar acesso. O RavenLab paga seu custo na primeira semana de uso.",
+
+    // LOGIN
+    loginAccess: "RavenQuest · Economy Intelligence",
+    loginWelcome: "Bem-vindo ao",
+    loginEmail: "Seu email de acesso",
+    loginPass: "Senha",
+    loginBtn: "ENTRAR →",
+    loginLoading: "VERIFICANDO...",
+    loginForgot: "Esqueci minha senha",
+    loginErrEmpty: t.loginErrEmpty,
+    loginErrWrong: t.loginErrWrong,
+    loginErrProfile: t.loginErrProfile,
+    loginErrSession: t.loginErrSession,
+    loginErrExpired: "Acesso expirado. Contate o suporte.",
+    loginErrInactive: t.loginErrInactive,
+    forgotTitle: "Informe seu email. Você receberá um código de 6 dígitos para redefinir a senha.",
+    forgotBtn: "ENVIAR CÓDIGO →", forgotLoading: "ENVIANDO...", forgotBack: "← Voltar ao login",
+    otpSent: "✅ Email enviado para",
+    otpTitle: "Insira o código de 6 dígitos recebido no email.",
+    otpPlaceholder: "Código de 6 dígitos",
+    otpBtn: "VERIFICAR CÓDIGO →", otpLoading: "VERIFICANDO...", otpResend: "← Reenviar código",
+    newPassTitle: "Código verificado. Defina sua nova senha.",
+    newPassPlaceholder: "Nova senha (mín. 6 caracteres)", newPassConfirm: "Confirmar senha",
+    newPassBtn: "SALVAR NOVA SENHA →", newPassLoading: "SALVANDO...",
+    newPassErrMatch: t.newPassErrMatch,
+    newPassErrShort: t.newPassErrShort,
+    footer: "ToilZero · RavenLab · Acesso restrito",
+
+    // HEADER APP
+    sync: "✓ sincronizado", saving: "⟳ salvando...", loading: "⟳ carregando...",
+    daysLeft: "d restantes", expired: "Expirado",
+    tutorial: "? Tutorial", logout: "Sair",
+
+    // TABS
+    tabTradepack: "📦 Tradepack", tabHunt: "🏹 Hunt", tabMateriais: "💰 Materiais",
+    tabInfusion: "✨ Infusion", tabCrafting: "⚒️ Crafting", tabCalibracao: "📐 Calibração",
+
+    // SEÇÕES PRINCIPAIS
+    secComparativo: "💰 Comparativo de Estratégias",
+    secFazendoPacks: "📦 Fazendo os Packs Prime",
+    secVendendo: "💰 Vendendo os Materiais",
+    secDiferenca: "📊 Diferença de Estratégia",
+    secBreakeven: "Break-even",
+    labelSemana: "/sem", labelMes: "/mês",
+
+    // OVERSUPPLY
+    osPlayerLevel: "Nível do Player",
+    osOversupply: "Oversupply Atual (%)",
+    osThreshold: "Threshold:",
+    osTaxExtra: "Tax extra:",
+    osPenalty: "✅ Sem penalidade",
+    osAlready: "já em OS",
+    osCraftsOS: "Crafts → OS",
+    osProfitOS: "Profit até OS",
+    osCraftsMax: "Crafts → MAX",
+    osProfitMax: "Profit até MAX",
+    osMaterials: "Preços de materiais",
+    osMaterialsHint: "Insira o preço de mercado de cada material. Os valores são aplicados automaticamente a todas as receitas que usam esse material.",
+    osRecipes: "Receitas e margens calculadas",
+    osFootnote: "Custo Mat. = soma de (qtd × preço) de cada material · Tax = tax base ajustada pelo oversupply atual · Crafts → OS = quantos crafts até atingir 100% de oversupply · Rankings só aparecem quando preço de venda e materiais estão preenchidos.",
+
+    // CALIBRAÇÃO
+    calTitle: "Calibração com Dados Reais",
+    calHint: "Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente.",
+    calQUEST: "QUEST recebido", calQUESTHint: "Chest de sexta-feira",
+    calApply: "APLICAR POOL RATE →",
+    calApplied: "Pool Rate Aplicado",
+
+    // INFUSION
+    infCostEXP: "Melhor Custo por EXP",
+    infHunt: "Melhor para Caçar",
+    infFlip: "Melhor para Flip",
+    infTargetEXP: "EXP necessário",
+    infMarketFee: "Taxa do mercado (%)",
+    infBestNow: "✅ Melhor custo-benefício atual",
+  },
+  en: {
+    // NAV / GENERAL
+    enter: "LOGIN →",
+    tools: "Tools",
+    plans: "Plans",
+    contactMatz: "CONTACT MATZ",
+    contactMatzArrow: "CONTACT MATZ →",
+    backToSite: "← Back to site",
+    notAffiliated: "Not affiliated with RavenQuest or Tavernlight Games",
+    tagline: "RavenQuest · Economy Intelligence",
+
+    // HERO
+    heroSub: "The most complete set of economic tools for RavenQuest players. Calculate margins, oversupply, infusions and much more.",
+    viewTools: "VIEW TOOLS",
+    accessNow: "GET ACCESS NOW →",
+    stat1: "Tools", stat2: "Crafting recipes", stat3: "Professions", stat4: "Real prices",
+
+    // FEATURES
+    featuresLabel: "Tools",
+    featuresTitle: "Everything you need to maximize profit",
+    f1t: "Tradepack Prime", f1d: "Calculate the real margin of your packs with Enhanced and Plunder support. Automatic break-even and strategy comparison.",
+    f2t: "Hunt & Mining", f2d: "Project your silver/hour from hunting with addons and infusions. Compare Hunt vs Mining vs Tradepack in real time.",
+    f3t: "Infusion Analyzer", f3d: "Cost-per-EXP ranking, best infusion for hunting and flip calculator with configurable market fee.",
+    f4t: "Crafting & Oversupply", f4d: "Calculate the real margin per recipe using your server's prices. Know exactly how many crafts until oversupply kicks in.",
+    f5t: "Pool Rate Calibration", f5d: "Enter the QUEST received from the Friday chest and calibrate the real pool rate of your server for accurate projections.",
+    f6t: "Materials", f6d: "Material table per pack with production cost vs market price. QUEST discount toggle per material.",
+
+    // PRICING
+    pricingLabel: "Plans",
+    pricingTitle: "Paid in silver, directly in-game",
+    pricingSub: "No card. No external signup. Pay the silver, get the access.",
+    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/week per member", p1d: "For guilds subscribing monthly. Minimum 5 members. Price is per member.",
+    p2n: "Solo Pass", p2p: "40kk", p2per: "silver/week", p2d: "For any player who wants full individual access.", popular: "Most popular",
+    p3n: "Via Streamer", p3p: "36kk", p3per: "silver/week", p3d: "Use your favorite streamer's coupon and save 10%.",
+    pricingNote: "Payment made directly in silver in-game · Access granted manually within 24h · Streamer coupons available · Guild Pass price is per member",
+
+    // CTA FINAL
+    ctaTitle: "Ready to profit more?",
+    ctaDesc: "Contact Matz to request access. RavenLab pays for itself in the first week of use.",
+
+    // LOGIN
+    loginAccess: "RavenQuest · Economy Intelligence",
+    loginWelcome: "Welcome to",
+    loginEmail: "Your access email",
+    loginPass: "Password",
+    loginBtn: "LOGIN →",
+    loginLoading: "CHECKING...",
+    loginForgot: "Forgot my password",
+    loginErrEmpty: "Please fill in email and password.",
+    loginErrWrong: "Incorrect email or password.",
+    loginErrProfile: "Profile not found. Contact support.",
+    loginErrSession: "Active session on another device.",
+    loginErrExpired: "Access expired. Contact support.",
+    loginErrInactive: "Access inactive. Contact support.",
+    forgotTitle: "Enter your email. You will receive a 6-digit code to reset your password.",
+    forgotBtn: "SEND CODE →", forgotLoading: "SENDING...", forgotBack: "← Back to login",
+    otpSent: "✅ Email sent to",
+    otpTitle: "Enter the 6-digit code received by email.",
+    otpPlaceholder: "6-digit code",
+    otpBtn: "VERIFY CODE →", otpLoading: "VERIFYING...", otpResend: "← Resend code",
+    newPassTitle: "Code verified. Set your new password.",
+    newPassPlaceholder: "New password (min. 6 characters)", newPassConfirm: "Confirm password",
+    newPassBtn: "SAVE NEW PASSWORD →", newPassLoading: "SAVING...",
+    newPassErrMatch: "Passwords do not match.",
+    newPassErrShort: "Password must be at least 6 characters.",
+    footer: "ToilZero · RavenLab · Restricted access",
+
+    // HEADER APP
+    sync: "✓ synced", saving: "⟳ saving...", loading: "⟳ loading...",
+    daysLeft: "d left", expired: "Expired",
+    tutorial: "? Tutorial", logout: "Logout",
+
+    // TABS
+    tabTradepack: "📦 Tradepack", tabHunt: "🏹 Hunt", tabMateriais: "💰 Materials",
+    tabInfusion: "✨ Infusion", tabCrafting: "⚒️ Crafting", tabCalibracao: "📐 Calibration",
+
+    // MAIN SECTIONS
+    secComparativo: "💰 Strategy Comparison",
+    secFazendoPacks: "📦 Crafting Prime Packs",
+    secVendendo: "💰 Selling Materials",
+    secDiferenca: "📊 Strategy Difference",
+    secBreakeven: "Break-even",
+    labelSemana: "/week", labelMes: "/month",
+
+    // OVERSUPPLY
+    osPlayerLevel: "Player Level",
+    osOversupply: "Current Oversupply (%)",
+    osThreshold: "Threshold:",
+    osTaxExtra: "Extra tax:",
+    osPenalty: "✅ No penalty",
+    osAlready: "already in OS",
+    osCraftsOS: "Crafts → OS",
+    osProfitOS: "Profit to OS",
+    osCraftsMax: "Crafts → MAX",
+    osProfitMax: "Profit to MAX",
+    osMaterials: "Material prices",
+    osMaterialsHint: "Enter the market price of each material. Values are automatically applied to all recipes that use that material.",
+    osRecipes: "Recipes and calculated margins",
+    osFootnote: "Mat. Cost = sum of (qty × price) per material · Tax = base tax adjusted by current oversupply · Crafts → OS = crafts needed to reach 100% oversupply · Rankings only appear when sell price and materials are filled.",
+
+    // CALIBRATION
+    calTitle: "Calibration with Real Data",
+    calHint: "Enter the QUEST received from the Friday chest. Total IM is calculated automatically.",
+    calQUEST: "QUEST received", calQUESTHint: "Friday chest",
+    calApply: "APPLY POOL RATE →",
+    calApplied: "Applied Pool Rate",
+
+    // INFUSION
+    infCostEXP: "Best Cost per EXP",
+    infHunt: "Best for Hunting",
+    infFlip: "Best for Flip",
+    infTargetEXP: "Required EXP",
+    infMarketFee: "Market fee (%)",
+    infBestNow: "✅ Best value right now",
+  }
+};
 
 // tabId único por aba — gerado no nível do módulo, acessível por todos os componentes
 const tabId = (() => {
@@ -49,22 +286,36 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format })
   );
 }
 // ── LANDING PAGE ──────────────────────────────────────────────────────────
-function LandingPage({ onEnter }) {
+function LangToggle({ lang, setLang }) {
+  return (
+    <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, overflow: "hidden" }}>
+      {["ptBR", "en"].map(l => (
+        <button key={l} onClick={() => setLang(l)}
+          style={{ background: lang === l ? "rgba(196,160,80,0.2)" : "transparent", border: "none", color: lang === l ? "#c4a050" : "rgba(224,234,248,0.3)", padding: "5px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 9, fontWeight: lang === l ? "bold" : "normal", letterSpacing: "0.08em" }}>
+          {l === "ptBR" ? "🇧🇷 PT" : "🇺🇸 EN"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function LandingPage({ onEnter, lang, setLang }) {
+  const t = TR[lang];
   const [hovered, setHovered] = useState(null);
 
   const features = [
-    { icon: "📦", title: "Tradepack Prime", desc: "Calcule a margem real dos seus packs com suporte a Enhanced e Plunder. Break-even automático e comparativo de estratégias.", color: "#c4a050" },
-    { icon: "🏹", title: "Hunt & Mineração", desc: "Projete o silver/hora da sua caçada com addons e infusions. Compare Hunt vs Mineração vs Tradepack em tempo real.", color: "#60a5fa" },
-    { icon: "✨", title: "Infusion Analyzer", desc: "Ranking de custo por EXP, melhor infusion para caçar e cálculo de flip no mercado com taxa configurável.", color: "#a78bfa" },
-    { icon: "⚒️", title: "Crafting & Oversupply", desc: "Calcule a margem real por receita usando preços do seu servidor. Saiba exatamente quantos crafts até travar o oversupply.", color: "#4ade80" },
-    { icon: "📐", title: "Pool Rate Calibration", desc: "Insira o QUEST recebido no chest de sexta e calibre o pool rate real do seu servidor para projeções precisas.", color: "#fb923c" },
-    { icon: "💰", title: "Materiais", desc: "Tabela de materiais por pack com custo de produção vs preço de mercado. Toggle de desconto QUEST por material.", color: "#f87171" },
+    { icon: "📦", title: t.f1t, desc: t.f1d, color: "#c4a050" },
+    { icon: "🏹", title: t.f2t, desc: t.f2d, color: "#60a5fa" },
+    { icon: "✨", title: t.f3t, desc: t.f3d, color: "#a78bfa" },
+    { icon: "⚒️", title: t.f4t, desc: t.f4d, color: "#4ade80" },
+    { icon: "📐", title: t.f5t, desc: t.f5d, color: "#fb923c" },
+    { icon: "💰", title: t.f6t, desc: t.f6d, color: "#f87171" },
   ];
 
   const plans = [
-    { nome: "Guild Pass", preco: "35kk", periodo: "silver/semana por membro", desc: "Para guildas que assinam mensalmente. Mínimo 5 membros. Valor por membro.", destaque: false, cor: "#60a5fa" },
-    { nome: "Solo Pass", preco: "40kk", periodo: "silver/semana", desc: "Para qualquer player que queira acesso individual completo.", destaque: true, cor: "#c4a050" },
-    { nome: "Via Streamer", preco: "36kk", periodo: "silver/semana", desc: "Use o cupom do seu streamer favorito e economize 10%.", destaque: false, cor: "#a78bfa" },
+    { nome: t.p1n, preco: t.p1p, periodo: t.p1per, desc: t.p1d, destaque: false, cor: "#60a5fa" },
+    { nome: t.p2n, preco: t.p2p, periodo: t.p2per, desc: t.p2d, destaque: true, cor: "#c4a050" },
+    { nome: t.p3n, preco: t.p3p, periodo: t.p3per, desc: t.p3d, destaque: false, cor: "#a78bfa" },
   ];
 
   return (
@@ -83,12 +334,13 @@ function LandingPage({ onEnter }) {
           <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 36, height: 36, objectFit: "contain" }} />
           <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#e0eaf8" }}>RavenLab</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <a href="#features" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>Ferramentas</a>
-          <a href="#pricing" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>Planos</a>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <a href="#features" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>{t.tools}</a>
+          <a href="#pricing" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>{t.plans}</a>
+          <LangToggle lang={lang} setLang={setLang} />
           <button onClick={onEnter}
             style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 7, color: "#000", padding: "8px 20px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", letterSpacing: "0.1em" }}>
-            ENTRAR →
+            {t.enter}
           </button>
         </div>
       </nav>
@@ -96,40 +348,36 @@ function LandingPage({ onEnter }) {
       {/* HERO */}
       <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "100px 24px 80px" }}>
         <div style={{ display: "inline-block", background: "rgba(196,160,80,0.08)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 20, padding: "5px 16px", fontSize: 10, color: "#c4a050", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 32 }}>
-          RavenQuest · Economy Intelligence
+          {t.tagline}
         </div>
-
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
           <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 120, height: 120, objectFit: "contain" }} />
         </div>
-
         <h1 style={{ fontSize: 52, fontWeight: 700, color: "#e0eaf8", margin: "0 0 8px", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1.1 }}>
           Raven<span style={{ color: "#c4a050" }}>Lab</span>
         </h1>
-        <p style={{ fontSize: 14, color: "rgba(143,160,184,0.8)", marginBottom: 48, letterSpacing: "0.04em", maxWidth: 520, margin: "16px auto 48px" }}>
-          O conjunto de ferramentas econômicas mais completo para jogadores de RavenQuest. Calcule margens, oversupply, infusions e muito mais.
+        <p style={{ fontSize: 14, color: "rgba(143,160,184,0.8)", letterSpacing: "0.04em", maxWidth: 520, margin: "16px auto 48px" }}>
+          {t.heroSub}
         </p>
-
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={onEnter}
             onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
             onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
             style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 32px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.1em", transition: "transform 0.2s" }}>
-            ACESSAR AGORA →
+            {t.accessNow}
           </button>
           <a href="#features"
             style={{ background: "rgba(30,58,95,0.4)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, color: "#60a5fa", padding: "14px 28px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.1em", textDecoration: "none", display: "flex", alignItems: "center" }}>
-            VER FERRAMENTAS
+            {t.viewTools}
           </a>
         </div>
-
         {/* Stats */}
         <div style={{ display: "flex", gap: 48, justifyContent: "center", marginTop: 72, flexWrap: "wrap" }}>
           {[
-            { valor: "6", label: "Ferramentas" },
-            { valor: "70+", label: "Receitas de crafting" },
-            { valor: "5", label: "Profissões" },
-            { valor: "100%", label: "Preços reais" },
+            { valor: "6", label: t.stat1 },
+            { valor: "70+", label: t.stat2 },
+            { valor: "5", label: t.stat3 },
+            { valor: "100%", label: t.stat4 },
           ].map(s => (
             <div key={s.label} style={{ textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 700, color: "#c4a050", letterSpacing: "0.05em" }}>{s.valor}</div>
@@ -142,18 +390,17 @@ function LandingPage({ onEnter }) {
       {/* FEATURES */}
       <section id="features" style={{ position: "relative", zIndex: 1, padding: "80px 48px", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>Ferramentas</div>
-          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>Tudo que você precisa para lucrar</h2>
+          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>{t.featuresLabel}</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>{t.featuresTitle}</h2>
         </div>
-
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
           {features.map(f => (
             <div key={f.title}
               onMouseEnter={() => setHovered(f.title)}
               onMouseLeave={() => setHovered(null)}
-              style={{ background: hovered === f.title ? "#0d1525" : "#080f1e", border: `1px solid ${hovered === f.title ? f.cor + "40" : "rgba(96,165,250,0.07)"}`, borderRadius: 12, padding: "24px 28px", transition: "all 0.2s", cursor: "default" }}>
+              style={{ background: hovered === f.title ? "#0d1525" : "#080f1e", border: `1px solid ${hovered === f.title ? f.color + "40" : "rgba(96,165,250,0.07)"}`, borderRadius: 12, padding: "24px 28px", transition: "all 0.2s", cursor: "default" }}>
               <div style={{ fontSize: 28, marginBottom: 14 }}>{f.icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: hovered === f.title ? f.cor : "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>{f.title}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: hovered === f.title ? f.color : "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>{f.title}</div>
               <div style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.8 }}>{f.desc}</div>
             </div>
           ))}
@@ -163,37 +410,30 @@ function LandingPage({ onEnter }) {
       {/* PRICING */}
       <section id="pricing" style={{ position: "relative", zIndex: 1, padding: "80px 48px", maxWidth: 960, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 56 }}>
-          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>Planos</div>
-          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 12px" }}>Pago em silver, direto no jogo</h2>
-          <p style={{ fontSize: 11, color: "rgba(143,160,184,0.5)", letterSpacing: "0.06em" }}>Sem cartão. Sem cadastro externo. Você paga o silver, ganha o acesso.</p>
+          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>{t.pricingLabel}</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 12px" }}>{t.pricingTitle}</h2>
+          <p style={{ fontSize: 11, color: "rgba(143,160,184,0.5)", letterSpacing: "0.06em" }}>{t.pricingSub}</p>
         </div>
-
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
           {plans.map(p => (
-            <div key={p.nome} style={{
-              background: p.destaque ? "linear-gradient(160deg, #0d1525, #101e35)" : "#080f1e",
-              border: `1px solid ${p.destaque ? "rgba(196,160,80,0.4)" : "rgba(96,165,250,0.08)"}`,
-              borderRadius: 14, padding: "32px 28px", position: "relative", textAlign: "center"
-            }}>
+            <div key={p.nome} style={{ background: p.destaque ? "linear-gradient(160deg, #0d1525, #101e35)" : "#080f1e", border: `1px solid ${p.destaque ? "rgba(196,160,80,0.4)" : "rgba(96,165,250,0.08)"}`, borderRadius: 14, padding: "32px 28px", position: "relative", textAlign: "center" }}>
               {p.destaque && (
                 <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #c4a050, #8a6a20)", borderRadius: 10, padding: "3px 14px", fontSize: 9, fontWeight: "bold", color: "#000", letterSpacing: "0.15em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-                  Mais popular
+                  {t.popular}
                 </div>
               )}
               <div style={{ fontSize: 12, fontWeight: 700, color: p.cor, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 20 }}>{p.nome}</div>
               <div style={{ fontSize: 32, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.04em", marginBottom: 4 }}>{p.preco}</div>
               <div style={{ fontSize: 10, color: "rgba(143,160,184,0.5)", letterSpacing: "0.1em", marginBottom: 20 }}>{p.periodo}</div>
               <div style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.8, marginBottom: 28 }}>{p.desc}</div>
-              <button onClick={onEnter}
-                style={{ background: p.destaque ? "linear-gradient(135deg, #c4a050, #8a6a20)" : "rgba(30,58,95,0.5)", border: p.destaque ? "none" : `1px solid ${p.cor}30`, borderRadius: 8, color: p.destaque ? "#000" : p.cor, padding: "10px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", letterSpacing: "0.08em", width: "100%" }}>
-                ENTRE EM CONTATO COM O MATZ
+              <button style={{ background: p.destaque ? "linear-gradient(135deg, #c4a050, #8a6a20)" : "rgba(30,58,95,0.5)", border: p.destaque ? "none" : `1px solid ${p.cor}30`, borderRadius: 8, color: p.destaque ? "#000" : p.cor, padding: "10px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, fontWeight: "bold", letterSpacing: "0.06em", width: "100%" }}>
+                {t.contactMatz}
               </button>
             </div>
           ))}
         </div>
-
         <div style={{ textAlign: "center", marginTop: 32, fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.1em", lineHeight: 1.8 }}>
-          Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis · Valor do Guild Pass é por membro
+          {t.pricingNote}
         </div>
       </section>
 
@@ -201,14 +441,14 @@ function LandingPage({ onEnter }) {
       <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "80px 24px 100px" }}>
         <div style={{ background: "linear-gradient(135deg, rgba(30,58,95,0.4), rgba(13,21,37,0.6))", border: "1px solid rgba(96,165,250,0.1)", borderRadius: 20, padding: "56px 40px", maxWidth: 640, margin: "0 auto" }}>
           <div style={{ fontSize: 22, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
-            Pronto para lucrar mais?
+            {t.ctaTitle}
           </div>
           <p style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.9, marginBottom: 32 }}>
-            Entre em contato com o Matz para solicitar acesso. O RavenLab paga seu custo na primeira semana de uso.
+            {t.ctaDesc}
           </p>
           <button onClick={onEnter}
-            style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 36px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.1em" }}>
-            ENTRE EM CONTATO COM O MATZ →
+            style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 36px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, fontWeight: "bold", letterSpacing: "0.08em" }}>
+            {t.contactMatzArrow}
           </button>
         </div>
       </section>
@@ -219,16 +459,17 @@ function LandingPage({ onEnter }) {
           <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 24, height: 24, objectFit: "contain" }} />
           <span style={{ fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" }}>RavenLab · ToilZero</span>
         </div>
+        <LangToggle lang={lang} setLang={setLang} />
         <div style={{ fontSize: 10, color: "rgba(143,160,184,0.25)", letterSpacing: "0.08em" }}>
-          Não afiliado ao RavenQuest ou Tavernlight Games
+          {t.notAffiliated}
         </div>
       </footer>
     </div>
   );
 }
-
 // ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
-function LoginScreen({ onLogin, onBack }) {
+function LoginScreen({ onLogin, onBack, lang }) {
+  const t = TR[lang || "ptBR"];
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -240,15 +481,15 @@ function LoginScreen({ onLogin, onBack }) {
   const [confirmar, setConfirmar] = useState("");
 
   const handleSubmit = async () => {
-    if (!email || !senha) { setErro("Preencha email e senha."); return; }
+    if (!email || !senha) { setErro(t.loginErrEmpty); return; }
     setLoading(true); setErro("");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-    if (error) { setErro("Email ou senha incorretos."); setLoading(false); return; }
+    if (error) { setErro(t.loginErrWrong); setLoading(false); return; }
     const { data: profile, error: profileError } = await supabase
       .from("profiles").select("*").eq("id", data.user.id).single();
     if (profileError || !profile) {
       await supabase.auth.signOut();
-      setErro("Perfil não encontrado. Contate o suporte.");
+      setErro(t.loginErrProfile);
       setLoading(false); return;
     }
     if (!profile.active) {
@@ -258,7 +499,7 @@ function LoginScreen({ onLogin, onBack }) {
     }
     if (new Date(profile.expires_at) < new Date()) {
       await supabase.auth.signOut();
-      setErro("Acesso expirado. Renove sua assinatura.");
+      setErro(t.loginErrExpired);
       setLoading(false); return;
     }
     const { error: upsertError } = await supabase.from("active_sessions").upsert({
@@ -276,7 +517,7 @@ function LoginScreen({ onLogin, onBack }) {
   };
 
   const handleForgot = async () => {
-    if (!emailRecovery) { setErro("Informe seu email."); return; }
+    if (!emailRecovery) { setErro(t.loginErrEmpty); return; }
     setLoading(true); setErro("");
     const { error } = await supabase.auth.resetPasswordForEmail(emailRecovery);
     if (error) { setErro("Erro ao enviar email. Verifique o endereço."); setLoading(false); return; }
@@ -299,8 +540,8 @@ function LoginScreen({ onLogin, onBack }) {
 
   const handleNewPassword = async () => {
     if (!novaSenha || !confirmar) { setErro("Preencha os dois campos."); return; }
-    if (novaSenha.length < 6) { setErro("A senha deve ter pelo menos 6 caracteres."); return; }
-    if (novaSenha !== confirmar) { setErro("As senhas não coincidem."); return; }
+    if (novaSenha.length < 6) { setErro(t.newPassErrShort); return; }
+    if (novaSenha !== confirmar) { setErro(t.newPassErrMatch); return; }
     setLoading(true); setErro("");
     const { error } = await supabase.auth.updateUser({ password: novaSenha });
     if (error) { setErro("Erro ao atualizar senha. Tente novamente."); setLoading(false); return; }
@@ -331,70 +572,64 @@ function LoginScreen({ onLogin, onBack }) {
           <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 120, height: 120, objectFit: "contain" }} />
         </div>
 
-        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 32 }}>RavenQuest · Economy Intelligence</div>
+        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "rgba(96,165,250,0.4)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 32 }}>{t.loginAccess}</div>
 
         {/* LOGIN */}
         {modo === "login" && <>
-          <input type="email" placeholder="Seu email de acesso" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(false)} />
-          <input type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(!!erro)} />
+          <input type="email" placeholder={t.loginEmail} value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(false)} />
+          <input type="password" placeholder={t.loginPass} value={senha} onChange={e => setSenha(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} style={inputStyle(!!erro)} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleSubmit} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.3)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
-            {loading ? "VERIFICANDO..." : "ENTRAR →"}
+            {loading ? t.loginLoading : t.loginBtn}
           </button>
           <button onClick={() => { setModo("forgot"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em" }}>
-            Esqueci minha senha
+            {t.loginForgot}
           </button>
         </>}
 
         {/* ESQUECI MINHA SENHA */}
         {modo === "forgot" && <>
-          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-            Informe seu email. Você receberá um código de 6 dígitos para redefinir a senha.
-          </div>
-          <input type="email" placeholder="Seu email de acesso" value={emailRecovery} onChange={e => setEmailRecovery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleForgot()} style={inputStyle(!!erro)} />
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>{t.forgotTitle}</div>
+          <input type="email" placeholder={t.loginEmail} value={emailRecovery} onChange={e => setEmailRecovery(e.target.value)} onKeyDown={e => e.key === "Enter" && handleForgot()} style={inputStyle(!!erro)} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleForgot} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
-            {loading ? "ENVIANDO..." : "ENVIAR CÓDIGO →"}
+            {loading ? t.forgotLoading : t.forgotBtn}
           </button>
           <button onClick={() => { setModo("login"); setErro(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
-            ← Voltar ao login
+            {t.forgotBack}
           </button>
         </>}
 
         {/* INSERIR CÓDIGO OTP */}
         {modo === "otp" && <>
-          <div style={{ color: green, fontSize: 11, marginBottom: 16 }}>✅ Email enviado para {emailRecovery}</div>
-          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-            Insira o código de 6 dígitos recebido no email.
-          </div>
-          <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder="Código de 6 dígitos" value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
+          <div style={{ color: green, fontSize: 11, marginBottom: 16 }}>{t.otpSent} {emailRecovery}</div>
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>{t.otpTitle}</div>
+          <input type="text" inputMode="numeric" pattern="[0-9]*" autoComplete="one-time-code" placeholder={t.otpPlaceholder} value={otpCode} onChange={e => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))} onKeyDown={e => e.key === "Enter" && handleOtp()}
             style={{ ...inputStyle(!!erro), fontSize: 24, letterSpacing: "0.3em", textAlign: "center" }} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleOtp} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em", marginBottom: 12 }}>
-            {loading ? "VERIFICANDO..." : "VERIFICAR CÓDIGO →"}
+            {loading ? t.otpLoading : t.otpBtn}
           </button>
           <button onClick={() => { setModo("forgot"); setErro(""); setOtpCode(""); }} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.45)", fontSize: 11, cursor: "pointer", fontFamily: "'Space Mono', monospace" }}>
-            ← Reenviar código
+            {t.otpResend}
           </button>
         </>}
 
         {/* NOVA SENHA */}
         {modo === "newpassword" && <>
-          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>
-            Código verificado. Defina sua nova senha.
-          </div>
-          <input type="password" placeholder="Nova senha (mín. 6 caracteres)" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} style={inputStyle(false)} />
-          <input type="password" placeholder="Confirmar senha" value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleNewPassword()} style={inputStyle(!!erro)} />
+          <div style={{ color: TEXT_DIM, fontSize: 12, marginBottom: 20, lineHeight: 1.6 }}>{t.newPassTitle}</div>
+          <input type="password" placeholder={t.newPassPlaceholder} value={novaSenha} onChange={e => setNovaSenha(e.target.value)} style={inputStyle(false)} />
+          <input type="password" placeholder={t.newPassConfirm} value={confirmar} onChange={e => setConfirmar(e.target.value)} onKeyDown={e => e.key === "Enter" && handleNewPassword()} style={inputStyle(!!erro)} />
           {erro && <div style={{ color: "#f87171", fontSize: 11, marginBottom: 12 }}>❌ {erro}</div>}
           <button onClick={handleNewPassword} disabled={loading} style={{ width: "100%", background: loading ? "rgba(196,160,80,0.2)" : "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: loading ? "#888" : "#000", padding: "12px", cursor: loading ? "not-allowed" : "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.08em" }}>
-            {loading ? "SALVANDO..." : "SALVAR NOVA SENHA →"}
+            {loading ? t.newPassLoading : t.newPassBtn}
           </button>
         </>}
 
-        <div style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, marginTop: 24, letterSpacing: "0.1em" }}>ToilZero · RavenLab · Acesso restrito</div>
+        <div style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, marginTop: 24, letterSpacing: "0.1em" }}>{t.footer}</div>
         {onBack && (
           <button onClick={onBack} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.3)", fontSize: 10, cursor: "pointer", fontFamily: "'Space Mono', monospace", marginTop: 12, letterSpacing: "0.08em" }}>
-            ← Voltar ao site
+            {t.backToSite}
           </button>
         )}
       </div>
@@ -615,6 +850,7 @@ export default function App() {
   const [tab, setTab] = useState("tradepack");
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [lang, setLang] = useState("ptBR");
   const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
 
   // Estados de Crafting / Oversupply
@@ -1051,7 +1287,7 @@ export default function App() {
   );
 
   if (!autenticado) {
-    if (showLogin) return <LoginScreen onLogin={(user, sessionId, profile) => {
+    if (showLogin) return <LoginScreen lang={lang} onLogin={(user, sessionId, profile) => {
       setUserId(user.id);
       setUserEmail(profile.email);
       setSessionAtual(sessionId);
@@ -1059,16 +1295,16 @@ export default function App() {
       setAutenticado(true);
       setShowLogin(false);
     }} onBack={() => setShowLogin(false)} />;
-    return <LandingPage onEnter={() => setShowLogin(true)} />;
+    return <LandingPage onEnter={() => setShowLogin(true)} lang={lang} setLang={setLang} />;
   }
 
   const tabs = [
-    { id: "tradepack",  label: "📦 Tradepack" },
-    { id: "comparativo",label: "🏹 Hunt" },
-    { id: "mercado",    label: "💰 Materiais" },
-    { id: "infusion",   label: "✨ Infusion" },
-    { id: "crafting",   label: "⚒️ Crafting" },
-    { id: "calibracao", label: "📐 Calibração" },
+    { id: "tradepack",   label: TR[lang].tabTradepack },
+    { id: "comparativo", label: TR[lang].tabHunt },
+    { id: "mercado",     label: TR[lang].tabMateriais },
+    { id: "infusion",    label: TR[lang].tabInfusion },
+    { id: "crafting",    label: TR[lang].tabCrafting },
+    { id: "calibracao",  label: TR[lang].tabCalibracao },
   ];
 
   return (
@@ -1098,31 +1334,32 @@ export default function App() {
 
         {/* Centro: status de sync */}
         <div style={{ fontSize: 10, color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.45)", letterSpacing: "0.1em", transition: "color 0.5s" }}>
-          {dataLoading ? "⟳ carregando..." : saving ? "⟳ salvando..." : settingsLoaded ? "✓ sincronizado" : ""}
+          {dataLoading ? TR[lang].loading : saving ? TR[lang].saving : settingsLoaded ? TR[lang].sync : ""}
         </div>
 
-        {/* Direita: expiração + tutorial + logout */}
+        {/* Direita: expiração + idioma + tutorial + logout */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {expiresAt && (() => {
             const dias = Math.ceil((new Date(expiresAt) - new Date()) / (1000 * 60 * 60 * 24));
             const expColor = dias <= 7 ? "#f87171" : dias <= 14 ? "#fb923c" : TEXT_DIM;
             return (
               <div style={{ fontSize: 10, color: expColor, letterSpacing: "0.06em" }}>
-                {dias <= 7 && "⚠️ "}{dias > 0 ? `${dias}d restantes` : "Expirado"}
+                {dias <= 7 && "⚠️ "}{dias > 0 ? `${dias}${TR[lang].daysLeft}` : TR[lang].expired}
               </div>
             );
           })()}
-          <button onClick={() => setShowTutorial(true)} title="Ver tutorial"
+          <LangToggle lang={lang} setLang={setLang} />
+          <button onClick={() => setShowTutorial(true)} title="Tutorial"
             style={{ background: "rgba(30,58,95,0.5)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, color: "rgba(96,165,250,0.5)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.05em", transition: "all 0.2s" }}
             onMouseEnter={e => { e.target.style.background = "rgba(30,58,95,0.8)"; e.target.style.color = "#60a5fa"; }}
             onMouseLeave={e => { e.target.style.background = "rgba(30,58,95,0.5)"; e.target.style.color = "rgba(96,165,250,0.5)"; }}>
-            ? Tutorial
+            {TR[lang].tutorial}
           </button>
           <button onClick={handleLogout}
             style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 6, color: "rgba(248,113,113,0.5)", padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 10, letterSpacing: "0.08em", transition: "all 0.2s" }}
             onMouseEnter={e => { e.target.style.background = "rgba(248,113,113,0.12)"; e.target.style.color = "#f87171"; }}
             onMouseLeave={e => { e.target.style.background = "rgba(248,113,113,0.06)"; e.target.style.color = "rgba(248,113,113,0.5)"; }}>
-            Sair
+            {TR[lang].logout}
           </button>
         </div>
       </div>
