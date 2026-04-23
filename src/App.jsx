@@ -48,7 +48,186 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format })
     />
   );
 }
-function LoginScreen({ onLogin }) {
+// ── LANDING PAGE ──────────────────────────────────────────────────────────
+function LandingPage({ onEnter }) {
+  const [hovered, setHovered] = useState(null);
+
+  const features = [
+    { icon: "📦", title: "Tradepack Prime", desc: "Calcule a margem real dos seus packs com suporte a Enhanced e Plunder. Break-even automático e comparativo de estratégias.", color: "#c4a050" },
+    { icon: "🏹", title: "Hunt & Mineração", desc: "Projete o silver/hora da sua caçada com addons e infusions. Compare Hunt vs Mineração vs Tradepack em tempo real.", color: "#60a5fa" },
+    { icon: "✨", title: "Infusion Analyzer", desc: "Ranking de custo por EXP, melhor infusion para caçar e cálculo de flip no mercado com taxa configurável.", color: "#a78bfa" },
+    { icon: "⚒️", title: "Crafting & Oversupply", desc: "Calcule a margem real por receita usando preços do seu servidor. Saiba exatamente quantos crafts até travar o oversupply.", color: "#4ade80" },
+    { icon: "📐", title: "Pool Rate Calibration", desc: "Insira o QUEST recebido no chest de sexta e calibre o pool rate real do seu servidor para projeções precisas.", color: "#fb923c" },
+    { icon: "💰", title: "Materiais", desc: "Tabela de materiais por pack com custo de produção vs preço de mercado. Toggle de desconto QUEST por material.", color: "#f87171" },
+  ];
+
+  const plans = [
+    { nome: "Guild Pass", preco: "30kk", periodo: "silver/semana/membro", desc: "Para guildas que assinam mensalmente. Mínimo 5 membros.", destaque: false, cor: "#60a5fa" },
+    { nome: "Solo Pass", preco: "40kk", periodo: "silver/semana", desc: "Para qualquer player que queira acesso individual completo.", destaque: true, cor: "#c4a050" },
+    { nome: "Via Streamer", preco: "32kk", periodo: "silver/semana", desc: "Use o cupom do seu streamer favorito e economize 20%.", destaque: false, cor: "#a78bfa" },
+  ];
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#050810", fontFamily: "'Space Mono', monospace", color: "#e0eaf8", overflowX: "hidden" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+      {/* BG decorativo */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: 900, height: 900, borderRadius: "50%", background: "radial-gradient(circle, rgba(30,58,95,0.35) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "10%", right: "-10%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(196,160,80,0.06) 0%, transparent 70%)" }} />
+      </div>
+
+      {/* NAVBAR */}
+      <nav style={{ position: "relative", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 48px", borderBottom: "1px solid rgba(96,165,250,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 36, height: 36, objectFit: "contain" }} />
+          <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#e0eaf8" }}>RavenLab</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <a href="#features" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>Ferramentas</a>
+          <a href="#pricing" style={{ fontSize: 10, color: "rgba(224,234,248,0.45)", letterSpacing: "0.12em", textTransform: "uppercase", textDecoration: "none" }}>Planos</a>
+          <button onClick={onEnter}
+            style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 7, color: "#000", padding: "8px 20px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", letterSpacing: "0.1em" }}>
+            ENTRAR →
+          </button>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "100px 24px 80px" }}>
+        <div style={{ display: "inline-block", background: "rgba(196,160,80,0.08)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 20, padding: "5px 16px", fontSize: 10, color: "#c4a050", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 32 }}>
+          RavenQuest · Economy Intelligence
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 28 }}>
+          <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 120, height: 120, objectFit: "contain" }} />
+        </div>
+
+        <h1 style={{ fontSize: 52, fontWeight: 700, color: "#e0eaf8", margin: "0 0 8px", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1.1 }}>
+          Raven<span style={{ color: "#c4a050" }}>Lab</span>
+        </h1>
+        <p style={{ fontSize: 14, color: "rgba(143,160,184,0.8)", marginBottom: 48, letterSpacing: "0.04em", maxWidth: 520, margin: "16px auto 48px" }}>
+          O conjunto de ferramentas econômicas mais completo para jogadores de RavenQuest. Calcule margens, oversupply, infusions e muito mais.
+        </p>
+
+        <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
+          <button onClick={onEnter}
+            onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+            style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 32px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.1em", transition: "transform 0.2s" }}>
+            ACESSAR AGORA →
+          </button>
+          <a href="#features"
+            style={{ background: "rgba(30,58,95,0.4)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, color: "#60a5fa", padding: "14px 28px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, letterSpacing: "0.1em", textDecoration: "none", display: "flex", alignItems: "center" }}>
+            VER FERRAMENTAS
+          </a>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: "flex", gap: 48, justifyContent: "center", marginTop: 72, flexWrap: "wrap" }}>
+          {[
+            { valor: "6", label: "Ferramentas" },
+            { valor: "70+", label: "Receitas de crafting" },
+            { valor: "5", label: "Profissões" },
+            { valor: "100%", label: "Preços reais" },
+          ].map(s => (
+            <div key={s.label} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#c4a050", letterSpacing: "0.05em" }}>{s.valor}</div>
+              <div style={{ fontSize: 10, color: "rgba(143,160,184,0.5)", letterSpacing: "0.15em", textTransform: "uppercase", marginTop: 4 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" style={{ position: "relative", zIndex: 1, padding: "80px 48px", maxWidth: 1200, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>Ferramentas</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>Tudo que você precisa para lucrar</h2>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
+          {features.map(f => (
+            <div key={f.title}
+              onMouseEnter={() => setHovered(f.title)}
+              onMouseLeave={() => setHovered(null)}
+              style={{ background: hovered === f.title ? "#0d1525" : "#080f1e", border: `1px solid ${hovered === f.title ? f.cor + "40" : "rgba(96,165,250,0.07)"}`, borderRadius: 12, padding: "24px 28px", transition: "all 0.2s", cursor: "default" }}>
+              <div style={{ fontSize: 28, marginBottom: 14 }}>{f.icon}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: hovered === f.title ? f.cor : "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>{f.title}</div>
+              <div style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.8 }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section id="pricing" style={{ position: "relative", zIndex: 1, padding: "80px 48px", maxWidth: 960, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>Planos</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 12px" }}>Pago em silver, direto no jogo</h2>
+          <p style={{ fontSize: 11, color: "rgba(143,160,184,0.5)", letterSpacing: "0.06em" }}>Sem cartão. Sem cadastro externo. Você paga o silver, ganha o acesso.</p>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+          {plans.map(p => (
+            <div key={p.nome} style={{
+              background: p.destaque ? "linear-gradient(160deg, #0d1525, #101e35)" : "#080f1e",
+              border: `1px solid ${p.destaque ? "rgba(196,160,80,0.4)" : "rgba(96,165,250,0.08)"}`,
+              borderRadius: 14, padding: "32px 28px", position: "relative", textAlign: "center"
+            }}>
+              {p.destaque && (
+                <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, #c4a050, #8a6a20)", borderRadius: 10, padding: "3px 14px", fontSize: 9, fontWeight: "bold", color: "#000", letterSpacing: "0.15em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                  Mais popular
+                </div>
+              )}
+              <div style={{ fontSize: 12, fontWeight: 700, color: p.cor, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 20 }}>{p.nome}</div>
+              <div style={{ fontSize: 32, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.04em", marginBottom: 4 }}>{p.preco}</div>
+              <div style={{ fontSize: 10, color: "rgba(143,160,184,0.5)", letterSpacing: "0.1em", marginBottom: 20 }}>{p.periodo}</div>
+              <div style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.8, marginBottom: 28 }}>{p.desc}</div>
+              <button onClick={onEnter}
+                style={{ background: p.destaque ? "linear-gradient(135deg, #c4a050, #8a6a20)" : "rgba(30,58,95,0.5)", border: p.destaque ? "none" : `1px solid ${p.cor}30`, borderRadius: 8, color: p.destaque ? "#000" : p.cor, padding: "10px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", letterSpacing: "0.08em", width: "100%" }}>
+                QUERO ACESSO →
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: 32, fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.1em", lineHeight: 1.8 }}>
+          Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "80px 24px 100px" }}>
+        <div style={{ background: "linear-gradient(135deg, rgba(30,58,95,0.4), rgba(13,21,37,0.6))", border: "1px solid rgba(96,165,250,0.1)", borderRadius: 20, padding: "56px 40px", maxWidth: 640, margin: "0 auto" }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 16 }}>
+            Pronto para lucrar mais?
+          </div>
+          <p style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", lineHeight: 1.9, marginBottom: 32 }}>
+            Entre em contato com um líder da sua guilda ou solicite acesso diretamente. O RavenLab paga seu custo na primeira semana de uso.
+          </p>
+          <button onClick={onEnter}
+            style={{ background: "linear-gradient(135deg, #c4a050, #8a6a20)", border: "none", borderRadius: 8, color: "#000", padding: "14px 36px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", letterSpacing: "0.1em" }}>
+            ACESSAR O RAVENLAB →
+          </button>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ position: "relative", zIndex: 1, borderTop: "1px solid rgba(96,165,250,0.06)", padding: "24px 48px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/ravenlab-logo.png" alt="RavenLab" style={{ width: 24, height: 24, objectFit: "contain" }} />
+          <span style={{ fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.12em", textTransform: "uppercase" }}>RavenLab · ToilZero</span>
+        </div>
+        <div style={{ fontSize: 10, color: "rgba(143,160,184,0.25)", letterSpacing: "0.08em" }}>
+          Não afiliado ao RavenQuest ou Tavernlight Games
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// ── LOGIN COM SUPABASE ─────────────────────────────────────────────────────
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
@@ -212,6 +391,11 @@ function LoginScreen({ onLogin }) {
         </>}
 
         <div style={{ color: "rgba(96,165,250,0.2)", fontSize: 10, marginTop: 24, letterSpacing: "0.1em" }}>ToilZero · RavenLab · Acesso restrito</div>
+        {onBack && (
+          <button onClick={onBack} style={{ background: "none", border: "none", color: "rgba(96,165,250,0.3)", fontSize: 10, cursor: "pointer", fontFamily: "'Space Mono', monospace", marginTop: 12, letterSpacing: "0.08em" }}>
+            ← Voltar ao site
+          </button>
+        )}
       </div>
     </div>
   );
@@ -429,6 +613,7 @@ export default function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [tab, setTab] = useState("tradepack");
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
 
   // Estados de Crafting / Oversupply
@@ -864,13 +1049,17 @@ export default function App() {
     </div>
   );
 
-  if (!autenticado) return <LoginScreen onLogin={(user, sessionId, profile) => {
-    setUserId(user.id);
-    setUserEmail(profile.email);
-    setSessionAtual(sessionId);
-    setExpiresAt(profile.expires_at);
-    setAutenticado(true);
-  }} />;
+  if (!autenticado) {
+    if (showLogin) return <LoginScreen onLogin={(user, sessionId, profile) => {
+      setUserId(user.id);
+      setUserEmail(profile.email);
+      setSessionAtual(sessionId);
+      setExpiresAt(profile.expires_at);
+      setAutenticado(true);
+      setShowLogin(false);
+    }} onBack={() => setShowLogin(false)} />;
+    return <LandingPage onEnter={() => setShowLogin(true)} />;
+  }
 
   const tabs = [
     { id: "tradepack",  label: "📦 Tradepack" },
