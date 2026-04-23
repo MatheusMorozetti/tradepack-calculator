@@ -1662,7 +1662,7 @@ export default function App() {
                   <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>USD</span>
                 </div>
                 <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 6, padding: "8px 12px", marginTop: 6, fontSize: 10, color: dim, lineHeight: 1.7 }}>
-                  📍 Onde encontrar: <strong style={{ color: blue }}>CoinGecko</strong> ou <strong style={{ color: blue }}>CoinMarketCap</strong> → pesquise "RavenQuest QUEST" → copie o preço atual em USD
+                  {lang==="en"?'📍 Where to find: ':"📍 Onde encontrar: "}<strong style={{ color: blue }}>CoinGecko</strong>{lang==="en"?' or ':" ou "}<strong style={{ color: blue }}>CoinMarketCap</strong>{lang==="en"?' → search "RavenQuest QUEST" → copy the current USD price':' → pesquise "RavenQuest QUEST" → copie o preço atual em USD'}
                 </div>
               </div>
 
@@ -1695,13 +1695,13 @@ export default function App() {
 
                 {/* Instrução */}
                 <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-                  📌 Insira a quantidade de itens coletados em <strong style={{ color: red }}>1 hora</strong> de caça.
+                  📌 {lang==="en"?"Enter the quantity of items collected in ":"Insira a quantidade de itens coletados em "}<strong style={{ color: red }}>1 {lang==="en"?"hour":"hora"}</strong>{lang==="en"?" of hunting.":" de caça."}
                 </div>
 
                 {/* Itens */}
                 <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Item</span>
-                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>Qtd / hora</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>{lang==="en"?"Qty / hour":"Qtd / hora"}</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>{TR[lang].matsMkt}</span>
                 </div>
 
@@ -1759,13 +1759,13 @@ export default function App() {
               <Section title={`⛏️ ${TR[lang].miningTitle}`} icon="🪨" borderColor="rgba(96,165,250,0.3)">
 
                 <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-                  📌 Insira a quantidade de itens coletados em <strong style={{ color: blue }}>1 hora</strong> de mineração.
+                  📌 {lang==="en"?"Enter the quantity of items collected in ":"Insira a quantidade de itens coletados em "}<strong style={{ color: blue }}>1 {lang==="en"?"hour":"hora"}</strong>{lang==="en"?" of mining.":" de mineração."}
                 </div>
 
                 {/* Headers */}
                 <div style={{ display: "grid", gridTemplateColumns: "110px 1fr 1fr 60px", gap: 4, marginBottom: 6 }}>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Item</span>
-                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Qtd / hora</span>
+                  <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>{lang==="en"?"Qty / hour":"Qtd / hora"}</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>{TR[lang].matsMkt}</span>
                   <span style={{ color: dim, fontSize: 9, textTransform: "uppercase" }}>Total/h</span>
                 </div>
@@ -2048,7 +2048,7 @@ export default function App() {
               <Divider label={`${PROF_ICONS[craftProfTab]} Preços de materiais — ${craftProfTab}`} />
               <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
                 <div style={{ fontSize: 10, color: TEXT_DIM, marginBottom: 14, lineHeight: 1.7 }}>
-                  💡 Insira o preço de mercado de cada material. Os valores são aplicados automaticamente a todas as receitas que usam esse material.
+                  {lang==="en"?"💡 Enter the market price of each material. Values are automatically applied to all recipes that use that material.":"💡 Insira o preço de mercado de cada material. Os valores são aplicados automaticamente a todas as receitas que usam esse material."}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
                   {matsUnicos.map(mat => (
@@ -2153,7 +2153,7 @@ export default function App() {
                 </table>
               </div>
               <div style={{ fontSize: 10, color: TEXT_DIM, marginTop: 12, lineHeight: 1.7 }}>
-                💡 <strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de (qtd × preço) de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply atual · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = quantos crafts até atingir 100% de oversupply a partir do nível atual · Rankings só aparecem quando preço de venda e materiais estão preenchidos.
+                💡 lang==="en"?<><strong style={{ color: TEXT_PRIM }}>Mat. Cost</strong> = sum of (qty × price) per material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = base tax adjusted by current oversupply · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = crafts needed to reach 100% oversupply · Rankings only appear when sell price and materials are filled.</>:<><strong style={{ color: TEXT_PRIM }}>Custo Mat.</strong> = soma de (qtd × preço) de cada material · <strong style={{ color: TEXT_PRIM }}>Tax</strong> = tax base ajustada pelo oversupply atual · <strong style={{ color: TEXT_PRIM }}>Crafts → OS</strong> = quantos crafts até atingir 100% de oversupply · Rankings só aparecem quando preço de venda e materiais estão preenchidos.</>
               </div>
             </Section>
           </div>
@@ -2216,7 +2216,7 @@ export default function App() {
               <div>QUEST recebido: <span style={{ color: green }}>{fmtInt(calQUEST)}</span></div>
               <div>${lang === "en" ? "Active Pool Rate:" : "Pool Rate ativo:"} <span style={{ color: green }}>{poolRate.toFixed(8)}</span></div>
               <div>IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span></div>
-              <div style={{ marginTop: 8, color: "#404050" }}>Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar.</div>
+              <div style={{ marginTop: 8, color: "#404050" }}>lang==="en"?"Update every Friday after payment — enter the QUEST received and click Apply.":"Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar."</div>
             </div>
           </Section>
         </div>
@@ -2228,7 +2228,7 @@ export default function App() {
           {/* Target EXP */}
           <Section title={`✨ ${lang==="en"?"Infusion Calculator":"Calculadora de Infusion"}`} icon="⚗️" accent>
             <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-              💡 Insira o <strong style={{ color: purple }}>preço de mercado</strong> de cada Infusion e o <strong style={{ color: gold }}>EXP que você precisa ganhar</strong>. A calculadora mostra qual comprar e quanto vai custar.
+              {lang==="en"?<>💡 Enter the <strong style={{ color: purple }}>market price</strong> of each Infusion and the <strong style={{ color: gold }}>EXP you need to gain</strong>. The calculator shows which to buy and how much it will cost.</>:<>💡 Insira o <strong style={{ color: purple }}>preço de mercado</strong> de cada Infusion e o <strong style={{ color: gold }}>EXP que você precisa ganhar</strong>. A calculadora mostra qual comprar e quanto vai custar.</>}
             </div>
 
             {/* Target EXP */}
@@ -2340,7 +2340,7 @@ export default function App() {
           {/* MELHOR PARA CAÇAR */}
           <Section title={`🏹 ${lang==="en"?"Best for Hunting":TR[lang].infHunt}`} icon="⚔️" borderColor="rgba(248,113,113,0.3)">
             <div style={{ background: "rgba(248,113,113,0.05)", border: "1px solid rgba(248,113,113,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-              📌 Insira a <strong style={{ color: red }}>quantidade dropada por hora</strong> para cada infusion. O ranking mostra qual gera mais silver/hora ao caçar.
+              📌 {lang==="en"?<>Enter the <strong style={{ color: red }}>quantity dropped per hour</strong> for each infusion. The ranking shows which generates the most silver/hour while hunting.</>:<>Insira a <strong style={{ color: red }}>quantidade dropada por hora</strong> para cada infusion. O ranking mostra qual gera mais silver/hora ao caçar.</>}
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, marginBottom: 12 }}>
               <thead>
@@ -2375,7 +2375,7 @@ export default function App() {
             {huntDropRanking.length > 0 && (
               <div style={{ background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 8, padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <div style={{ color: red, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>🏆 Melhor para caçar</div>
+                  <div style={{ color: red, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{lang==="en"?"🏆 Best for hunting":"🏆 Melhor para caçar"}</div>
                   <div style={{ color: "#f0e6c8", fontSize: 16, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{huntDropRanking[0].nome}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -2389,7 +2389,7 @@ export default function App() {
           {/* MELHOR PARA REVENDER */}
           <Section title={`💸 ${lang==="en"?"Best for Flip":"Melhor para Revender (Flip)"}`} icon="📈" borderColor="rgba(74,222,128,0.3)">
             <div style={{ background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)", borderRadius: 8, padding: "10px 14px", marginBottom: 12, fontSize: 11, color: dim, lineHeight: 1.7 }}>
-              📌 Insira o <strong style={{ color: blue }}>preço de compra</strong> (oferta mais barata no mkt) e o <strong style={{ color: orange }}>preço de venda</strong> (campo Preço Mkt na tabela acima). O ranking mostra qual tem maior margem.
+              📌 {lang==="en"?<>Enter the <strong style={{ color: blue }}>buy price</strong> (cheapest offer on the market) and the <strong style={{ color: orange }}>sell price</strong> (Market Price field in the table above). The ranking shows which has the highest margin.</>:<>Insira o <strong style={{ color: blue }}>preço de compra</strong> (oferta mais barata no mkt) e o <strong style={{ color: orange }}>preço de venda</strong> (campo Preço Mkt na tabela acima). O ranking mostra qual tem maior margem.</>}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
               <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Taxa do mercado:</label>
