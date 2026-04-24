@@ -2621,9 +2621,16 @@ export default function App() {
                           {/* Crafts → Oversupply (100%) */}
                           <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
                             {craftOversupply >= 100
-                              ? <span style={{ color: red, fontSize: 10 }}>já em OS</span>
+                              ? <span style={{ color: red, fontSize: 10 }}>{lang==="en"?"already in OS":TR[lang].osAlready}</span>
                               : item.craftsParaOS !== null
-                                ? <span style={{ color: orange, fontWeight: "bold" }}>{fmtInt(item.craftsParaOS)}</span>
+                                ? <div>
+                                    <span style={{ color: orange, fontWeight: "bold" }}>{fmtInt(item.craftsParaOS)}</span>
+                                    {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
+                                      <div key={matNome} style={{ fontSize: 9, color: "rgba(96,165,250,0.55)", marginTop: 2 }}>
+                                        ↳ {fmtInt(item.craftsParaOS * sc.craftsNeeded)} {matNome}
+                                      </div>
+                                    ))}
+                                  </div>
                                 : <span style={{ color: TEXT_DIM }}>—</span>}
                           </td>
 
@@ -2632,7 +2639,14 @@ export default function App() {
                             {craftOversupply >= 100
                               ? <span style={{ color: TEXT_DIM }}>—</span>
                               : item.profitAteOS !== null
-                                ? <span style={{ color: pc(item.profitAteOS), fontWeight: "bold" }}>{item.profitAteOS >= 0 ? "+" : ""}{fmtInt(item.profitAteOS)}</span>
+                                ? <div>
+                                    <span style={{ color: pc(item.profitAteOS), fontWeight: "bold" }}>{item.profitAteOS >= 0 ? "+" : ""}{fmtInt(item.profitAteOS)}</span>
+                                    {item.expSubcrafts > 0 && item.craftsParaOS !== null && (
+                                      <div style={{ fontSize: 9, color: blue, marginTop: 2 }}>
+                                        +{fmtInt(item.craftsParaOS * item.expSubcrafts)} EXP sub
+                                      </div>
+                                    )}
+                                  </div>
                                 : <span style={{ color: TEXT_DIM }}>—</span>}
                           </td>
 
@@ -2641,7 +2655,14 @@ export default function App() {
                             {craftOversupply >= 500
                               ? <span style={{ color: red, fontSize: 10 }}>MAX</span>
                               : item.craftsParaMax !== null
-                                ? <span style={{ color: TEXT_DIM }}>{fmtInt(item.craftsParaMax)}</span>
+                                ? <div>
+                                    <span style={{ color: TEXT_DIM }}>{fmtInt(item.craftsParaMax)}</span>
+                                    {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
+                                      <div key={matNome} style={{ fontSize: 9, color: "rgba(96,165,250,0.35)", marginTop: 2 }}>
+                                        ↳ {fmtInt(item.craftsParaMax * sc.craftsNeeded)} {matNome}
+                                      </div>
+                                    ))}
+                                  </div>
                                 : <span style={{ color: TEXT_DIM }}>—</span>}
                           </td>
 
@@ -2650,7 +2671,14 @@ export default function App() {
                             {craftOversupply >= 500
                               ? <span style={{ color: TEXT_DIM }}>—</span>
                               : item.profitAteMax !== null
-                                ? <span style={{ color: pc(item.profitAteMax) }}>{item.profitAteMax >= 0 ? "+" : ""}{fmtInt(item.profitAteMax)}</span>
+                                ? <div>
+                                    <span style={{ color: pc(item.profitAteMax) }}>{item.profitAteMax >= 0 ? "+" : ""}{fmtInt(item.profitAteMax)}</span>
+                                    {item.expSubcrafts > 0 && item.craftsParaMax !== null && (
+                                      <div style={{ fontSize: 9, color: "rgba(96,165,250,0.35)", marginTop: 2 }}>
+                                        +{fmtInt(item.craftsParaMax * item.expSubcrafts)} EXP sub
+                                      </div>
+                                    )}
+                                  </div>
                                 : <span style={{ color: TEXT_DIM }}>—</span>}
                           </td>
                         </tr>
