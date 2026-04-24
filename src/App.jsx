@@ -1147,6 +1147,9 @@ export default function App() {
   const [craftMaterialPrices, setCraftMaterialPrices] = useState({});
   const [craftSubcat, setCraftSubcat]           = useState("all");
   const [subcraftToggles, setSubcraftToggles]   = useState({});
+  const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});  // { "Prof|ItemNome": true } = pagar tax em QUEST
+  const [taxDescQUEST, setTaxDescQUEST]         = useState(20);  // % de desconto ao pagar tax em QUEST
+  const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});  // toggle tax em QUEST por item
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
   // Função de logout
@@ -1447,6 +1450,9 @@ export default function App() {
         if (s.craftMaterialPrices !== undefined) setCraftMaterialPrices(s.craftMaterialPrices);
         if (s.gemPrices !== undefined) setGemPrices(s.gemPrices);
         if (s.subcraftToggles !== undefined) setSubcraftToggles(s.subcraftToggles);
+        if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
+        if (s.taxDescQUEST !== undefined) setTaxDescQUEST(s.taxDescQUEST);
+        if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
         if (s.taxMktCrafting !== undefined) setTaxMktCrafting(s.taxMktCrafting);
@@ -1480,7 +1486,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxDescQUEST,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1499,7 +1505,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxDescQUEST,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -2312,6 +2318,12 @@ export default function App() {
         // Materiais únicos (excluindo isGemstone — exibidos separadamente)
         const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.filter(m => !m.isGemstone).map(m => m.nome)))].sort();
 
+        // ── Tax QUEST por item ────────────────────────────────────────────────
+        const tqKey       = (itemNome) => `${craftProfTab}|${itemNome}|taxQUEST`;
+        const isTaxQUEST  = (itemNome) => taxQUESTToggles[tqKey(itemNome)] || false;
+        const toggleTQ    = (itemNome) => setTaxQUESTToggles(p => ({ ...p, [tqKey(itemNome)]: !p[tqKey(itemNome)] }));
+        const calcTaxQUEST = (taxSilver) => (taxSilver * (1 - taxDescQUEST / 100)) / questToSilver;
+
         // ── Sub-craft helpers ────────────────────────────────────────────────
         // Procura a receita de um material em qualquer profissão do DB
         const findRecipe = (matNome) => {
@@ -2373,8 +2385,14 @@ export default function App() {
           });
 
           const expTotal   = item.exp + expSubcrafts;
-          const taxReal    = item.baseTax * (1 + extraTaxPct / 100);
-          const custoTotal = custoMateriais + taxReal;
+          const taxBase        = item.baseTax * (1 + extraTaxPct / 100);
+          const taxQUESTAtivo  = isTaxQUEST(item.nome);
+          // Modo QUEST: desconto de taxDescQUEST% na tax, pago em QUEST
+          const taxSilver      = taxQUESTAtivo ? 0 : taxBase;
+          const taxQUEST_valor = taxQUESTAtivo ? (taxBase * (1 - taxDescQUEST / 100)) / questToSilver : 0;
+          // Para custoTotal comparativo, convertemos taxQUEST de volta para silver equivalente
+          const taxReal        = taxQUESTAtivo ? taxBase * (1 - taxDescQUEST / 100) : taxBase;
+          const custoTotal     = custoMateriais + taxReal;
           const precoVenda = getCraftPrice(item.nome);
           const receitaTotal = applyMkt(precoVenda * item.qty, taxMktCrafting);
           const temDados   = precoVenda > 0 && custoMateriais > 0;
@@ -2390,7 +2408,7 @@ export default function App() {
           const profitAteOS    = margem !== null && craftsParaOS !== null ? margem * craftsParaOS : null;
           const profitAteMax   = margem !== null && craftsParaMax !== null ? margem * craftsParaMax : null;
 
-          return { ...item, custoMateriais, expTotal, expSubcrafts, subcraftInfo, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
+          return { ...item, custoMateriais, expTotal, expSubcrafts, subcraftInfo, taxReal, taxSilver, taxQUEST_valor, taxQUESTAtivo, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
         });
 
         const comDados  = calc.filter(i => i.temDados);
@@ -2405,7 +2423,7 @@ export default function App() {
             <Section title="Crafting — Oversupply Calculator" icon="⚒️" borderColor="rgba(196,160,80,0.4)">
 
               {/* CONFIG TOPO */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 16, marginBottom: 20, alignItems: "start" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 16, marginBottom: 20, alignItems: "start" }}>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Nível do Player</div>
                   <NumInput value={craftPlayerLevel} onChange={v => setCraftPlayerLevel(Math.max(1, Math.min(100, v)))} min={1} max={100}
@@ -2418,6 +2436,14 @@ export default function App() {
                     style={{ background: BG_CARD, border: `1px solid ${craftOversupply >= 200 ? "rgba(248,113,113,0.5)" : craftOversupply >= 100 ? "rgba(251,146,60,0.5)" : "rgba(74,222,128,0.4)"}`, borderRadius: 6, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
                   <div style={{ fontSize: 10, color: craftOversupply >= 200 ? red : craftOversupply >= 100 ? orange : green, marginTop: 4 }}>
                     Tax extra: +{extraTaxPct}% {craftOversupply === 0 ? TR[lang].osPenalty : craftOversupply >= 500 ? "🔴 MAX" : ""}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>{lang==="en"?"QUEST tax discount (%)":"Desconto tax QUEST (%)"}</div>
+                  <NumInput value={taxDescQUEST} onChange={v => setTaxDescQUEST(Math.max(0, Math.min(100, v)))} min={0} max={100}
+                    style={{ background: BG_CARD, border: "1px solid rgba(167,139,250,0.3)", borderRadius: 6, color: purple, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                  <div style={{ fontSize: 10, color: "rgba(167,139,250,0.5)", marginTop: 4 }}>
+                    {lang==="en"?"Click S/Q per row to toggle":"Clique S/Q por linha para alternar"}
                   </div>
                 </div>
                 <div>
@@ -2544,7 +2570,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {["Nv", "Item", "Qtd", lang==="en"?"Mat. Cost":"Custo Mat.", `Tax (+${extraTaxPct}%)`, lang==="en"?"Total Cost":"Custo Total", lang==="en"?"Sell Price (un)":"Preço Venda (un)", lang==="en"?"Revenue":"Receita", lang==="en"?"Margin":"Margem", lang==="en"?"Margin %":"Margem %", "Silver/EXP", "Crafts → OS", lang==="en"?"Profit to OS":"Profit até OS", "Crafts → MAX", lang==="en"?"Profit to MAX":"Profit até MAX"].map(h => (
+                      {["Nv", "Item", "Qtd", lang==="en"?"Mat. Cost":"Custo Mat.", `Tax S/Q (+${extraTaxPct}%)`, lang==="en"?"Total Cost":"Custo Total", lang==="en"?"Sell Price (un)":"Preço Venda (un)", lang==="en"?"Revenue":"Receita", lang==="en"?"Margin":"Margem", lang==="en"?"Margin %":"Margem %", "Silver/EXP", "Crafts → OS", lang==="en"?"Profit to OS":"Profit até OS", "Crafts → MAX", lang==="en"?"Profit to MAX":"Profit até MAX"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
@@ -2596,7 +2622,27 @@ export default function App() {
                             {item.custoMateriais > 0 ? fmtInt(item.custoMateriais) : "—"}
                           </td>
                           <td style={{ padding: "7px 8px", textAlign: "right", color: extraTaxPct > 0 ? red : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
-                            {fmtInt(item.taxReal)} <span style={{ fontSize: 9, color: TEXT_DIM }}>(+{fmtInt(item.taxReal - item.baseTax)})</span>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6 }}>
+                              {/* Toggle Silver/QUEST */}
+                              <button onClick={() => toggleTQ(item.nome)}
+                                title={item.taxQUESTAtivo ? (lang==="en"?"Pay tax in Silver":"Pagar tax em Silver") : (lang==="en"?"Pay tax in QUEST (-20%)":"Pagar tax em QUEST (-20%)")}
+                                style={{ background: item.taxQUESTAtivo ? "rgba(167,139,250,0.2)" : "rgba(255,255,255,0.05)", border: `1px solid ${item.taxQUESTAtivo ? "rgba(167,139,250,0.5)" : "rgba(255,255,255,0.1)"}`, borderRadius: 3, color: item.taxQUESTAtivo ? purple : TEXT_DIM, padding: "1px 5px", cursor: "pointer", fontSize: 9, fontFamily: "'Space Mono',monospace", lineHeight: 1.4 }}>
+                                {item.taxQUESTAtivo ? "Q" : "S"}
+                              </button>
+                              <div style={{ textAlign: "right" }}>
+                                {item.taxQUESTAtivo ? (
+                                  <>
+                                    <div style={{ color: purple, fontSize: 11 }}>{item.taxQUEST_valor.toFixed(4)} Q</div>
+                                    <div style={{ color: green, fontSize: 9 }}>-{taxDescQUEST}% {lang==="en"?"disc.":"desc."}</div>
+                                  </>
+                                ) : (
+                                  <>
+                                    {fmtInt(item.taxReal)}
+                                    <span style={{ fontSize: 9, color: TEXT_DIM }}> (+{fmtInt(item.taxReal - item.baseTax)})</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
                           </td>
                           <td style={{ padding: "7px 8px", textAlign: "right", color: item.custoMateriais > 0 ? orange : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
                             {item.custoMateriais > 0 ? fmtInt(item.custoTotal) : "—"}
