@@ -560,7 +560,7 @@ function TaxToggle({ label, active, onChange, detail }) {
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: active ? "rgba(196,160,80,0.06)" : "rgba(0,0,0,0.2)", border: `1px solid ${active ? "rgba(196,160,80,0.25)" : "rgba(255,255,255,0.05)"}`, borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
       <div>
         <div style={{ fontSize: 11, color: active ? "#f0e6c8" : "#606070", fontFamily: "'Space Mono', monospace" }}>{label}</div>
-        {detail && <div style={{ fontSize: 10, color: active ? "rgba(196,160,80,0.6)" : "#404050", marginTop: 3 }}>{detail}</div>}
+        {detail && <div style={{ fontSize: 10, color: active ? "rgba(196,160,80,0.6)" : "rgba(143,160,184,0.45)", marginTop: 3 }}>{detail}</div>}
       </div>
       <div onClick={() => onChange(!active)} style={{ width: 36, height: 20, borderRadius: 10, background: active ? "#c4a050" : "#303040", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
         <div style={{ position: "absolute", top: 3, left: active ? 18 : 3, width: 14, height: 14, borderRadius: "50%", background: "#fff", transition: "left 0.2s" }} />
@@ -593,7 +593,7 @@ function SaquePanel({ taxSaqueAtivo, setTaxSaqueAtivo, taxSaquePct, setTaxSaqueP
             <div style={{ fontSize: 10, color: "#8fa0b8", marginBottom: 4 }}>Fee Credit (QUEST)</div>
             <NumInput value={feeCredit} onChange={setFeeCredit} min={0}
               style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, color: "#4ade80", padding: "6px 10px", fontSize: 12, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
-            <div style={{ fontSize: 9, color: "#404050", marginTop: 3 }}>{lang === "en" ? "QUEST exempt from tax" : "QUEST isentos de taxa"}</div>
+            <div style={{ fontSize: 9, color: "rgba(143,160,184,0.45)", marginTop: 3 }}>{lang === "en" ? "QUEST exempt from tax" : "QUEST isentos de taxa"}</div>
           </div>
         </div>
       )}
@@ -786,100 +786,235 @@ const TEXT_PRIM  = "#e0eaf8";
 const TEXT_DIM   = "#8fa0b8";
 
 // ── CRAFTING DATABASE ─────────────────────────────────────────────────────
+// ── CRAFTING DATABASE ─────────────────────────────────────────────────────
+// materiais: [{ nome, qtd, isGemstone? }]
+// subcategoria: para agrupamento visual na tabela
+const GEMSTONE_NAMES = ["Amethyst", "Topaz", "Emerald", "Ruby", "Sapphire", "Citrine"];
+
 const CRAFTING_DB = {
-  Alchemy: [
-    { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   exp: 187,  qty: 3, materiais: [{ nome: "Refreshing Leaf", qtd: 6 }, { nome: "Earthy Stem", qtd: 4 }, { nome: "Purified Alcohol", qtd: 1 }] },
-    { nome: "Lesser Strengthening Tonic", nivel: 5,  baseTax: 66,   exp: 275,  qty: 3, materiais: [{ nome: "Refreshing Leaf", qtd: 8 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Purified Oil", qtd: 1 }] },
-    { nome: "Lesser Enlightenment Tonic", nivel: 6,  baseTax: 59,   exp: 243,  qty: 3, materiais: [{ nome: "Cerulean Cap", qtd: 6 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
-    { nome: "Lesser Rejuvenation Tonic",  nivel: 7,  baseTax: 90,   exp: 375,  qty: 3, materiais: [{ nome: "Toadchew", qtd: 8 }, { nome: "Fungal Dust", qtd: 12 }, { nome: "Purified Oil", qtd: 1 }] },
-    { nome: "Lesser Wellspring Tonic",    nivel: 8,  baseTax: 68,   exp: 281,  qty: 3, materiais: [{ nome: "Cerulean Cap", qtd: 8 }, { nome: "Fungal Dust", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
-    { nome: "Lesser Mountainheart Tonic", nivel: 9,  baseTax: 105,  exp: 437,  qty: 3, materiais: [{ nome: "Pirate's Bliss", qtd: 8 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Oil", qtd: 1 }] },
-    { nome: "Lesser Arcana Tonic",        nivel: 11, baseTax: 87,   exp: 362,  qty: 3, materiais: [{ nome: "Juicy Stem", qtd: 8 }, { nome: "Emerald Spores", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
-    { nome: "Lesser Champion's Tonic",   nivel: 14, baseTax: 122,  exp: 506,  qty: 3, materiais: [{ nome: "Brightday", qtd: 8 }, { nome: "Shimmering Spores", qtd: 10 }, { nome: "Purified Oil", qtd: 1 }] },
-    { nome: "Arcane Energy Tonic",        nivel: 16, baseTax: 150,  exp: 625,  qty: 3, materiais: [{ nome: "Lesser Arcane Energy Tonic", qtd: 1 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 14 }, { nome: "Acid", qtd: 1 }] },
-    { nome: "Strengthening Tonic",        nivel: 17, baseTax: 150,  exp: 625,  qty: 3, materiais: [{ nome: "Lesser Strengthening Tonic", qtd: 1 }, { nome: "Shimmering Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
-    { nome: "Enlightenment Tonic",        nivel: 19, baseTax: 168,  exp: 700,  qty: 3, materiais: [{ nome: "Lesser Enlightenment Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 8 }, { nome: "Thorny Roots", qtd: 8 }, { nome: "Alkali", qtd: 1 }] },
-    { nome: "Rejuvenation Tonic",         nivel: 21, baseTax: 198,  exp: 825,  qty: 3, materiais: [{ nome: "Lesser Rejuvenation Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Green Cap", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
-    { nome: "Wellspring Tonic",           nivel: 22, baseTax: 203,  exp: 843,  qty: 3, materiais: [{ nome: "Lesser Wellspring Tonic", qtd: 1 }, { nome: "Pirate's Cap", qtd: 14 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Acid", qtd: 1 }] },
-    { nome: "Mountainheart Tonic",        nivel: 24, baseTax: 213,  exp: 887,  qty: 3, materiais: [{ nome: "Lesser Mountainheart Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Alkali", qtd: 1 }] },
-    { nome: "Arcana Tonic",               nivel: 27, baseTax: 300,  exp: 1250, qty: 3, materiais: [{ nome: "Lesser Arcana Tonic", qtd: 1 }, { nome: "Brightday", qtd: 24 }, { nome: "Fungal Dust", qtd: 30 }, { nome: "Alkali", qtd: 1 }] },
-    { nome: "Champion's Tonic",          nivel: 28, baseTax: 315,  exp: 1312, qty: 3, materiais: [{ nome: "Lesser Champion's Tonic", qtd: 1 }, { nome: "Toadchew", qtd: 20 }, { nome: "Juicy Stem", qtd: 26 }, { nome: "Acid", qtd: 1 }] },
-    { nome: "Mana Surge Tonic",           nivel: 35, baseTax: 324,  exp: 1350, qty: 3, materiais: [{ nome: "Wellspring Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Dry Stem", qtd: 12 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Nimble Grace Tonic",         nivel: 35, baseTax: 360,  exp: 1500, qty: 3, materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Mighty Impact Tonic",        nivel: 37, baseTax: 408,  exp: 1700, qty: 3, materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Numbing Thorns", qtd: 12 }, { nome: "Juicy Stem", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Iron Will Tonic",            nivel: 45, baseTax: 414,  exp: 1725, qty: 3, materiais: [{ nome: "Strengthening Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Chest Warmer", qtd: 6 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Profound Insight Tonic",     nivel: 48, baseTax: 609,  exp: 2537, qty: 3, materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Rejuvenation Tonic", qtd: 1 }, { nome: "Lizard's Delight", qtd: 24 }, { nome: "Chest Warmer", qtd: 14 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Light of Dawn Tonic",        nivel: 51, baseTax: 567,  exp: 2362, qty: 3, materiais: [{ nome: "Enlightenment Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Hagthorn", qtd: 10 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Arcane Mastery Tonic",       nivel: 55, baseTax: 684,  exp: 2850, qty: 3, materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Twisted Flower", qtd: 10 }, { nome: "Hagthorn", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Dark Pact Tonic",            nivel: 57, baseTax: 585,  exp: 2437, qty: 3, materiais: [{ nome: "Light of Dawn Tonic", qtd: 1 }, { nome: "Catalytic Solution", qtd: 6 }, { nome: "Bloody Chalice", qtd: 20 }, { nome: "Acid", qtd: 4 }] },
-    { nome: "Chillguard Tonic",           nivel: 59, baseTax: 900,  exp: 3750, qty: 3, materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 20 }, { nome: "Cold Roots", qtd: 20 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Burning Aegis Tonic",        nivel: 61, baseTax: 1008, exp: 4200, qty: 3, materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 16 }, { nome: "Fire Cap", qtd: 18 }, { nome: "Catalytic Solution", qtd: 1 }] },
-    { nome: "Wealthbringer's Tonic",     nivel: 70, baseTax: 1152, exp: 4800, qty: 1, materiais: [{ nome: "Brightday", qtd: 52 }, { nome: "Ambar Dust", qtd: 40 }, { nome: "Core Essence", qtd: 1 }] },
-    { nome: "Purifying Tonic",            nivel: 70, baseTax: 720,  exp: 3000, qty: 1, materiais: [{ nome: "Chest Warmer", qtd: 16 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Core Essence", qtd: 1 }] },
-    { nome: "Serendipity Draught",        nivel: 78, baseTax: 2334, exp: 9725, qty: 1, materiais: [{ nome: "Wealthbringer's Tonic", qtd: 1 }, { nome: "Tonic of Forbidden Knowledge", qtd: 1 }, { nome: "Mixing Agent", qtd: 2 }] },
-  ],
   Blacksmithing: [
-    { nome: "Copper Ingot",     nivel: 1,  baseTax: 29,  exp: 120,  qty: 1, materiais: [{ nome: "Copper Ore", qtd: 5 }] },
-    { nome: "Bronze Ingot",     nivel: 10, baseTax: 40,  exp: 165,  qty: 1, materiais: [{ nome: "Copper Ore", qtd: 2 }, { nome: "Tin Ore", qtd: 3 }] },
-    { nome: "Iron Ingot",       nivel: 20, baseTax: 48,  exp: 200,  qty: 1, materiais: [{ nome: "Iron Ore", qtd: 5 }] },
-    { nome: "Steel Ingot",      nivel: 30, baseTax: 69,  exp: 287,  qty: 1, materiais: [{ nome: "Iron Ore", qtd: 5 }, { nome: "Coal", qtd: 2 }] },
-    { nome: "Cobalt Ingot",     nivel: 50, baseTax: 99,  exp: 412,  qty: 1, materiais: [{ nome: "Cobalt Ore", qtd: 5 }, { nome: "Coal", qtd: 3 }] },
-    { nome: "Titanium Ingot",   nivel: 70, baseTax: 156, exp: 650,  qty: 1, materiais: [{ nome: "Titanium Ore", qtd: 5 }, { nome: "Coal", qtd: 4 }] },
-    { nome: "Glimmery Ingot",   nivel: 88, baseTax: 480, exp: 2000, qty: 1, materiais: [{ nome: "Titanium Ingot", qtd: 6 }, { nome: "Cobalt Ingot", qtd: 4 }, { nome: "Binding Aether", qtd: 1 }] },
-    { nome: "Copper Whetstone", nivel: 1,  baseTax: 38,  exp: 157,  qty: 1, materiais: [{ nome: "Copper Ingot", qtd: 2 }, { nome: "Small Log", qtd: 4 }] },
-    { nome: "Bronze Whetstone", nivel: 10, baseTax: 75,  exp: 312,  qty: 1, materiais: [{ nome: "Bronze Ingot", qtd: 2 }, { nome: "Rough Plank", qtd: 2 }] },
-    { nome: "Iron Whetstone",   nivel: 20, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Iron Ingot", qtd: 2 }, { nome: "Rough Plank", qtd: 3 }] },
-    { nome: "Steel Whetstone",  nivel: 30, baseTax: 146, exp: 608,  qty: 1, materiais: [{ nome: "Steel Ingot", qtd: 2 }, { nome: "Refined Plank", qtd: 2 }] },
-    { nome: "Dense Whetstone",  nivel: 50, baseTax: 197, exp: 820,  qty: 1, materiais: [{ nome: "Cobalt Ingot", qtd: 2 }, { nome: "Treated Plank", qtd: 2 }] },
-    { nome: "Fishing Hook T1",  nivel: 1,  baseTax: 15,  exp: 62,   qty: 1, materiais: [{ nome: "Copper Ingot", qtd: 1 }, { nome: "Small Log", qtd: 2 }] },
-    { nome: "Fishing Hook T2",  nivel: 20, baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Iron Ingot", qtd: 1 }, { nome: "Refined Plank", qtd: 1 }] },
-    { nome: "Fishing Hook T3",  nivel: 40, baseTax: 98,  exp: 408,  qty: 1, materiais: [{ nome: "Steel Ingot", qtd: 1 }, { nome: "Treated Plank", qtd: 1 }, { nome: "Coal", qtd: 2 }] },
+    // ── Ingots ──────────────────────────────────────────────────────────────
+    { nome: "Copper Ingot",   nivel: 1,  baseTax: 29,  exp: 120,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Copper Ore", qtd: 5 }] },
+    { nome: "Bronze Ingot",   nivel: 10, baseTax: 40,  exp: 165,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Copper Ore", qtd: 2 }, { nome: "Tin Ore", qtd: 3 }] },
+    { nome: "Iron Ingot",     nivel: 20, baseTax: 48,  exp: 200,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Iron Ore", qtd: 5 }] },
+    { nome: "Steel Ingot",    nivel: 30, baseTax: 69,  exp: 287,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Iron Ore", qtd: 5 }, { nome: "Coal", qtd: 2 }] },
+    { nome: "Cobalt Ingot",   nivel: 50, baseTax: 99,  exp: 412,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Cobalt Ore", qtd: 5 }, { nome: "Coal", qtd: 3 }] },
+    { nome: "Titanium Ingot", nivel: 70, baseTax: 156, exp: 650,  qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Titanium Ore", qtd: 5 }, { nome: "Coal", qtd: 4 }] },
+    { nome: "Glimmery Ingot", nivel: 88, baseTax: 480, exp: 2000, qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Titanium Ingot", qtd: 6 }, { nome: "Cobalt Ingot", qtd: 4 }, { nome: "Binding Aether", qtd: 1 }] },
+    { nome: "Radiant Ingot",  nivel: 98, baseTax: 660, exp: 2750, qty: 1, subcategoria: "Ingots",      materiais: [{ nome: "Titanium Ingot", qtd: 5 }, { nome: "Cobalt Ingot", qtd: 12 }, { nome: "Radiant Catalyst", qtd: 2 }] },
+    // ── Whetstones ──────────────────────────────────────────────────────────
+    { nome: "Whetstone",        nivel: 3,  baseTax: 36,  exp: 150,  qty: 5, subcategoria: "Whetstones", materiais: [{ nome: "Stone", qtd: 10 }] },
+    { nome: "Coarse Whetstone", nivel: 18, baseTax: 102, exp: 425,  qty: 5, subcategoria: "Whetstones", materiais: [{ nome: "Stone", qtd: 15 }, { nome: "Coal", qtd: 4 }] },
+    { nome: "Heavy Whetstone",  nivel: 33, baseTax: 207, exp: 862,  qty: 5, subcategoria: "Whetstones", materiais: [{ nome: "Stone Block", qtd: 5 }, { nome: "Coal", qtd: 6 }] },
+    { nome: "Solid Whetstone",  nivel: 48, baseTax: 539, exp: 2243, qty: 5, subcategoria: "Whetstones", materiais: [{ nome: "Stone Block", qtd: 10 }, { nome: "Coal", qtd: 8 }, { nome: "Gemstone Dust", qtd: 1 }] },
+    { nome: "Dense Whetstone",  nivel: 70, baseTax: 845, exp: 3518, qty: 5, subcategoria: "Whetstones", materiais: [{ nome: "Dense Block", qtd: 5 }, { nome: "Coal", qtd: 8 }, { nome: "Gemstone Dust", qtd: 2 }] },
+    // ── Blocks ──────────────────────────────────────────────────────────────
+    { nome: "Stone Block", nivel: 10, baseTax: 24,  exp: 100, qty: 1, subcategoria: "Blocks", materiais: [{ nome: "Stone", qtd: 20 }] },
+    { nome: "Dense Block", nivel: 30, baseTax: 56,  exp: 230, qty: 1, subcategoria: "Blocks", materiais: [{ nome: "Stone", qtd: 40 }, { nome: "Coal", qtd: 2 }] },
+    // ── Components ──────────────────────────────────────────────────────────
+    { nome: "Nail",               nivel: 2,  baseTax: 10,  exp: 40,   qty: 1, subcategoria: "Components", materiais: [{ nome: "Copper Ingot", qtd: 1 }] },
+    { nome: "Malleable Screw",    nivel: 20, baseTax: 14,  exp: 55,   qty: 1, subcategoria: "Components", materiais: [{ nome: "Bronze Ingot", qtd: 1 }] },
+    { nome: "Iron Bar",           nivel: 20, baseTax: 48,  exp: 200,  qty: 1, subcategoria: "Components", materiais: [{ nome: "Iron Ingot", qtd: 1 }] },
+    { nome: "Bolt",               nivel: 30, baseTax: 24,  exp: 97,   qty: 1, subcategoria: "Components", materiais: [{ nome: "Steel Ingot", qtd: 1 }] },
+    { nome: "Steel Bar",          nivel: 45, baseTax: 45,  exp: 187,  qty: 1, subcategoria: "Components", materiais: [{ nome: "Steel Ingot", qtd: 2 }] },
+    { nome: "Arcane Reflector",   nivel: 10, baseTax: 66,  exp: 275,  qty: 1, subcategoria: "Components", materiais: [{ nome: "Bronze Ingot", qtd: 5 }] },
+    { nome: "Common Plate",       nivel: 4,  baseTax: 300, exp: 1250, qty: 1, subcategoria: "Components", materiais: [{ nome: "Copper Ingot", qtd: 10 }, { nome: "Rough Plank", qtd: 10 }, { nome: "Nail", qtd: 10 }] },
+    { nome: "Reinforced Plate",   nivel: 20, baseTax: 765, exp: 3187, qty: 2, subcategoria: "Components", materiais: [{ nome: "Iron Ingot", qtd: 15 }, { nome: "Refined Plank", qtd: 15 }, { nome: "Malleable Screw", qtd: 10 }] },
+    { nome: "Basic Field Tools",  nivel: 50, baseTax: 480, exp: 2000, qty: 3, subcategoria: "Components", materiais: [{ nome: "Bronze Ingot", qtd: 15 }] },
+    // ── Special ─────────────────────────────────────────────────────────────
+    { nome: "Gemstone Dust", nivel: 10, baseTax: 240, exp: 10000, qty: 1, subcategoria: "Special", materiais: [{ nome: "Cheap Gemstone", qtd: 1, isGemstone: true }] },
   ],
+
   Cooking: [
-    { nome: "Vodka",              nivel: 1,  baseTax: 30,   exp: 125,  qty: 5, materiais: [{ nome: "Potato", qtd: 10 }] },
-    { nome: "Beer",               nivel: 5,  baseTax: 69,   exp: 287,  qty: 5, materiais: [{ nome: "Wheat", qtd: 8 }] },
-    { nome: "Landing Brandy",     nivel: 10, baseTax: 113,  exp: 468,  qty: 5, materiais: [{ nome: "Apple", qtd: 2 }] },
-    { nome: "Wine",               nivel: 20, baseTax: 180,  exp: 750,  qty: 5, materiais: [{ nome: "Grape", qtd: 8 }, { nome: "Brewer Yeast", qtd: 2 }] },
-    { nome: "Whiskey",            nivel: 22, baseTax: 219,  exp: 912,  qty: 5, materiais: [{ nome: "Corn", qtd: 12 }, { nome: "Brewer Yeast", qtd: 1 }] },
-    { nome: "Orange Liqueur",     nivel: 30, baseTax: 450,  exp: 1875, qty: 5, materiais: [{ nome: "Orange", qtd: 4 }, { nome: "Brewer Yeast", qtd: 1 }] },
-    { nome: "Rum",                nivel: 32, baseTax: 399,  exp: 1662, qty: 5, materiais: [{ nome: "Apple", qtd: 6 }, { nome: "Brewer Yeast", qtd: 2 }] },
-    { nome: "Blueberry Wine",     nivel: 40, baseTax: 578,  exp: 2406, qty: 5, materiais: [{ nome: "Grape", qtd: 20 }, { nome: "Blueberry", qtd: 40 }, { nome: "Brewer Yeast", qtd: 2 }] },
-    { nome: "Boozemelon",         nivel: 42, baseTax: 612,  exp: 2550, qty: 5, materiais: [{ nome: "Watermelon", qtd: 6 }, { nome: "Pumpkin", qtd: 2 }, { nome: "Brewer Yeast", qtd: 3 }] },
-    { nome: "Spiced Rum",         nivel: 55, baseTax: 936,  exp: 3900, qty: 5, materiais: [{ nome: "Apple", qtd: 12 }, { nome: "Pepper", qtd: 12 }, { nome: "Brewer Yeast", qtd: 2 }] },
-    { nome: "Banana Vodka",       nivel: 57, baseTax: 981,  exp: 4087, qty: 5, materiais: [{ nome: "Potato", qtd: 50 }, { nome: "Banana", qtd: 10 }, { nome: "Brewer Yeast", qtd: 2 }] },
-    { nome: "Strawberry Whiskey", nivel: 72, baseTax: 1890, exp: 7875, qty: 5, materiais: [{ nome: "Corn", qtd: 48 }, { nome: "Strawberry", qtd: 70 }, { nome: "Brewer Yeast", qtd: 7 }, { nome: "Honey", qtd: 20 }] },
-    { nome: "Fermented Liquor",   nivel: 78, baseTax: 2160, exp: 9000, qty: 5, materiais: [{ nome: "Herbal Alcohol", qtd: 1 }, { nome: "Watermelon", qtd: 10 }, { nome: "Brewer Yeast", qtd: 5 }] },
+    // ── Ingredientes ────────────────────────────────────────────────────────
+    { nome: "Oil",                    nivel: 1,  baseTax: 32,   exp: 131,   qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Corn", qtd: 6 }] },
+    { nome: "Fermented Potato Pulp",  nivel: 1,  baseTax: 33,   exp: 137,   qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Potato", qtd: 32 }] },
+    { nome: "Basic Seasoning",        nivel: 5,  baseTax: 52,   exp: 215,   qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Salt", qtd: 1 }, { nome: "Chicken", qtd: 2 }] },
+    { nome: "Seafood Seasoning",      nivel: 5,  baseTax: 36,   exp: 150,   qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Salt", qtd: 1 }, { nome: "Orange Scales", qtd: 5 }] },
+    { nome: "Ground Flour (Corn)",    nivel: 10, baseTax: 216,  exp: 900,   qty: 20, subcategoria: "Ingredientes", materiais: [{ nome: "Corn", qtd: 42 }] },
+    { nome: "Ground Flour (Wheat)",   nivel: 10, baseTax: 108,  exp: 450,   qty: 10, subcategoria: "Ingredientes", materiais: [{ nome: "Wheat", qtd: 38 }] },
+    { nome: "Collagen",               nivel: 11, baseTax: 141,  exp: 587,   qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Shank", qtd: 10 }] },
+    { nome: "Butter",                 nivel: 15, baseTax: 128,  exp: 531,   qty: 2,  subcategoria: "Ingredientes", materiais: [{ nome: "Milk", qtd: 14 }] },
+    { nome: "Brewer Yeast",           nivel: 20, baseTax: 150,  exp: 625,   qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Orange Scales", qtd: 20 }, { nome: "Wheat", qtd: 28 }] },
+    { nome: "Gourmet Seasoning",      nivel: 25, baseTax: 180,  exp: 750,   qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Salt", qtd: 8 }, { nome: "Onion", qtd: 8 }] },
+    { nome: "Fermented Corn Pulp",    nivel: 35, baseTax: 195,  exp: 812,   qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Corn", qtd: 28 }, { nome: "Fish Roe", qtd: 9 }] },
+    { nome: "Concentrated Collagen",  nivel: 39, baseTax: 411,  exp: 1712,  qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Collagen", qtd: 10 }, { nome: "Shank", qtd: 16 }] },
+    { nome: "Rich Flour",             nivel: 45, baseTax: 720,  exp: 3000,  qty: 20, subcategoria: "Ingredientes", materiais: [{ nome: "Ground Flour (Corn)", qtd: 10 }, { nome: "Three-Leaf-Clover", qtd: 6 }] },
+    { nome: "Spiced Oil",             nivel: 62, baseTax: 1128, exp: 4700,  qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Oil", qtd: 6 }, { nome: "Pepper", qtd: 12 }, { nome: "Three-Leaf-Clover", qtd: 4 }] },
+    { nome: "Spicy Seasoning",        nivel: 65, baseTax: 1050, exp: 4375,  qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Salt", qtd: 8 }, { nome: "Pepper", qtd: 20 }, { nome: "Three-Leaf-Clover", qtd: 8 }] },
+    { nome: "Fermented Wheat Pulp",   nivel: 65, baseTax: 411,  exp: 1712,  qty: 1,  subcategoria: "Ingredientes", materiais: [{ nome: "Wheat", qtd: 70 }, { nome: "Fish Oil", qtd: 25 }] },
+    { nome: "Herbal Alcohol",         nivel: 75, baseTax: 1200, exp: 5000,  qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Foreign Alcohol", qtd: 4 }, { nome: "Three-Leaf-Clover", qtd: 8 }] },
+    { nome: "Puff Pastry",            nivel: 75, baseTax: 1200, exp: 5000,  qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Rich Flour", qtd: 70 }, { nome: "Butter", qtd: 10 }, { nome: "Cheese", qtd: 4 }] },
+    { nome: "Vegetable Broth",        nivel: 75, baseTax: 1200, exp: 5000,  qty: 5,  subcategoria: "Ingredientes", materiais: [{ nome: "Onion", qtd: 20 }, { nome: "Bean", qtd: 20 }, { nome: "Spiced Oil", qtd: 3 }] },
+    // ── Bebidas ─────────────────────────────────────────────────────────────
+    { nome: "Vodka",             nivel: 1,  baseTax: 30,   exp: 125,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Potato", qtd: 10 }] },
+    { nome: "Beer",              nivel: 5,  baseTax: 69,   exp: 287,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Wheat", qtd: 8 }] },
+    { nome: "Landing Brandy",    nivel: 10, baseTax: 113,  exp: 468,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Apple", qtd: 2 }] },
+    { nome: "Apple Cider",       nivel: 17, baseTax: 150,  exp: 625,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Apple", qtd: 2 }, { nome: "Wheat", qtd: 4 }] },
+    { nome: "Wine",              nivel: 20, baseTax: 180,  exp: 750,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Grape", qtd: 8 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Whisky",            nivel: 22, baseTax: 219,  exp: 912,  qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Corn", qtd: 12 }, { nome: "Brewer Yeast", qtd: 1 }] },
+    { nome: "Orange Liqueur",    nivel: 30, baseTax: 450,  exp: 1875, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Orange", qtd: 4 }, { nome: "Brewer Yeast", qtd: 1 }] },
+    { nome: "Rum",               nivel: 32, baseTax: 399,  exp: 1662, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Apple", qtd: 6 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Blueberry Wine",    nivel: 40, baseTax: 578,  exp: 2406, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Grape", qtd: 20 }, { nome: "Blueberry", qtd: 40 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Boozemelon",        nivel: 42, baseTax: 612,  exp: 2550, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Watermelon", qtd: 6 }, { nome: "Pumpkin", qtd: 2 }, { nome: "Brewer Yeast", qtd: 3 }] },
+    { nome: "Spiced Rum",        nivel: 55, baseTax: 936,  exp: 3900, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Apple", qtd: 12 }, { nome: "Pepper", qtd: 12 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Banana Vodka",      nivel: 57, baseTax: 981,  exp: 4087, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Potato", qtd: 50 }, { nome: "Banana", qtd: 10 }, { nome: "Brewer Yeast", qtd: 2 }] },
+    { nome: "Eclipse",           nivel: 70, baseTax: 1680, exp: 7000, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Moonberry", qtd: 26 }, { nome: "Sunberry", qtd: 26 }, { nome: "Brewer Yeast", qtd: 4 }] },
+    { nome: "Strawberry Whisky", nivel: 72, baseTax: 1890, exp: 7875, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Corn", qtd: 48 }, { nome: "Strawberry", qtd: 70 }, { nome: "Brewer Yeast", qtd: 7 }, { nome: "Honey", qtd: 20 }] },
+    { nome: "Fermented Liquor",  nivel: 78, baseTax: 2160, exp: 9000, qty: 5, subcategoria: "Bebidas", materiais: [{ nome: "Herbal Alcohol", qtd: 1 }, { nome: "Watermelon", qtd: 10 }, { nome: "Brewer Yeast", qtd: 5 }] },
+    // ── Assados ─────────────────────────────────────────────────────────────
+    { nome: "Baked Potatoes",     nivel: 2,  baseTax: 42,   exp: 175,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Potato", qtd: 14 }] },
+    { nome: "Corn on a Cob",      nivel: 3,  baseTax: 60,   exp: 250,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Corn", qtd: 4 }] },
+    { nome: "Potato Bread",       nivel: 4,  baseTax: 68,   exp: 281,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Potato", qtd: 12 }, { nome: "Corn", qtd: 2 }] },
+    { nome: "Sajecho Hardtack",   nivel: 13, baseTax: 96,   exp: 400,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 6 }, { nome: "Orange Scales", qtd: 3 }] },
+    { nome: "Rohna Crackers",     nivel: 14, baseTax: 129,  exp: 537,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 6 }, { nome: "Butter", qtd: 1 }] },
+    { nome: "Glademire Crackers", nivel: 15, baseTax: 128,  exp: 531,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 9 }, { nome: "Basic Seasoning", qtd: 3 }] },
+    { nome: "Bun",                nivel: 20, baseTax: 204,  exp: 850,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 8 }, { nome: "Basic Seasoning", qtd: 1 }, { nome: "Milk", qtd: 4 }] },
+    { nome: "Loaf Bread",         nivel: 21, baseTax: 216,  exp: 900,  qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 13 }, { nome: "Basic Seasoning", qtd: 2 }, { nome: "Milk", qtd: 2 }] },
+    { nome: "Cookies",            nivel: 22, baseTax: 351,  exp: 1462, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 8 }, { nome: "Basic Seasoning", qtd: 1 }, { nome: "Butter", qtd: 4 }] },
+    { nome: "Scone",              nivel: 25, baseTax: 324,  exp: 1350, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 4 }, { nome: "Milk", qtd: 10 }, { nome: "Basic Seasoning", qtd: 1 }] },
+    { nome: "Cornbread",          nivel: 26, baseTax: 360,  exp: 1500, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 15 }, { nome: "Corn", qtd: 12 }, { nome: "Basic Seasoning", qtd: 1 }] },
+    { nome: "Deluxe Cookies",     nivel: 27, baseTax: 309,  exp: 1287, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 12 }, { nome: "Butter", qtd: 2 }, { nome: "Salt", qtd: 1 }] },
+    { nome: "Muffin",             nivel: 35, baseTax: 473,  exp: 1968, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 10 }, { nome: "Milk", qtd: 4 }, { nome: "Honey", qtd: 12 }] },
+    { nome: "Bagel",              nivel: 36, baseTax: 410,  exp: 1706, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 12 }, { nome: "Egg", qtd: 4 }, { nome: "Basic Seasoning", qtd: 3 }] },
+    { nome: "Cake",               nivel: 37, baseTax: 540,  exp: 2250, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Ground Flour (Corn)", qtd: 14 }, { nome: "Milk", qtd: 10 }, { nome: "Egg", qtd: 9 }] },
+    { nome: "Croissant",          nivel: 50, baseTax: 798,  exp: 3325, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 8 }, { nome: "Butter", qtd: 6 }, { nome: "Honey", qtd: 6 }] },
+    { nome: "Sourdough Bagel",    nivel: 51, baseTax: 813,  exp: 3387, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 13 }, { nome: "Milk", qtd: 10 }, { nome: "Gourmet Seasoning", qtd: 2 }] },
+    { nome: "Deluxe Cake",        nivel: 52, baseTax: 918,  exp: 3825, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 15 }, { nome: "Milk", qtd: 8 }, { nome: "Egg", qtd: 8 }, { nome: "Honey", qtd: 2 }] },
+    { nome: "Danish",             nivel: 70, baseTax: 1668, exp: 6950, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 16 }, { nome: "Butter", qtd: 10 }, { nome: "Honey", qtd: 16 }, { nome: "Strawberry", qtd: 16 }] },
+    { nome: "Rye Bread",          nivel: 71, baseTax: 1785, exp: 7437, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 14 }, { nome: "Butter", qtd: 6 }, { nome: "Egg", qtd: 20 }, { nome: "Pea", qtd: 50 }] },
+    { nome: "Pie",                nivel: 72, baseTax: 1932, exp: 8050, qty: 5, subcategoria: "Assados", materiais: [{ nome: "Rich Flour", qtd: 12 }, { nome: "Butter", qtd: 12 }, { nome: "Egg", qtd: 4 }, { nome: "Sunberry", qtd: 20 }] },
+    { nome: "Sunshine Muffin",    nivel: 77, baseTax: 2940, exp: 12250,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Sunberry", qtd: 16 }] },
+    { nome: "Luxury Pie",         nivel: 79, baseTax: 2940, exp: 12250,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Cherry", qtd: 8 }] },
+    { nome: "Posh Croissant",     nivel: 80, baseTax: 2880, exp: 12000,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Acorn", qtd: 4 }] },
+    { nome: "Softcrust Bun",      nivel: 82, baseTax: 3090, exp: 12875,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Milk", qtd: 16 }, { nome: "Honey", qtd: 12 }] },
+    { nome: "Caramel Biscuit",    nivel: 84, baseTax: 3090, exp: 12875,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Honey", qtd: 16 }, { nome: "Milk", qtd: 12 }] },
+    { nome: "Peacemaker Bread",   nivel: 85, baseTax: 2949, exp: 12287,qty: 5, subcategoria: "Assados", materiais: [{ nome: "Puff Pastry", qtd: 2 }, { nome: "Banana", qtd: 4 }, { nome: "Acorn", qtd: 2 }] },
+    // ── Refeições ────────────────────────────────────────────────────────────
+    { nome: "Apple Puree",                    nivel: 8,  baseTax: 113,  exp: 468,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Apple", qtd: 2 }] },
+    { nome: "Mashed Potatoes",                nivel: 8,  baseTax: 92,   exp: 381,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Potato", qtd: 20 }, { nome: "Basic Seasoning", qtd: 3 }] },
+    { nome: "Corn Chowder",                   nivel: 8,  baseTax: 99,   exp: 412,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Corn", qtd: 6 }, { nome: "Potato", qtd: 2 }] },
+    { nome: "Scrambled Eggs",                 nivel: 8,  baseTax: 92,   exp: 400,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Egg", qtd: 6 }, { nome: "Basic Seasoning", qtd: 1 }] },
+    { nome: "Lyderian Fries",                 nivel: 18, baseTax: 174,  exp: 725,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Potato", qtd: 26 }, { nome: "Oil", qtd: 3 }] },
+    { nome: "Silky Scrambled Eggs",           nivel: 18, baseTax: 179,  exp: 743,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Egg", qtd: 8 }, { nome: "Butter", qtd: 1 }] },
+    { nome: "Omelet",                         nivel: 18, baseTax: 177,  exp: 737,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Egg", qtd: 4 }, { nome: "Milk", qtd: 4 }, { nome: "Basic Seasoning", qtd: 1 }] },
+    { nome: "Carrot Soup",                    nivel: 18, baseTax: 186,  exp: 775,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Carrot", qtd: 12 }, { nome: "Potato", qtd: 4 }, { nome: "Chicken", qtd: 2 }] },
+    { nome: "Steamed Carrots",                nivel: 18, baseTax: 162,  exp: 675,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Carrot", qtd: 20 }, { nome: "Basic Seasoning", qtd: 4 }] },
+    { nome: "Fruit Pancakes",                 nivel: 20, baseTax: 224,  exp: 931,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Milk", qtd: 2 }, { nome: "Egg", qtd: 4 }, { nome: "Ground Flour (Corn)", qtd: 4 }, { nome: "Grape", qtd: 4 }] },
+    { nome: "Smoked Sausage",                 nivel: 21, baseTax: 206,  exp: 856,  qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Shank", qtd: 2 }, { nome: "Basic Seasoning", qtd: 3 }] },
+    { nome: "Charred Meat Kebab",             nivel: 22, baseTax: 240,  exp: 1000, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Beef", qtd: 4 }, { nome: "Carrot", qtd: 6 }, { nome: "Cabbage", qtd: 2 }] },
+    { nome: "Roasted Chicken and Veggies",    nivel: 23, baseTax: 288,  exp: 1200, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Chicken", qtd: 2 }, { nome: "Carrot", qtd: 2 }, { nome: "Cheese", qtd: 2 }] },
+    { nome: "Ravendawian Porridge",           nivel: 24, baseTax: 309,  exp: 1287, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Wheat", qtd: 10 }, { nome: "Apple", qtd: 2 }, { nome: "Milk", qtd: 4 }] },
+    { nome: "Rum Dowslider",                  nivel: 35, baseTax: 288,  exp: 1200, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Fish Roe", qtd: 10 }, { nome: "Cabbage", qtd: 8 }, { nome: "Basic Seasoning", qtd: 5 }] },
+    { nome: "Shaked Fruitmilk",               nivel: 36, baseTax: 501,  exp: 2087, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Milk", qtd: 12 }, { nome: "Strawberry", qtd: 6 }, { nome: "Blueberry", qtd: 30 }] },
+    { nome: "Settler's Stew",               nivel: 37, baseTax: 552,  exp: 2175, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Potato", qtd: 20 }, { nome: "Bean", qtd: 40 }, { nome: "Basic Seasoning", qtd: 4 }] },
+    { nome: "Dwarven Purple Shank",           nivel: 38, baseTax: 594,  exp: 2475, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Shank", qtd: 6 }, { nome: "Grape", qtd: 4 }, { nome: "Watermelon", qtd: 4 }] },
+    { nome: "Fillet Lucien",                  nivel: 39, baseTax: 606,  exp: 2525, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Beef", qtd: 10 }, { nome: "Ground Flour (Corn)", qtd: 3 }, { nome: "Egg", qtd: 2 }, { nome: "Pumpkin", qtd: 2 }] },
+    { nome: "Blueberry Pie",                  nivel: 50, baseTax: 792,  exp: 3300, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Butter", qtd: 5 }, { nome: "Rich Flour", qtd: 5 }, { nome: "Blueberry", qtd: 68 }] },
+    { nome: "Frozen Sweet Berries",           nivel: 51, baseTax: 864,  exp: 3600, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Blueberry", qtd: 24 }, { nome: "Cherry", qtd: 8 }, { nome: "Moonberry", qtd: 8 }] },
+    { nome: "Lucien's Waffles",             nivel: 52, baseTax: 893,  exp: 3718, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Corn", qtd: 12 }, { nome: "Egg", qtd: 16 }, { nome: "Rich Flour", qtd: 10 }, { nome: "Strawberry", qtd: 16 }] },
+    { nome: "Acornchar Sausage",              nivel: 53, baseTax: 798,  exp: 3325, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Shank", qtd: 10 }, { nome: "Gourmet Seasoning", qtd: 4 }, { nome: "Acorn", qtd: 2 }] },
+    { nome: "Freshfish Roll",                 nivel: 54, baseTax: 642,  exp: 2675, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Red Fish Roe", qtd: 14 }, { nome: "Cheese", qtd: 4 }, { nome: "Gourmet Seasoning", qtd: 2 }] },
+    { nome: "Sweetened Beans",                nivel: 65, baseTax: 1230, exp: 5125, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Bean", qtd: 36 }, { nome: "Apple", qtd: 10 }, { nome: "Banana", qtd: 4 }] },
+    { nome: "Firered Chicken Kebab",          nivel: 66, baseTax: 1293, exp: 5387, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Chicken", qtd: 16 }, { nome: "Garlic", qtd: 4 }, { nome: "Orange", qtd: 2 }, { nome: "Spicy Seasoning", qtd: 1 }] },
+    { nome: "Lyderian Chopped Tenderloin",    nivel: 67, baseTax: 1335, exp: 5562, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Beef", qtd: 16 }, { nome: "Garlic", qtd: 15 }, { nome: "Spicy Seasoning", qtd: 2 }] },
+    { nome: "Rohna Roasted Ham",              nivel: 68, baseTax: 1440, exp: 6000, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Shank", qtd: 20 }, { nome: "Spicy Seasoning", qtd: 2 }] },
+    { nome: "Sailor's Seastew",             nivel: 69, baseTax: 1241, exp: 5168, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Black Fish Roe", qtd: 10 }, { nome: "Broccoli", qtd: 20 }, { nome: "Pea", qtd: 32 }] },
+    { nome: "Bittersweet Roast",              nivel: 70, baseTax: 1710, exp: 7125, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Beef", qtd: 20 }, { nome: "Broccoli", qtd: 6 }, { nome: "Cherry", qtd: 10 }] },
+    { nome: "Shanks N' Mash",               nivel: 75, baseTax: 2136, exp: 8900, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Shank", qtd: 30 }, { nome: "Garlic", qtd: 30 }, { nome: "Milk", qtd: 16 }] },
+    { nome: "Iced Fruitmilk",                 nivel: 75, baseTax: 2100, exp: 8750, qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Milk", qtd: 20 }, { nome: "Orange", qtd: 10 }, { nome: "Sunberry", qtd: 10 }, { nome: "Moonberry", qtd: 6 }] },
+    { nome: "Exotic Stew",                    nivel: 81, baseTax: 8070, exp: 33625,qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Vegetable Broth", qtd: 2 }, { nome: "Basic Seasoning", qtd: 5 }, { nome: "Spiced Oil", qtd: 5 }, { nome: "Exotic Fin", qtd: 4 }] },
+    { nome: "Squidink",                       nivel: 86, baseTax: 3000, exp: 12500,qty: 5, subcategoria: "Refeições", materiais: [{ nome: "Vegetable Broth", qtd: 2 }, { nome: "Basic Seasoning", qtd: 5 }, { nome: "Black Fish Roe", qtd: 3 }, { nome: "Ink Sack", qtd: 3 }] },
+    // ── Iscas de Pesca ───────────────────────────────────────────────────────
+    { nome: "Gummy Wriggler",       nivel: 12, baseTax: 153,  exp: 637,  qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 1 }, { nome: "Carrot", qtd: 2 }] },
+    { nome: "Shrimp Bait",          nivel: 13, baseTax: 141,  exp: 587,  qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 1 }, { nome: "Exotic Fin", qtd: 3 }] },
+    { nome: "Catfish Bait",         nivel: 18, baseTax: 180,  exp: 750,  qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 1 }, { nome: "Jellyfish Remains", qtd: 3 }] },
+    { nome: "Gelatinous Pupa",      nivel: 23, baseTax: 492,  exp: 2050, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 2 }, { nome: "Orange", qtd: 2 }] },
+    { nome: "Tench Fish Bait",      nivel: 23, baseTax: 282,  exp: 1175, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 2 }, { nome: "Exotic Fin", qtd: 5 }] },
+    { nome: "Rainbow Fish Bait",    nivel: 28, baseTax: 336,  exp: 1400, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 2 }, { nome: "Stolen Spices", qtd: 3 }] },
+    { nome: "Scale Fish Bait",      nivel: 32, baseTax: 423,  exp: 1762, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 3 }, { nome: "Caudal Fin", qtd: 3 }] },
+    { nome: "Princess Fish Bait",   nivel: 37, baseTax: 480,  exp: 2000, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 3 }, { nome: "Narwhal Blubber", qtd: 3 }] },
+    { nome: "Plump Jellygrub",      nivel: 40, baseTax: 731,  exp: 3043, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Collagen", qtd: 3 }, { nome: "Banana", qtd: 4 }] },
+    { nome: "Sky Fish Bait",        nivel: 47, baseTax: 570,  exp: 2375, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 1 }, { nome: "Ink Sack", qtd: 3 }] },
+    { nome: "Star Fish Bait",       nivel: 57, baseTax: 630,  exp: 2625, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 1 }, { nome: "Foreign Alcohol", qtd: 3 }] },
+    { nome: "Blobby Beetle",        nivel: 61, baseTax: 984,  exp: 4100, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 1 }, { nome: "Moonberry", qtd: 22 }] },
+    { nome: "Rainbow Flounder Bait",nivel: 67, baseTax: 750,  exp: 3125, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 2 }, { nome: "Seahunter Eye", qtd: 3 }] },
+    { nome: "Chewy Jellyworm",      nivel: 75, baseTax: 1050, exp: 4375, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 2 }, { nome: "Sunberry", qtd: 10 }] },
+    { nome: "Tiger Shark Bait",     nivel: 77, baseTax: 1080, exp: 4500, qty: 50, subcategoria: "Iscas", materiais: [{ nome: "Concentrated Collagen", qtd: 2 }, { nome: "Orca Blubber", qtd: 3 }] },
+    // ── Ração Animal ─────────────────────────────────────────────────────────
+    { nome: "Basic Animal Feed",      nivel: 20, baseTax: 213,  exp: 887,  qty: 3, subcategoria: "Ração", materiais: [{ nome: "Shank", qtd: 12 }, { nome: "Cabbage", qtd: 4 }, { nome: "Carrot", qtd: 10 }] },
+    { nome: "Superior Ration",        nivel: 20, baseTax: 213,  exp: 887,  qty: 5, subcategoria: "Ração", materiais: [{ nome: "Basic Animal Feed", qtd: 3 }, { nome: "Moa Ration", qtd: 1 }] },
+    { nome: "Rustic Ration",          nivel: 30, baseTax: 438,  exp: 1825, qty: 5, subcategoria: "Ração", materiais: [{ nome: "Basic Animal Feed", qtd: 5 }, { nome: "Attachment Feather", qtd: 1 }, { nome: "Superior Ration", qtd: 2 }] },
+    { nome: "Gourmet Ration",         nivel: 40, baseTax: 660,  exp: 2750, qty: 5, subcategoria: "Ração", materiais: [{ nome: "Basic Animal Feed", qtd: 7 }, { nome: "Moa Ration", qtd: 1 }, { nome: "Rustic Ration", qtd: 2 }] },
+    { nome: "Complex Animal Feed",    nivel: 50, baseTax: 552,  exp: 2175, qty: 3, subcategoria: "Ração", materiais: [{ nome: "Beef", qtd: 20 }, { nome: "Broccoli", qtd: 10 }, { nome: "Pea", qtd: 8 }, { nome: "Pumpkin", qtd: 6 }] },
+    { nome: "Seafood Extravaganza",   nivel: 50, baseTax: 786,  exp: 3275, qty: 5, subcategoria: "Ração", materiais: [{ nome: "Complex Animal Feed", qtd: 3 }, { nome: "Attachment Feather", qtd: 1 }, { nome: "Gourmet Ration", qtd: 2 }] },
+    { nome: "Uncanny Ration",         nivel: 60, baseTax: 1185, exp: 4937, qty: 5, subcategoria: "Ração", materiais: [{ nome: "Complex Animal Feed", qtd: 5 }, { nome: "Moa Ration", qtd: 1 }, { nome: "Seafood Extravaganza", qtd: 2 }] },
+    { nome: "Moa's Delight",         nivel: 75, baseTax: 1692, exp: 7050, qty: 5, subcategoria: "Ração", materiais: [{ nome: "Complex Animal Feed", qtd: 7 }, { nome: "Attachment Feather", qtd: 2 }, { nome: "Uncanny Ration", qtd: 2 }] },
   ],
+
+  Alchemy: [
+    { nome: "Lesser Arcane Energy Tonic", nivel: 4,  baseTax: 45,   exp: 187,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Refreshing Leaf", qtd: 6 }, { nome: "Earthy Stem", qtd: 4 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Strengthening Tonic", nivel: 5,  baseTax: 66,   exp: 275,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Refreshing Leaf", qtd: 8 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Enlightenment Tonic", nivel: 6,  baseTax: 59,   exp: 243,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Cerulean Cap", qtd: 6 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Rejuvenation Tonic",  nivel: 7,  baseTax: 90,   exp: 375,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Toadchew", qtd: 8 }, { nome: "Fungal Dust", qtd: 12 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Wellspring Tonic",    nivel: 8,  baseTax: 68,   exp: 281,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Cerulean Cap", qtd: 8 }, { nome: "Fungal Dust", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Mountainheart Tonic", nivel: 9,  baseTax: 105,  exp: 437,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Pirate's Bliss", qtd: 8 }, { nome: "Refreshing Leaf", qtd: 6 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Lesser Arcana Tonic",        nivel: 11, baseTax: 87,   exp: 362,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Juicy Stem", qtd: 8 }, { nome: "Emerald Spores", qtd: 6 }, { nome: "Purified Alcohol", qtd: 1 }] },
+    { nome: "Lesser Champion's Tonic",   nivel: 14, baseTax: 122,  exp: 506,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Brightday", qtd: 8 }, { nome: "Shimmering Spores", qtd: 10 }, { nome: "Purified Oil", qtd: 1 }] },
+    { nome: "Arcane Energy Tonic",        nivel: 16, baseTax: 150,  exp: 625,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Arcane Energy Tonic", qtd: 1 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 14 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Strengthening Tonic",        nivel: 17, baseTax: 150,  exp: 625,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Strengthening Tonic", qtd: 1 }, { nome: "Shimmering Spores", qtd: 14 }, { nome: "Earthy Stem", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Enlightenment Tonic",        nivel: 19, baseTax: 168,  exp: 700,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Enlightenment Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 8 }, { nome: "Thorny Roots", qtd: 8 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Rejuvenation Tonic",         nivel: 21, baseTax: 198,  exp: 825,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Rejuvenation Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Green Cap", qtd: 12 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Wellspring Tonic",           nivel: 22, baseTax: 203,  exp: 843,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Wellspring Tonic", qtd: 1 }, { nome: "Pirate's Cap", qtd: 14 }, { nome: "Thin Roots", qtd: 8 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Mountainheart Tonic",        nivel: 24, baseTax: 213,  exp: 887,  qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Mountainheart Tonic", qtd: 1 }, { nome: "Juicy Roots", qtd: 16 }, { nome: "Emerald Spores", qtd: 14 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Arcana Tonic",               nivel: 27, baseTax: 300,  exp: 1250, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Arcana Tonic", qtd: 1 }, { nome: "Brightday", qtd: 24 }, { nome: "Fungal Dust", qtd: 30 }, { nome: "Alkali", qtd: 1 }] },
+    { nome: "Champion's Tonic",          nivel: 28, baseTax: 315,  exp: 1312, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Lesser Champion's Tonic", qtd: 1 }, { nome: "Toadchew", qtd: 20 }, { nome: "Juicy Stem", qtd: 26 }, { nome: "Acid", qtd: 1 }] },
+    { nome: "Mana Surge Tonic",           nivel: 35, baseTax: 324,  exp: 1350, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Wellspring Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Dry Stem", qtd: 12 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Nimble Grace Tonic",         nivel: 35, baseTax: 360,  exp: 1500, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Bloody Bud", qtd: 4 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Mighty Impact Tonic",        nivel: 37, baseTax: 408,  exp: 1700, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Champion's Tonic", qtd: 1 }, { nome: "Numbing Thorns", qtd: 12 }, { nome: "Juicy Stem", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Iron Will Tonic",            nivel: 45, baseTax: 414,  exp: 1725, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Strengthening Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Chest Warmer", qtd: 6 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Profound Insight Tonic",     nivel: 48, baseTax: 609,  exp: 2537, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Rejuvenation Tonic", qtd: 1 }, { nome: "Lizard's Delight", qtd: 24 }, { nome: "Chest Warmer", qtd: 14 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Light of Dawn Tonic",        nivel: 51, baseTax: 567,  exp: 2362, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Enlightenment Tonic", qtd: 1 }, { nome: "Glowing Spores", qtd: 16 }, { nome: "Hagthorn", qtd: 10 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Arcane Mastery Tonic",       nivel: 55, baseTax: 684,  exp: 2850, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Twisted Flower", qtd: 10 }, { nome: "Hagthorn", qtd: 16 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Dark Pact Tonic",            nivel: 57, baseTax: 585,  exp: 2437, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Light of Dawn Tonic", qtd: 1 }, { nome: "Catalytic Solution", qtd: 6 }, { nome: "Bloody Chalice", qtd: 20 }, { nome: "Acid", qtd: 4 }] },
+    { nome: "Chillguard Tonic",           nivel: 59, baseTax: 900,  exp: 3750, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Arcane Energy Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 20 }, { nome: "Cold Roots", qtd: 20 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Burning Aegis Tonic",        nivel: 61, baseTax: 1008, exp: 4200, qty: 3, subcategoria: "Elixir", materiais: [{ nome: "Arcana Tonic", qtd: 1 }, { nome: "Mountainheart Tonic", qtd: 1 }, { nome: "Dusk Dust", qtd: 16 }, { nome: "Fire Cap", qtd: 18 }, { nome: "Catalytic Solution", qtd: 1 }] },
+    { nome: "Wealthbringer's Tonic",     nivel: 70, baseTax: 1152, exp: 4800, qty: 1, subcategoria: "Elixir", materiais: [{ nome: "Brightday", qtd: 52 }, { nome: "Ambar Dust", qtd: 40 }, { nome: "Core Essence", qtd: 1 }] },
+    { nome: "Purifying Tonic",            nivel: 70, baseTax: 720,  exp: 3000, qty: 1, subcategoria: "Elixir", materiais: [{ nome: "Chest Warmer", qtd: 16 }, { nome: "Pirate's Bliss", qtd: 16 }, { nome: "Core Essence", qtd: 1 }] },
+    { nome: "Serendipity Draught",        nivel: 78, baseTax: 2334, exp: 9725, qty: 1, subcategoria: "Elixir", materiais: [{ nome: "Wealthbringer's Tonic", qtd: 1 }, { nome: "Tonic of Forbidden Knowledge", qtd: 1 }, { nome: "Mixing Agent", qtd: 2 }] },
+  ],
+
   Carpentry: [
-    { nome: "Rough Plank",   nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Small Log", qtd: 12 }] },
-    { nome: "Dense Plank",   nivel: 10, baseTax: 255, exp: 1062, qty: 1, materiais: [{ nome: "Dense Log", qtd: 8 }] },
-    { nome: "Refined Plank", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Heavy Log", qtd: 8 }] },
-    { nome: "Treated Plank", nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Heavy Log", qtd: 12 }, { nome: "Oil", qtd: 2 }] },
-    { nome: "Heavy Plank",   nivel: 30, baseTax: 534, exp: 2225, qty: 1, materiais: [{ nome: "Dense Log", qtd: 16 }, { nome: "Oil", qtd: 2 }] },
-    { nome: "Sturdy Plank",  nivel: 50, baseTax: 197, exp: 818,  qty: 1, materiais: [{ nome: "Sturdy Log", qtd: 10 }, { nome: "Oil", qtd: 4 }] },
-    { nome: "Fishing Rod T1",nivel: 5,  baseTax: 107, exp: 445,  qty: 1, materiais: [{ nome: "Rough Plank", qtd: 3 }, { nome: "Copper Ingot", qtd: 1 }, { nome: "Coarse Thread", qtd: 2 }] },
-    { nome: "Fishing Rod T2",nivel: 25, baseTax: 197, exp: 820,  qty: 1, materiais: [{ nome: "Refined Plank", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }, { nome: "Linen Cloth", qtd: 2 }] },
-    { nome: "Fishing Rod T3",nivel: 45, baseTax: 380, exp: 1583, qty: 1, materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Steel Ingot", qtd: 1 }, { nome: "Bolted Cloth", qtd: 2 }] },
-    { nome: "Short Bow",     nivel: 10, baseTax: 144, exp: 600,  qty: 1, materiais: [{ nome: "Rough Plank", qtd: 4 }, { nome: "Coarse Thread", qtd: 4 }] },
-    { nome: "Long Bow",      nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Refined Plank", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }] },
-    { nome: "Arcane Staff",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }, { nome: "Iron Ingot", qtd: 1 }] },
+    { nome: "Rough Plank",   nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, subcategoria: "Planks", materiais: [{ nome: "Small Log", qtd: 12 }] },
+    { nome: "Dense Plank",   nivel: 10, baseTax: 255, exp: 1062, qty: 1, subcategoria: "Planks", materiais: [{ nome: "Dense Log", qtd: 8 }] },
+    { nome: "Refined Plank", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, subcategoria: "Planks", materiais: [{ nome: "Heavy Log", qtd: 8 }] },
+    { nome: "Treated Plank", nivel: 25, baseTax: 165, exp: 687,  qty: 1, subcategoria: "Planks", materiais: [{ nome: "Heavy Log", qtd: 12 }, { nome: "Oil", qtd: 2 }] },
+    { nome: "Heavy Plank",   nivel: 30, baseTax: 534, exp: 2225, qty: 1, subcategoria: "Planks", materiais: [{ nome: "Dense Log", qtd: 16 }, { nome: "Oil", qtd: 2 }] },
+    { nome: "Sturdy Plank",  nivel: 50, baseTax: 197, exp: 818,  qty: 1, subcategoria: "Planks", materiais: [{ nome: "Sturdy Log", qtd: 10 }, { nome: "Oil", qtd: 4 }] },
+    { nome: "Fishing Rod T1",nivel: 5,  baseTax: 107, exp: 445,  qty: 1, subcategoria: "Fishing", materiais: [{ nome: "Rough Plank", qtd: 3 }, { nome: "Copper Ingot", qtd: 1 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Fishing Rod T2",nivel: 25, baseTax: 197, exp: 820,  qty: 1, subcategoria: "Fishing", materiais: [{ nome: "Refined Plank", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }, { nome: "Linen Cloth", qtd: 2 }] },
+    { nome: "Fishing Rod T3",nivel: 45, baseTax: 380, exp: 1583, qty: 1, subcategoria: "Fishing", materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Steel Ingot", qtd: 1 }, { nome: "Bolted Cloth", qtd: 2 }] },
+    { nome: "Short Bow",     nivel: 10, baseTax: 144, exp: 600,  qty: 1, subcategoria: "Weapons", materiais: [{ nome: "Rough Plank", qtd: 4 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Long Bow",      nivel: 30, baseTax: 285, exp: 1187, qty: 1, subcategoria: "Weapons", materiais: [{ nome: "Refined Plank", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Iron Ingot", qtd: 1 }] },
+    { nome: "Arcane Staff",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, subcategoria: "Weapons", materiais: [{ nome: "Treated Plank", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }, { nome: "Iron Ingot", qtd: 1 }] },
   ],
+
   Weaving: [
-    { nome: "Coarse Thread",  nivel: 1,  baseTax: 19,  exp: 78,   qty: 1, materiais: [{ nome: "Cotton", qtd: 4 }] },
-    { nome: "Linen Cloth",    nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, materiais: [{ nome: "Cotton", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
-    { nome: "Tanned Leather", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, materiais: [{ nome: "Rawhide", qtd: 6 }] },
-    { nome: "Thick Leather",  nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 3 }, { nome: "Tallow", qtd: 2 }] },
-    { nome: "Bolted Cloth",   nivel: 25, baseTax: 165, exp: 687,  qty: 1, materiais: [{ nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
-    { nome: "Silk",           nivel: 50, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Silkworm Cocoon", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
-    { nome: "Tanned Silk",    nivel: 50, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Silk", qtd: 2 }, { nome: "Tallow", qtd: 3 }] },
-    { nome: "Light Armor T2", nivel: 20, baseTax: 210, exp: 875,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
-    { nome: "Light Armor T3", nivel: 40, baseTax: 405, exp: 1687, qty: 1, materiais: [{ nome: "Thick Leather", qtd: 4 }, { nome: "Bolted Cloth", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }] },
-    { nome: "Moa Saddle T1",  nivel: 10, baseTax: 144, exp: 600,  qty: 1, materiais: [{ nome: "Tanned Leather", qtd: 5 }, { nome: "Coarse Thread", qtd: 4 }] },
-    { nome: "Moa Saddle T2",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, materiais: [{ nome: "Thick Leather", qtd: 5 }, { nome: "Bolted Cloth", qtd: 2 }, { nome: "Linen Cloth", qtd: 2 }] },
+    { nome: "Coarse Thread",  nivel: 1,  baseTax: 19,  exp: 78,   qty: 1, subcategoria: "Thread",  materiais: [{ nome: "Cotton", qtd: 4 }] },
+    { nome: "Linen Cloth",    nivel: 1,  baseTax: 53,  exp: 220,  qty: 1, subcategoria: "Cloth",   materiais: [{ nome: "Cotton", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Tanned Leather", nivel: 10, baseTax: 96,  exp: 400,  qty: 1, subcategoria: "Leather", materiais: [{ nome: "Rawhide", qtd: 6 }] },
+    { nome: "Thick Leather",  nivel: 25, baseTax: 165, exp: 687,  qty: 1, subcategoria: "Leather", materiais: [{ nome: "Tanned Leather", qtd: 3 }, { nome: "Tallow", qtd: 2 }] },
+    { nome: "Bolted Cloth",   nivel: 25, baseTax: 165, exp: 687,  qty: 1, subcategoria: "Cloth",   materiais: [{ nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Silk",           nivel: 50, baseTax: 285, exp: 1187, qty: 1, subcategoria: "Cloth",   materiais: [{ nome: "Silkworm Cocoon", qtd: 8 }, { nome: "Coarse Thread", qtd: 2 }] },
+    { nome: "Tanned Silk",    nivel: 50, baseTax: 285, exp: 1187, qty: 1, subcategoria: "Cloth",   materiais: [{ nome: "Silk", qtd: 2 }, { nome: "Tallow", qtd: 3 }] },
+    { nome: "Light Armor T2", nivel: 20, baseTax: 210, exp: 875,  qty: 1, subcategoria: "Armors",  materiais: [{ nome: "Tanned Leather", qtd: 4 }, { nome: "Linen Cloth", qtd: 3 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Light Armor T3", nivel: 40, baseTax: 405, exp: 1687, qty: 1, subcategoria: "Armors",  materiais: [{ nome: "Thick Leather", qtd: 4 }, { nome: "Bolted Cloth", qtd: 3 }, { nome: "Linen Cloth", qtd: 2 }] },
+    { nome: "Moa Saddle T1",  nivel: 10, baseTax: 144, exp: 600,  qty: 1, subcategoria: "Moa",     materiais: [{ nome: "Tanned Leather", qtd: 5 }, { nome: "Coarse Thread", qtd: 4 }] },
+    { nome: "Moa Saddle T2",  nivel: 30, baseTax: 285, exp: 1187, qty: 1, subcategoria: "Moa",     materiais: [{ nome: "Thick Leather", qtd: 5 }, { nome: "Bolted Cloth", qtd: 2 }, { nome: "Linen Cloth", qtd: 2 }] },
   ],
 };
 
-const PROF_ICONS = { Alchemy: "⚗️", Blacksmithing: "⚒️", Cooking: "🍳", Carpentry: "🪵", Weaving: "🧵" };
+const PROF_ICONS = { Blacksmithing: "⚒️", Cooking: "🍳", Alchemy: "⚗️", Carpentry: "🪵", Weaving: "🧵" };
 
 const PACKS = {
   "Pickled Vegetables": { materiais: [
@@ -954,7 +1089,7 @@ function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, co
         />
         {suffix && <span style={{ color: gold, fontSize: 12, whiteSpace: "nowrap" }}>{suffix}</span>}
       </div>
-      {hint && <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>{hint}</div>}
+      {hint && <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 3 }}>{hint}</div>}
     </div>
   );
 }
@@ -1007,9 +1142,11 @@ export default function App() {
   // Estados de Crafting / Oversupply
   const [craftPlayerLevel, setCraftPlayerLevel] = useState(50);
   const [craftOversupply, setCraftOversupply]   = useState(0);
-  const [craftProfTab, setCraftProfTab]         = useState("Alchemy");
+  const [craftProfTab, setCraftProfTab]         = useState("Blacksmithing");
   const [craftPrices, setCraftPrices]           = useState({});
   const [craftMaterialPrices, setCraftMaterialPrices] = useState({});
+  const [craftSubcat, setCraftSubcat]           = useState("all");
+  const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
   // Função de logout
   const handleLogout = async () => {
@@ -1307,6 +1444,7 @@ export default function App() {
         if (s.craftOversupply !== undefined) setCraftOversupply(s.craftOversupply);
         if (s.craftPrices !== undefined) setCraftPrices(s.craftPrices);
         if (s.craftMaterialPrices !== undefined) setCraftMaterialPrices(s.craftMaterialPrices);
+        if (s.gemPrices !== undefined) setGemPrices(s.gemPrices);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
         if (s.taxMktCrafting !== undefined) setTaxMktCrafting(s.taxMktCrafting);
@@ -1340,7 +1478,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1359,7 +1497,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -1614,21 +1752,21 @@ export default function App() {
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secFazendoPacks2}</div>
             <div style={{ color: green, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: green, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + silver + QUEST ✅":"Expedição + silver + QUEST ✅"}</div>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + silver + QUEST ✅":"Expedição + silver + QUEST ✅"}</div>
           </div>
           {/* Vendendo materiais */}
           <div style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secVendendo2}</div>
             <div style={{ color: orange, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: orange, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + market sale ✅":"Expedição + venda no mkt ✅"}</div>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + market sale ✅":"Expedição + venda no mkt ✅"}</div>
           </div>
           {/* Diferença */}
           <div style={{ background: r.diferenca_mes >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferenca_mes >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>📊 Diferença de Estratégia</div>
             <div style={{ color: pc(r.diferenca_mes), fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.diferenca_mes >= 0 ? "+" : ""}{fmtUSD(r.diferenca_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: pc(r.diferenca_sem), fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>{r.diferenca_sem >= 0 ? "+" : ""}{fmtUSD(r.diferenca_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "#505060", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>
               {r.diferenca_mes >= 0 ? lang==="en"?"Pack worthwhile ✅":"Pack compensa ✅" : lang==="en"?"Selling mats is better ❌":"Vender mat. é melhor ❌"}
             </div>
           </div>
@@ -1670,7 +1808,7 @@ export default function App() {
                   <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
                   <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px" }}>
                     <div style={{ color: green, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{fmtInt(imPorPack)}</div>
-                    <div style={{ color: "#505060", fontSize: 10, marginTop: 2 }}>{fmtInt(silverPorPack)} silver × 10 (prime)</div>
+                    <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 2 }}>{fmtInt(silverPorPack)} silver × 10 (prime)</div>
                   </div>
                 </div>
               </div>
@@ -1690,12 +1828,12 @@ export default function App() {
                     <span style={{ color: "#c0c0d0", fontFamily: "'Space Mono', monospace" }}>{r.packsNormais} × {fmtInt(r.imBase)} = {fmtInt(r.imNormalTotal)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: qtdEnhanced > 0 ? gold : "#404050" }}>🔮 Enhanced (×2)</span>
-                    <span style={{ color: qtdEnhanced > 0 ? gold : "#404050", fontFamily: "'Space Mono', monospace" }}>{r.enhancedVal} × {fmtInt(r.imBase * 2)} = {fmtInt(r.imEnhancedTotal)}</span>
+                    <span style={{ color: qtdEnhanced > 0 ? gold : "rgba(143,160,184,0.45)" }}>🔮 Enhanced (×2)</span>
+                    <span style={{ color: qtdEnhanced > 0 ? gold : "rgba(143,160,184,0.45)", fontFamily: "'Space Mono', monospace" }}>{r.enhancedVal} × {fmtInt(r.imBase * 2)} = {fmtInt(r.imEnhancedTotal)}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: qtdPlunder > 0 ? red : "#404050" }}>⚔️ Plunder (+15%)</span>
-                    <span style={{ color: qtdPlunder > 0 ? red : "#404050", fontFamily: "'Space Mono', monospace" }}>{r.plunderVal} packs → +{fmtInt(r.imPlunderTotal)} bônus</span>
+                    <span style={{ color: qtdPlunder > 0 ? red : "rgba(143,160,184,0.45)" }}>⚔️ Plunder (+15%)</span>
+                    <span style={{ color: qtdPlunder > 0 ? red : "rgba(143,160,184,0.45)", fontFamily: "'Space Mono', monospace" }}>{r.plunderVal} packs → +{fmtInt(r.imPlunderTotal)} bônus</span>
                   </div>
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 6, display: "flex", justifyContent: "space-between" }}>
                     <span style={{ color: gold, fontWeight: "bold" }}>{TR[lang].totalIM}</span>
@@ -1730,7 +1868,7 @@ export default function App() {
                 ].map((b, i) => (
                   <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: i < 3 ? 6 : 0 }}>
                     <span style={{ color: b.color, fontSize: 12 }}>{b.label}</span>
-                    <span style={{ color: "#505060", fontSize: 11 }}>{b.sub}</span>
+                    <span style={{ color: "rgba(143,160,184,0.55)", fontSize: 11 }}>{b.sub}</span>
                   </div>
                 ))}
               </div>
@@ -1805,7 +1943,7 @@ export default function App() {
                 <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>{TR[lang].poolRate} ({lang === "en" ? "calculated via calibration" : "calculado via calibração"})</label>
                 <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ color: green, fontSize: 14, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{poolRate.toFixed(8)}</span>
-                  <span style={{ color: "#404050", fontSize: 10 }}>QUEST ÷ IM Total · atualize via aba Calibração</span>
+                  <span style={{ color: "rgba(143,160,184,0.45)", fontSize: 10 }}>QUEST ÷ IM Total · atualize via aba Calibração</span>
                 </div>
               </div>
 
@@ -1908,7 +2046,7 @@ export default function App() {
                   <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Horas/dia:</span>
                   <NumInput value={huntHorasDia} onChange={v => setHuntHorasDia(v)} min={1} max={24}
                     style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${red}55`, borderRadius: 6, color: red, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
-                  <span style={{ color: "#404050", fontSize: 10 }}>horas de hunt por dia</span>
+                  <span style={{ color: "rgba(143,160,184,0.45)", fontSize: 10 }}>horas de hunt por dia</span>
                 </div>
 
                 {/* Cards de projeção hunt */}
@@ -1963,7 +2101,7 @@ export default function App() {
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                     <NumInput value={v.preco} onChange={val => setOre(nome, "preco", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: 6, color: orange, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                    <span style={{ color: v.qtd * v.preco > 0 ? green : "rgba(143,160,184,0.45)", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
                 ))}
 
@@ -1976,7 +2114,7 @@ export default function App() {
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 6, color: "#f0e6c8", padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
                     <NumInput value={v.preco} onChange={val => setGem(nome, "preco", val)} min={0}
                       style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 6, color: purple, padding: "5px 8px", fontSize: 11, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none" }} />
-                    <span style={{ color: v.qtd * v.preco > 0 ? green : "#404050", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
+                    <span style={{ color: v.qtd * v.preco > 0 ? green : "rgba(143,160,184,0.45)", fontSize: 10, fontFamily: "'Space Mono', monospace", textAlign: "right" }}>{fmtInt(v.qtd * v.preco)}</span>
                   </div>
                 ))}
 
@@ -1987,7 +2125,7 @@ export default function App() {
                   <span style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{TR[lang].huntHours}:</span>
                   <NumInput value={mineHorasDia} onChange={v => setMineHorasDia(v)} min={1} max={24}
                     style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${blue}55`, borderRadius: 6, color: blue, padding: "6px 12px", fontSize: 14, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
-                  <span style={{ color: "#404050", fontSize: 10 }}>{lang==="en"?"hours of mining per day":"horas de mineração por dia"}</span>
+                  <span style={{ color: "rgba(143,160,184,0.45)", fontSize: 10 }}>{lang==="en"?"hours of mining per day":"horas de mineração por dia"}</span>
                 </div>
 
                 {/* Cards projeção mine — usa mesmos toggles do Hunt */}
@@ -2032,7 +2170,7 @@ export default function App() {
                     {a.isUSD ? fmtUSD(a.dia) : fmtUSD(toUSD(a.dia, a.exch, taxSaqueAtivo))}
                     <span style={{ fontSize: 9 }}>/{lang==="en"?"day":"dia"}</span>
                   </div>
-                  <div style={{ color: "#404050", fontSize: 10, marginTop: 4 }}>
+                  <div style={{ color: "rgba(143,160,184,0.45)", fontSize: 10, marginTop: 4 }}>
                     {a.isUSD ? fmtUSD(a.hora) : fmtUSD(toUSD(a.hora, a.exch, taxSaqueAtivo))}
                     <span style={{ fontSize: 9 }}>/{lang==="en"?"hour":"hora"}</span>
                   </div>
@@ -2081,7 +2219,7 @@ export default function App() {
                         <button onClick={() => toggleQUEST(m.nome)} style={{
                           background: comQUEST ? "rgba(167,139,250,0.25)" : "rgba(0,0,0,0.3)",
                           border: `1px solid ${comQUEST ? "rgba(167,139,250,0.6)" : "rgba(255,255,255,0.1)"}`,
-                          borderRadius: 6, color: comQUEST ? purple : "#404050",
+                          borderRadius: 6, color: comQUEST ? purple : "rgba(143,160,184,0.45)",
                           padding: "4px 10px", cursor: "pointer", fontSize: 11,
                           fontFamily: "'Space Mono', monospace", transition: "all 0.15s",
                         }}>
@@ -2140,18 +2278,35 @@ export default function App() {
       {/* TAB: CALIBRAÇÃO */}
       {tab === "crafting" && (() => {
         const extraTaxPct = Math.min(100, Math.floor(craftOversupply / 10) * 2);
-        const itens = CRAFTING_DB[craftProfTab] || [];
+        const itens = (CRAFTING_DB[craftProfTab] || []).filter(i =>
+          !craftSubcat || craftSubcat === "all" || (i.subcategoria || "Geral") === craftSubcat
+        );
 
-        // Extrai materiais únicos da profissão atual
-        const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.map(m => m.nome)))].sort();
+        // Cheapest gemstone helper
+        const cheapestGem = () => {
+          const entries = Object.entries(gemPrices).filter(([, v]) => v > 0);
+          if (!entries.length) return { nome: "—", preco: 0 };
+          return entries.reduce((a, b) => a[1] < b[1] ? a : b, entries[0])
+            .reduce ? { nome: entries[0][0], preco: entries[0][1] }
+            : (() => { const [nome, preco] = entries.reduce((a, b) => a[1] < b[1] ? a : b); return { nome, preco }; })();
+        };
 
-        const getMatPreco = (nome) => craftMaterialPrices[craftProfTab + "|" + nome] || 0;
+        const getMatPreco = (mat) => {
+          if (mat.isGemstone) return cheapestGem().preco;
+          return craftMaterialPrices[craftProfTab + "|" + mat.nome] || 0;
+        };
         const setMatPreco = (nome, val) => setCraftMaterialPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
         const getCraftPrice = (nome) => craftPrices[craftProfTab + "|" + nome] || 0;
         const setCraftPrice = (nome, val) => setCraftPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
 
+        // Materiais únicos (excluindo isGemstone — exibidos separadamente)
+        const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.filter(m => !m.isGemstone).map(m => m.nome)))].sort();
+
+        // Subcategorias únicas na ordem em que aparecem
+        const subcats = [...new Set(itens.map(i => i.subcategoria || "Geral"))];
+
         const calc = itens.map(item => {
-          const custoMateriais = item.materiais.reduce((acc, m) => acc + m.qtd * getMatPreco(m.nome), 0);
+          const custoMateriais = item.materiais.reduce((acc, m) => acc + m.qtd * getMatPreco(m), 0);
           const taxReal        = item.baseTax * (1 + extraTaxPct / 100);
           const custoTotal     = custoMateriais + taxReal;
           const precoVenda     = getCraftPrice(item.nome);
@@ -2250,6 +2405,31 @@ export default function App() {
               )}
 
               {/* PREÇOS DE MATERIAIS */}
+              {/* GEMSTONES — só exibe se a profissão tem Gemstone Dust */}
+              {itens.some(i => i.materiais.some(m => m.isGemstone)) && (
+                <div style={{ background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 10, padding: "14px 18px", marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, color: purple, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>
+                    💎 {lang==="en"?"Gemstone Prices — cheapest used automatically in Gemstone Dust":"Preços das Joias — a mais barata é usada automaticamente no Gemstone Dust"}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
+                    {GEMSTONE_NAMES.map(gem => {
+                      const filled = Object.entries(gemPrices).filter(([,v]) => v > 0);
+                      const isCheapest = filled.length > 0 && gem === filled.reduce((a, b) => a[1] < b[1] ? a : b)[0];
+                      return (
+                        <div key={gem} style={{ display: "flex", alignItems: "center", gap: 8, background: isCheapest ? "rgba(167,139,250,0.12)" : BG_SURFACE, border: `1px solid ${isCheapest ? "rgba(167,139,250,0.5)" : "rgba(255,255,255,0.05)"}`, borderRadius: 7, padding: "6px 10px" }}>
+                          <div style={{ flex: 1, fontSize: 11, color: isCheapest ? purple : TEXT_DIM }}>{gem}{isCheapest && " ✓"}</div>
+                          <NumInput value={gemPrices[gem]} onChange={v => setGemPrices(p => ({ ...p, [gem]: v }))} min={0}
+                            style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 4, color: purple, padding: "4px 8px", fontSize: 11, width: 80, fontFamily: "'Space Mono',monospace", outline: "none", textAlign: "right" }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {Object.values(gemPrices).every(v => v === 0) && (
+                    <div style={{ fontSize: 10, color: red, marginTop: 8 }}>⚠️ {lang==="en"?"Enter at least one gemstone price to calculate Gemstone Dust cost":"Insira ao menos uma joia para calcular o custo do Gemstone Dust"}</div>
+                  )}
+                </div>
+              )}
+
               <Divider label={`${PROF_ICONS[craftProfTab]} Preços de materiais — ${craftProfTab}`} />
               <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 10, padding: "14px 18px", marginBottom: 20 }}>
                 <div style={{ fontSize: 10, color: TEXT_DIM, marginBottom: 14, lineHeight: 1.7 }}>
@@ -2265,6 +2445,22 @@ export default function App() {
                   ))}
                 </div>
               </div>
+
+              {/* FILTRO DE SUBCATEGORIA */}
+              {subcats.length > 1 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
+                  <button onClick={() => setCraftSubcat("all")}
+                    style={{ background: (!craftSubcat || craftSubcat === "all") ? "rgba(196,160,80,0.2)" : "rgba(0,0,0,0.3)", border: `1px solid ${(!craftSubcat || craftSubcat === "all") ? "rgba(196,160,80,0.4)" : "rgba(255,255,255,0.07)"}`, borderRadius: 6, color: (!craftSubcat || craftSubcat === "all") ? gold : TEXT_DIM, padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10 }}>
+                    {lang==="en"?"All":"Todos"}
+                  </button>
+                  {subcats.map(sc => (
+                    <button key={sc} onClick={() => setCraftSubcat(sc)}
+                      style={{ background: craftSubcat === sc ? "rgba(96,165,250,0.15)" : "rgba(0,0,0,0.3)", border: `1px solid ${craftSubcat === sc ? "rgba(96,165,250,0.4)" : "rgba(255,255,255,0.07)"}`, borderRadius: 6, color: craftSubcat === sc ? blue : TEXT_DIM, padding: "4px 10px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10 }}>
+                      {sc}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* TABELA DE RECEITAS */}
               <div style={{ marginBottom: 12 }}>
@@ -2388,17 +2584,17 @@ export default function App() {
               <div style={{ background: "rgba(96,165,250,0.05)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Expedição/sem</div>
                 <div style={{ color: blue, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imExpSemana)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>da aba Tradepack</div>
+                <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 3 }}>da aba Tradepack</div>
               </div>
               <div style={{ background: "rgba(196,160,80,0.05)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Packs/sem</div>
                 <div style={{ color: gold, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(r.imTotal_semana)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>incl. Enhanced + Plunder</div>
+                <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 3 }}>incl. Enhanced + Plunder</div>
               </div>
               <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 8, padding: "12px 14px" }}>
                 <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>IM Total (automático)</div>
                 <div style={{ color: green, fontSize: 16, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>{fmtInt(imExpSemana + r.imTotal_semana)}</div>
-                <div style={{ color: "#505060", fontSize: 10, marginTop: 3 }}>Exp + Packs</div>
+                <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 3 }}>Exp + Packs</div>
               </div>
             </div>
 
@@ -2407,7 +2603,7 @@ export default function App() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", marginBottom: 4 }}>{`${TR[lang].poolRate} ${lang==="en"?"calculated":"calculado"}`}</div>
-                  <div style={{ color: "#505060", fontSize: 10 }}>{calQUEST} QUEST ÷ {fmtInt(imExpSemana + r.imTotal_semana)} IM</div>
+                  <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10 }}>{calQUEST} QUEST ÷ {fmtInt(imExpSemana + r.imTotal_semana)} IM</div>
                 </div>
                 <div style={{ color: green, fontSize: 22, fontFamily: "'Space Mono', monospace", fontWeight: "bold" }}>{(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}</div>
               </div>
@@ -2428,7 +2624,7 @@ export default function App() {
               <div>QUEST recebido: <span style={{ color: green }}>{fmtInt(calQUEST)}</span></div>
               <div>${lang === "en" ? "Active Pool Rate:" : "Pool Rate ativo:"} <span style={{ color: green }}>{poolRate.toFixed(8)}</span></div>
               <div>IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span></div>
-              <div style={{ marginTop: 8, color: "#404050" }}>lang==="en"?"Update every Friday after payment — enter the QUEST received and click Apply.":"Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar."</div>
+              <div style={{ marginTop: 8, color: "rgba(143,160,184,0.45)" }}>lang==="en"?"Update every Friday after payment — enter the QUEST received and click Apply.":"Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar."</div>
             </div>
           </Section>
         </div>
@@ -2448,7 +2644,7 @@ export default function App() {
               <label style={{ color: dim, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>EXP necessário:</label>
               <NumInput value={infusionTargetEXP} onChange={v => setInfusionTargetEXP(v)} min={0}
                 style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${gold}55`, borderRadius: 6, color: gold, padding: "8px 14px", fontSize: 16, width: 160, fontFamily: "'Space Mono', monospace", outline: "none", fontWeight: "bold" }} />
-              <span style={{ color: "#404050", fontSize: 10 }}>EXP para infundir no item</span>
+              <span style={{ color: "rgba(143,160,184,0.45)", fontSize: 10 }}>EXP para infundir no item</span>
             </div>
 
             {/* Melhor opção destaque */}
@@ -2484,7 +2680,7 @@ export default function App() {
                   const rowColor = isBest ? "rgba(74,222,128,0.06)" : "transparent";
                   return (
                     <tr key={inf.nome} style={{ background: rowColor }}>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? `#${rank + 1}` : "—"}
                       </td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
@@ -2493,13 +2689,13 @@ export default function App() {
                         <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(251,146,60,0.35)", borderRadius: 4, color: orange, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "rgba(143,160,184,0.45)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? orange : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? orange : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
                       </td>
                     </tr>
@@ -2524,7 +2720,7 @@ export default function App() {
                   const isBest = rank === 0 && inf.preco > 0;
                   return (
                     <tr key={inf.nome} style={{ background: isBest ? "rgba(74,222,128,0.06)" : "transparent" }}>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? `#${rank + 1}` : "—"}
                       </td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
@@ -2533,13 +2729,13 @@ export default function App() {
                         <NumInput value={inf.preco} onChange={v => setInfusionPreco(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.35)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: "100%", fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? "#f0e6c8" : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmt(inf.silverPerExp, 1) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: inf.preco > 0 ? "#f0e6c8" : "rgba(143,160,184,0.45)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.qtdNecessaria) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? blue : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : (inf.preco > 0 ? blue : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {inf.preco > 0 ? fmtInt(inf.custoTotal) : "—"}
                       </td>
                     </tr>
@@ -2569,16 +2765,16 @@ export default function App() {
                   const isBest = rank === 0 && silverH > 0;
                   return (
                     <tr key={inf.nome} style={{ background: isBest ? "rgba(248,113,113,0.06)" : "transparent" }}>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? `#${rank + 1}` : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? `#${rank + 1}` : "—"}</td>
                       <td style={{ padding: "8px 10px", color: isBest ? red : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
                       <td style={{ padding: "8px 10px", textAlign: "center", color: inf.tipo === "mar" ? blue : gold, fontSize: 10, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.tipo === "mar" ? "🌊 Mar" : "⚔️ Terra"}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: preco > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{preco > 0 ? fmtInt(preco) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: preco > 0 ? orange : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{preco > 0 ? fmtInt(preco) : "—"}</td>
                       <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <NumInput value={qtd} onChange={v => setInfusionQtd(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 4, color: red, padding: "4px 8px", fontSize: 12, width: 80, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : (silverH > 0 ? "#f0e6c8" : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtInt(silverH) : "—"}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: silverH > 0 ? dim : "#404050", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtUSD(toUSD(silverH, taxExchHunt, taxSaqueAtivo)) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? red : (silverH > 0 ? "#f0e6c8" : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtInt(silverH) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: silverH > 0 ? dim : "rgba(143,160,184,0.45)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{silverH > 0 ? fmtUSD(toUSD(silverH, taxExchHunt, taxSaqueAtivo)) : "—"}</td>
                     </tr>
                   );
                 })}
@@ -2626,17 +2822,17 @@ export default function App() {
                   const isBest = rank === 0 && lucro > 0;
                   return (
                     <tr key={inf.nome} style={{ background: isBest ? "rgba(74,222,128,0.06)" : "transparent" }}>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{lucro > 0 ? `#${rank + 1}` : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: isBest ? green : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{lucro > 0 ? `#${rank + 1}` : "—"}</td>
                       <td style={{ padding: "8px 10px", color: isBest ? green : "#c0c0d0", fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{inf.nome}</td>
                       <td style={{ padding: "4px 10px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         <NumInput value={compra} onChange={v => setInfusionBuy(inf.nome, v)} min={0}
                           style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(96,165,250,0.25)", borderRadius: 4, color: blue, padding: "4px 8px", fontSize: 12, width: 100, fontFamily: "'Space Mono', monospace", outline: "none", textAlign: "center" }} />
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: venda > 0 ? orange : "#404050", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{venda > 0 ? fmtInt(venda) : "—"}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: lucro > 0 ? green : (lucro < 0 ? red : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: venda > 0 ? orange : "rgba(143,160,184,0.45)", fontSize: 11, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{venda > 0 ? fmtInt(venda) : "—"}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: lucro > 0 ? green : (lucro < 0 ? red : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {compra > 0 && venda > 0 ? (lucro > 0 ? "+" : "") + fmtInt(lucro) : "—"}
                       </td>
-                      <td style={{ padding: "8px 10px", textAlign: "center", color: margem > 0 ? green : (lucro < 0 ? red : "#404050"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                      <td style={{ padding: "8px 10px", textAlign: "center", color: margem > 0 ? green : (lucro < 0 ? red : "rgba(143,160,184,0.45)"), fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                         {margem > 0 ? `+${fmt(margem, 1)}%` : (lucro < 0 ? `${fmt((lucro / compra) * 100, 1)}%` : "—")}
                       </td>
                     </tr>
