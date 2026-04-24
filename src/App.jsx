@@ -1147,9 +1147,8 @@ export default function App() {
   const [craftMaterialPrices, setCraftMaterialPrices] = useState({});
   const [craftSubcat, setCraftSubcat]           = useState("all");
   const [subcraftToggles, setSubcraftToggles]   = useState({});
-  const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});  // { "Prof|ItemNome": true } = pagar tax em QUEST
-  const [taxDescQUEST, setTaxDescQUEST]         = useState(20);  // % de desconto ao pagar tax em QUEST
-  const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});  // toggle tax em QUEST por item
+  const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});
+  const [taxQUESTDesconto, setTaxQUESTDesconto] = useState(20);
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
   // Função de logout
@@ -1451,7 +1450,7 @@ export default function App() {
         if (s.gemPrices !== undefined) setGemPrices(s.gemPrices);
         if (s.subcraftToggles !== undefined) setSubcraftToggles(s.subcraftToggles);
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
-        if (s.taxDescQUEST !== undefined) setTaxDescQUEST(s.taxDescQUEST);
+        if (s.taxQUESTDesconto !== undefined) setTaxQUESTDesconto(s.taxQUESTDesconto);
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
@@ -1486,7 +1485,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxDescQUEST,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1505,7 +1504,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxDescQUEST,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -2322,7 +2321,7 @@ export default function App() {
         const tqKey       = (itemNome) => `${craftProfTab}|${itemNome}|taxQUEST`;
         const isTaxQUEST  = (itemNome) => taxQUESTToggles[tqKey(itemNome)] || false;
         const toggleTQ    = (itemNome) => setTaxQUESTToggles(p => ({ ...p, [tqKey(itemNome)]: !p[tqKey(itemNome)] }));
-        const calcTaxQUEST = (taxSilver) => (taxSilver * (1 - taxDescQUEST / 100)) / questToSilver;
+        const calcTaxQUEST = (taxSilver) => (taxSilver * (1 - taxQUESTDesconto / 100)) / questToSilver;
 
         // ── Sub-craft helpers ────────────────────────────────────────────────
         // Procura a receita de um material em qualquer profissão do DB
@@ -2387,11 +2386,11 @@ export default function App() {
           const expTotal   = item.exp + expSubcrafts;
           const taxBase        = item.baseTax * (1 + extraTaxPct / 100);
           const taxQUESTAtivo  = isTaxQUEST(item.nome);
-          // Modo QUEST: desconto de taxDescQUEST% na tax, pago em QUEST
+          // Modo QUEST: desconto de taxQUESTDesconto% na tax, pago em QUEST
           const taxSilver      = taxQUESTAtivo ? 0 : taxBase;
-          const taxQUEST_valor = taxQUESTAtivo ? (taxBase * (1 - taxDescQUEST / 100)) / questToSilver : 0;
+          const taxQUEST_valor = taxQUESTAtivo ? (taxBase * (1 - taxQUESTDesconto / 100)) / questToSilver : 0;
           // Para custoTotal comparativo, convertemos taxQUEST de volta para silver equivalente
-          const taxReal        = taxQUESTAtivo ? taxBase * (1 - taxDescQUEST / 100) : taxBase;
+          const taxReal        = taxQUESTAtivo ? taxBase * (1 - taxQUESTDesconto / 100) : taxBase;
           const custoTotal     = custoMateriais + taxReal;
           const precoVenda = getCraftPrice(item.nome);
           const receitaTotal = applyMkt(precoVenda * item.qty, taxMktCrafting);
@@ -2440,7 +2439,7 @@ export default function App() {
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>{lang==="en"?"QUEST tax discount (%)":"Desconto tax QUEST (%)"}</div>
-                  <NumInput value={taxDescQUEST} onChange={v => setTaxDescQUEST(Math.max(0, Math.min(100, v)))} min={0} max={100}
+                  <NumInput value={taxQUESTDesconto} onChange={v => setTaxQUESTDesconto(Math.max(0, Math.min(100, v)))} min={0} max={100}
                     style={{ background: BG_CARD, border: "1px solid rgba(167,139,250,0.3)", borderRadius: 6, color: purple, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
                   <div style={{ fontSize: 10, color: "rgba(167,139,250,0.5)", marginTop: 4 }}>
                     {lang==="en"?"Click S/Q per row to toggle":"Clique S/Q por linha para alternar"}
@@ -2633,7 +2632,7 @@ export default function App() {
                                 {item.taxQUESTAtivo ? (
                                   <>
                                     <div style={{ color: purple, fontSize: 11 }}>{item.taxQUEST_valor.toFixed(4)} Q</div>
-                                    <div style={{ color: green, fontSize: 9 }}>-{taxDescQUEST}% {lang==="en"?"disc.":"desc."}</div>
+                                    <div style={{ color: green, fontSize: 9 }}>-{taxQUESTDesconto}% {lang==="en"?"disc.":"desc."}</div>
                                   </>
                                 ) : (
                                   <>
