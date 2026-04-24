@@ -1137,7 +1137,7 @@ export default function App() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [lang, setLang] = useState("ptBR");
-  const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
+  const TUTORIAL_VIDEO_ID = "0uBNBgmDjN0";
 
   // Estados de Crafting / Oversupply
   const [craftPlayerLevel, setCraftPlayerLevel] = useState(50);
