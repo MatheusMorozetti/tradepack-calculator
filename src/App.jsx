@@ -2296,8 +2296,12 @@ export default function App() {
         };
 
         const getMatPreco = (mat) => {
-          if (mat.isGemstone) return cheapestGem().preco;
-          return craftMaterialPrices[craftProfTab + "|" + mat.nome] || 0;
+          if (typeof mat === "object") {
+            if (mat.isGemstone) return cheapestGem().preco;
+            return craftMaterialPrices[craftProfTab + "|" + mat.nome] || 0;
+          }
+          // string (chamado do grid de materiais)
+          return craftMaterialPrices[craftProfTab + "|" + mat] || 0;
         };
         const setMatPreco = (nome, val) => setCraftMaterialPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
         const getCraftPrice = (nome) => craftPrices[craftProfTab + "|" + nome] || 0;
