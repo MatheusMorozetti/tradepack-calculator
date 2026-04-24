@@ -33,10 +33,11 @@ const TR = {
     pricingLabel: "Planos",
     pricingTitle: "Pago em silver, direto no jogo",
     pricingSub: "Sem cartão. Sem cadastro externo. Você paga o silver, ganha o acesso.",
-    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/semana por membro", p1d: "Para guildas que assinam mensalmente. Mínimo 5 membros. Valor por membro.",
-    p2n: "Solo Pass",  p2p: "40kk", p2per: "silver/semana", p2d: "Para qualquer player que queira acesso individual completo.", popular: "Mais popular",
-    p3n: "Via Streamer",p3p: "36kk", p3per: "silver/semana", p3d: "Use o cupom do seu streamer favorito e economize 10%.",
-    pricingNote: "Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis · Valor do Guild Pass é por membro",
+    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/semana por membro", p1d: "Para guildas. Mínimo 10 membros. Preços de mercado sincronizados em tempo real entre todos os membros.",
+    p2n: "Plano Amigos", p2p: "35kk", p2per: "silver/semana por pessoa", p2d: "Para grupos de amigos. Mínimo 5 pessoas. Preços do mercado atualizados automaticamente para todos do grupo.",
+    p3n: "Solo Pass",  p3p: "40kk", p3per: "silver/semana", p3d: "Para qualquer player que queira acesso individual completo.", popular: "Mais popular",
+    p4n: "Via Streamer",p4p: "36kk", p4per: "silver/semana", p4d: "Use o cupom do seu streamer favorito e economize 10%.",
+    pricingNote: "Pagamento feito diretamente em silver no jogo · Acesso liberado manualmente em até 24h · Cupons de streamer disponíveis · Valor do Guild Pass e Plano Amigos é por membro",
 
     // CTA FINAL
     ctaTitle: "Pronto para lucrar mais?",
@@ -182,10 +183,11 @@ const TR = {
     pricingLabel: "Plans",
     pricingTitle: "Paid in silver, directly in-game",
     pricingSub: "No card. No external signup. Pay the silver, get the access.",
-    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/week per member", p1d: "For guilds subscribing monthly. Minimum 5 members. Price is per member.",
-    p2n: "Solo Pass", p2p: "40kk", p2per: "silver/week", p2d: "For any player who wants full individual access.", popular: "Most popular",
-    p3n: "Via Streamer", p3p: "36kk", p3per: "silver/week", p3d: "Use your favorite streamer's coupon and save 10%.",
-    pricingNote: "Payment made directly in silver in-game · Access granted manually within 24h · Streamer coupons available · Guild Pass price is per member",
+    p1n: "Guild Pass", p1p: "35kk", p1per: "silver/week per member", p1d: "For guilds. Minimum 10 members. Market prices synced in real time across all members.",
+    p2n: "Friends Plan", p2p: "35kk", p2per: "silver/week per person", p2d: "For friend groups. Minimum 5 people. Market prices updated automatically for everyone in the group.",
+    p3n: "Solo Pass", p3p: "40kk", p3per: "silver/week", p3d: "For any player who wants full individual access.", popular: "Most popular",
+    p4n: "Via Streamer", p4p: "36kk", p4per: "silver/week", p4d: "Use your favorite streamer's coupon and save 10%.",
+    pricingNote: "Payment made directly in silver in-game · Access granted manually within 24h · Streamer coupons available · Guild Pass and Friends Plan price is per member",
 
     // CTA FINAL
     ctaTitle: "Ready to profit more?",
@@ -401,8 +403,9 @@ function LandingPage({ onEnter, lang, setLang }) {
 
   const plans = [
     { nome: t.p1n, preco: t.p1p, periodo: t.p1per, desc: t.p1d, destaque: false, cor: "#60a5fa" },
-    { nome: t.p2n, preco: t.p2p, periodo: t.p2per, desc: t.p2d, destaque: true, cor: "#c4a050" },
-    { nome: t.p3n, preco: t.p3p, periodo: t.p3per, desc: t.p3d, destaque: false, cor: "#a78bfa" },
+    { nome: t.p2n, preco: t.p2p, periodo: t.p2per, desc: t.p2d, destaque: false, cor: "#4ade80" },
+    { nome: t.p3n, preco: t.p3p, periodo: t.p3per, desc: t.p3d, destaque: true,  cor: "#c4a050" },
+    { nome: t.p4n, preco: t.p4p, periodo: t.p4per, desc: t.p4d, destaque: false, cor: "#a78bfa" },
   ];
 
   return (
@@ -501,7 +504,7 @@ function LandingPage({ onEnter, lang, setLang }) {
           <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: "0 0 12px" }}>{t.pricingTitle}</h2>
           <p style={{ fontSize: 11, color: "rgba(143,160,184,0.5)", letterSpacing: "0.06em" }}>{t.pricingSub}</p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 16 }}>
           {plans.map(p => (
             <div key={p.nome} style={{ background: p.destaque ? "linear-gradient(160deg, #0d1525, #101e35)" : "#080f1e", border: `1px solid ${p.destaque ? "rgba(196,160,80,0.4)" : "rgba(96,165,250,0.08)"}`, borderRadius: 14, padding: "32px 28px", position: "relative", textAlign: "center" }}>
               {p.destaque && (
@@ -1151,7 +1154,11 @@ export default function App() {
   const [taxQUESTDesconto, setTaxQUESTDesconto] = useState(20);
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
-  // Função de logout
+  // GUILDA — preços compartilhados em tempo real
+  const [guildId, setGuildId]           = useState(null);
+  const [guildPlan, setGuildPlan]       = useState(null); // 'guild' | 'friends' | null
+  const [guildPrices, setGuildPrices]   = useState({});   // preços sincronizados da guilda
+  const [guildSyncing, setGuildSyncing] = useState(false);
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setAutenticado(false);
@@ -1201,11 +1208,59 @@ export default function App() {
       setUserEmail(profile.email);
       setSessionAtual(tabId);
       setExpiresAt(profile.expires_at);
+      if (profile.guild_id) setGuildId(profile.guild_id);
+      if (profile.plan) setGuildPlan(profile.plan);
       setAutenticado(true);
       setInitialLoading(false);
     };
     restoreSession();
   }, []);
+
+  // GUILDA — subscrição realtime de preços compartilhados
+  useEffect(() => {
+    const isGuildPlan = guildPlan === 'guild' || guildPlan === 'friends';
+    if (!guildId || !isGuildPlan || !autenticado) return;
+
+    // Carrega preços iniciais da guilda
+    const loadGuildPrices = async () => {
+      const { data } = await supabase
+        .from("guild_market_prices")
+        .select("*")
+        .eq("guild_id", guildId)
+        .single();
+      if (data?.prices) setGuildPrices(data.prices);
+    };
+    loadGuildPrices();
+
+    // Subscrição realtime — qualquer membro atualiza, todos recebem
+    const channel = supabase
+      .channel(`guild_prices_${guildId}`)
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "guild_market_prices",
+        filter: `guild_id=eq.${guildId}`,
+      }, (payload) => {
+        if (payload.new?.prices) setGuildPrices(payload.new.prices);
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [guildId, guildPlan, autenticado]);
+
+  // Helper — publica preço da guilda quando usuário edita
+  const updateGuildPrice = async (key, val) => {
+    if (!guildId || (guildPlan !== 'guild' && guildPlan !== 'friends')) return;
+    const newPrices = { ...guildPrices, [key]: val };
+    setGuildPrices(newPrices);
+    setGuildSyncing(true);
+    await supabase.from("guild_market_prices").upsert({
+      guild_id: guildId,
+      prices: newPrices,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "guild_id" });
+    setTimeout(() => setGuildSyncing(false), 1000);
+  };
 
   // Verificação de sessão única a cada 60 segundos
   useEffect(() => {
@@ -1682,8 +1737,15 @@ export default function App() {
         </div>
 
         {/* Centro: status de sync */}
-        <div style={{ fontSize: 10, color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.45)", letterSpacing: "0.1em", transition: "color 0.5s" }}>
-          {dataLoading ? TR[lang].loading : saving ? TR[lang].saving : settingsLoaded ? TR[lang].sync : ""}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 10, letterSpacing: "0.1em" }}>
+          <span style={{ color: saving ? "rgba(196,160,80,0.6)" : "rgba(74,222,128,0.45)", transition: "color 0.5s" }}>
+            {dataLoading ? TR[lang].loading : saving ? TR[lang].saving : settingsLoaded ? TR[lang].sync : ""}
+          </span>
+          {guildId && (guildPlan === 'guild' || guildPlan === 'friends') && (
+            <span style={{ background: guildSyncing ? "rgba(196,160,80,0.15)" : "rgba(96,165,250,0.08)", border: `1px solid ${guildSyncing ? "rgba(196,160,80,0.4)" : "rgba(96,165,250,0.2)"}`, borderRadius: 5, padding: "2px 8px", color: guildSyncing ? gold : "rgba(96,165,250,0.6)", fontSize: 9, letterSpacing: "0.1em", transition: "all 0.3s" }}>
+              {guildSyncing ? "⟳ syncing..." : `🔗 ${guildPlan === 'guild' ? 'Guild' : 'Friends'}`}
+            </span>
+          )}
         </div>
 
         {/* Direita: expiração + idioma + tutorial + logout */}
@@ -2302,15 +2364,21 @@ export default function App() {
             : (() => { const [nome, preco] = entries.reduce((a, b) => a[1] < b[1] ? a : b); return { nome, preco }; })();
         };
 
+        const isGuildPlan = guildPlan === 'guild' || guildPlan === 'friends';
         const getMatPreco = (mat) => {
           if (typeof mat === "object") {
             if (mat.isGemstone) return cheapestGem().preco;
-            return craftMaterialPrices[craftProfTab + "|" + mat.nome] || 0;
+            const key = craftProfTab + "|" + mat.nome;
+            return (isGuildPlan && guildPrices[key] !== undefined ? guildPrices[key] : craftMaterialPrices[key]) || 0;
           }
-          // string (chamado do grid de materiais)
-          return craftMaterialPrices[craftProfTab + "|" + mat] || 0;
+          const key = craftProfTab + "|" + mat;
+          return (isGuildPlan && guildPrices[key] !== undefined ? guildPrices[key] : craftMaterialPrices[key]) || 0;
         };
-        const setMatPreco = (nome, val) => setCraftMaterialPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
+        const setMatPreco = (nome, val) => {
+          const key = craftProfTab + "|" + nome;
+          setCraftMaterialPrices(p => ({ ...p, [key]: val }));
+          if (isGuildPlan) updateGuildPrice(key, val);
+        };
         const getCraftPrice = (nome) => craftPrices[craftProfTab + "|" + nome] || 0;
         const setCraftPrice = (nome, val) => setCraftPrices(p => ({ ...p, [craftProfTab + "|" + nome]: val }));
 
@@ -2425,7 +2493,19 @@ export default function App() {
           <div>
             <Section title="Crafting — Oversupply Calculator" icon="⚒️" borderColor="rgba(196,160,80,0.4)">
 
-              {/* CONFIG TOPO */}
+              {/* BANNER GUILDA */}
+            {guildId && (guildPlan === 'guild' || guildPlan === 'friends') && (
+              <div style={{ background: "rgba(96,165,250,0.07)", border: "1px solid rgba(96,165,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 11, color: blue }}>
+                  🔗 {lang==="en"
+                    ? `${guildPlan === 'guild' ? 'Guild' : 'Friends'} mode — material prices are shared in real time with all members`
+                    : `Modo ${guildPlan === 'guild' ? 'Guilda' : 'Amigos'} — preços de materiais sincronizados em tempo real com todos os membros`}
+                </div>
+                {guildSyncing && <span style={{ color: gold, fontSize: 10 }}>⟳ {lang==="en"?"syncing...":"sincronizando..."}</span>}
+              </div>
+            )}
+
+            {/* CONFIG TOPO */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 16, marginBottom: 20, alignItems: "start" }}>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Nível do Player</div>
@@ -2828,6 +2908,67 @@ export default function App() {
               style={{ width: "100%", background: "linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.08))", border: "1px solid rgba(74,222,128,0.4)", borderRadius: 8, color: green, padding: "11px", cursor: "pointer", fontFamily: "'Space Mono', monospace", fontSize: 12, letterSpacing: "0.06em" }}>
               ${lang === "en" ? "✅ Apply Pool Rate:" : "✅ Aplicar Pool Rate:"} {(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}
             </button>
+          </Section>
+
+          <Section title={lang==="en"?"QUEST Forecast — Next Friday":"Previsão de QUEST — Próxima Sexta"} icon="🔮" borderColor="rgba(167,139,250,0.4)">
+            <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: 11, color: dim, lineHeight: 1.7 }}>
+              {lang==="en"
+                ? "Based on your current Pool Rate and IM configuration, this is the estimated QUEST you will receive next Friday."
+                : "Com base no Pool Rate atual e na sua configuração de IM, esta é a estimativa de QUEST que você vai receber na próxima sexta."}
+            </div>
+
+            {(() => {
+              const imTotal = imExpSemana + r.imTotal_semana;
+              const questPrevisto = imTotal * poolRate;
+              const questComExch  = applySaque(applyExchQ(questPrevisto, taxExchTradepack));
+              const usdPrevisto   = questComExch * questUSD;
+              const silverPrevisto = questPrevisto * questToSilver;
+
+              return (
+                <div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
+                    <div style={{ background: "rgba(167,139,250,0.07)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 10, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>IM Total/sem</div>
+                      <div style={{ color: purple, fontSize: 18, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(imTotal)}</div>
+                      <div style={{ color: "rgba(143,160,184,0.45)", fontSize: 9, marginTop: 4 }}>{lang==="en"?"Exp + Packs":"Exp + Packs"}</div>
+                    </div>
+                    <div style={{ background: "rgba(167,139,250,0.07)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 10, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Pool Rate</div>
+                      <div style={{ color: purple, fontSize: 14, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{poolRate.toFixed(8)}</div>
+                      <div style={{ color: "rgba(143,160,184,0.45)", fontSize: 9, marginTop: 4 }}>{lang==="en"?"from calibration":"da calibração"}</div>
+                    </div>
+                    <div style={{ background: "rgba(167,139,250,0.12)", border: "1px solid rgba(167,139,250,0.45)", borderRadius: 10, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"Estimated QUEST":"QUEST Estimado"}</div>
+                      <div style={{ color: purple, fontSize: 22, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmt(questPrevisto, 2)}</div>
+                      <div style={{ color: "rgba(143,160,184,0.45)", fontSize: 9, marginTop: 4 }}>{lang==="en"?"before fees":"antes das taxas"}</div>
+                    </div>
+                    <div style={{ background: "rgba(74,222,128,0.07)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 10, padding: "14px 16px", textAlign: "center" }}>
+                      <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"Net QUEST (after fees)":"QUEST Líquido (após taxas)"}</div>
+                      <div style={{ color: green, fontSize: 22, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmt(questComExch, 2)}</div>
+                      <div style={{ color: "rgba(143,160,184,0.45)", fontSize: 9, marginTop: 4 }}>≈ {fmtUSD(usdPrevisto)} USD</div>
+                    </div>
+                  </div>
+
+                  {/* Breakdown */}
+                  <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 10 }}>{lang==="en"?"Breakdown":"Detalhamento"}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, fontSize: 11 }}>
+                      <div style={{ color: dim }}>{lang==="en"?"Expedition IM:":"IM Expedição:"} <span style={{ color: blue }}>{fmtInt(imExpSemana)}</span></div>
+                      <div style={{ color: dim }}>{lang==="en"?"Packs IM:":"IM Packs:"} <span style={{ color: gold }}>{fmtInt(r.imTotal_semana)}</span></div>
+                      <div style={{ color: dim }}>{lang==="en"?"Gross QUEST:":"QUEST bruto:"} <span style={{ color: purple }}>{fmt(questPrevisto, 4)}</span></div>
+                      <div style={{ color: dim }}>{lang==="en"?"Silver equivalent:":"Equiv. silver:"} <span style={{ color: gold }}>{fmtInt(silverPrevisto)}</span></div>
+                      <div style={{ color: dim }}>{lang==="en"?"After exchange (4%):":"Após exchange (4%):"} <span style={{ color: questComExch < questPrevisto ? red : green }}>{fmt(applyExchQ(questPrevisto, taxExchTradepack), 4)}</span></div>
+                      <div style={{ color: dim }}>{lang==="en"?"After withdraw (20%):":"Após saque (20%):"} <span style={{ color: green }}>{fmt(questComExch, 4)}</span></div>
+                    </div>
+                    <div style={{ marginTop: 10, fontSize: 10, color: "rgba(143,160,184,0.4)", lineHeight: 1.7 }}>
+                      {lang==="en"
+                        ? "⚠️ This is a forecast based on your current settings. Actual QUEST may vary with pool rate fluctuations."
+                        : "⚠️ Esta é uma previsão com base nas suas configurações atuais. O QUEST real pode variar com flutuações do pool rate."}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </Section>
 
           <Section title={TR[lang].lastCalib} icon="📅">
