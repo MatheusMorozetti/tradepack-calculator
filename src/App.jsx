@@ -1146,6 +1146,7 @@ export default function App() {
   const [craftPrices, setCraftPrices]           = useState({});
   const [craftMaterialPrices, setCraftMaterialPrices] = useState({});
   const [craftSubcat, setCraftSubcat]           = useState("all");
+  const [subcraftToggles, setSubcraftToggles]   = useState({});
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
   // Função de logout
@@ -1445,6 +1446,7 @@ export default function App() {
         if (s.craftPrices !== undefined) setCraftPrices(s.craftPrices);
         if (s.craftMaterialPrices !== undefined) setCraftMaterialPrices(s.craftMaterialPrices);
         if (s.gemPrices !== undefined) setGemPrices(s.gemPrices);
+        if (s.subcraftToggles !== undefined) setSubcraftToggles(s.subcraftToggles);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
         if (s.taxMktCrafting !== undefined) setTaxMktCrafting(s.taxMktCrafting);
@@ -1478,7 +1480,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1497,7 +1499,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -2310,27 +2312,85 @@ export default function App() {
         // Materiais únicos (excluindo isGemstone — exibidos separadamente)
         const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.filter(m => !m.isGemstone).map(m => m.nome)))].sort();
 
-        const calc = itens.map(item => {
-          const custoMateriais = item.materiais.reduce((acc, m) => acc + m.qtd * getMatPreco(m), 0);
-          const taxReal        = item.baseTax * (1 + extraTaxPct / 100);
-          const custoTotal     = custoMateriais + taxReal;
-          const precoVenda     = getCraftPrice(item.nome);
-          const receitaTotal   = applyMkt(precoVenda * item.qty, taxMktCrafting);
-          const temDados       = precoVenda > 0 && custoMateriais > 0;
-          const margem         = temDados ? receitaTotal - custoTotal : null;
-          const margemPct      = margem !== null && custoTotal > 0 ? (margem / custoTotal) * 100 : null;
-          const margemEXP      = margem !== null && item.exp > 0 ? margem / item.exp : null;
+        // ── Sub-craft helpers ────────────────────────────────────────────────
+        // Procura a receita de um material em qualquer profissão do DB
+        const findRecipe = (matNome) => {
+          for (const prof of Object.keys(CRAFTING_DB)) {
+            const r = CRAFTING_DB[prof].find(i => i.nome === matNome);
+            if (r) return { recipe: r, prof };
+          }
+          return null;
+        };
 
-          // Crafts para atingir oversupply
+        // Chave única do toggle por item+material
+        const scKey = (itemNome, matNome) => `${craftProfTab}|${itemNome}|${matNome}`;
+        const isSubcraft = (itemNome, matNome) => subcraftToggles[scKey(itemNome, matNome)] || false;
+        const toggleSC = (itemNome, matNome) => setSubcraftToggles(p => ({
+          ...p, [scKey(itemNome, matNome)]: !p[scKey(itemNome, matNome)]
+        }));
+
+        // Calcula custo e EXP de sub-craftar um material
+        const calcSubcraft = (matNome, qtdNecessaria) => {
+          const found = findRecipe(matNome);
+          if (!found) return null;
+          const { recipe, prof } = found;
+          const custoMatSub = recipe.materiais.reduce((acc, m) => {
+            const preco = m.isGemstone
+              ? cheapestGem().preco
+              : (craftMaterialPrices[prof + "|" + m.nome] || craftMaterialPrices[craftProfTab + "|" + m.nome] || 0);
+            return acc + m.qtd * preco;
+          }, 0);
+          const craftsNeeded = Math.ceil(qtdNecessaria / recipe.qty);
+          const proporcao    = qtdNecessaria / recipe.qty;
+          const custoUm      = custoMatSub + recipe.baseTax;
+          return {
+            custo:        proporcao * custoUm,          // proporcional (sobras guardadas)
+            exp:          craftsNeeded * recipe.exp,    // EXP de crafts completos
+            craftsNeeded,
+            proporcao,
+            recipe,
+            prof,
+            custoUm,
+          };
+        };
+
+        const calc = itens.map(item => {
+          let custoMateriais = 0;
+          let expSubcrafts   = 0;
+          const subcraftInfo = {}; // { matNome: { custo, exp, craftsNeeded } }
+
+          item.materiais.forEach(m => {
+            if (isSubcraft(item.nome, m.nome)) {
+              const sc = calcSubcraft(m.nome, m.qtd);
+              if (sc) {
+                custoMateriais += sc.custo;
+                expSubcrafts   += sc.exp;
+                subcraftInfo[m.nome] = sc;
+                return;
+              }
+            }
+            custoMateriais += m.qtd * getMatPreco(m);
+          });
+
+          const expTotal   = item.exp + expSubcrafts;
+          const taxReal    = item.baseTax * (1 + extraTaxPct / 100);
+          const custoTotal = custoMateriais + taxReal;
+          const precoVenda = getCraftPrice(item.nome);
+          const receitaTotal = applyMkt(precoVenda * item.qty, taxMktCrafting);
+          const temDados   = precoVenda > 0 && custoMateriais > 0;
+          const margem     = temDados ? receitaTotal - custoTotal : null;
+          const margemPct  = margem !== null && custoTotal > 0 ? (margem / custoTotal) * 100 : null;
+          const margemEXP  = margem !== null && expTotal > 0 ? margem / expTotal : null;
+
           const threshold      = 10000 + 10000 * craftPlayerLevel;
           const expRestante100 = threshold * Math.max(0, (100 - craftOversupply) / 100);
           const expRestanteMax = threshold * Math.max(0, (500 - craftOversupply) / 100);
-          const craftsParaOS   = item.exp > 0 ? Math.ceil(expRestante100 / item.exp) : null;
-          const craftsParaMax  = item.exp > 0 ? Math.ceil(expRestanteMax / item.exp) : null;
+          const craftsParaOS   = expTotal > 0 ? Math.ceil(expRestante100 / expTotal) : null;
+          const craftsParaMax  = expTotal > 0 ? Math.ceil(expRestanteMax / expTotal) : null;
           const profitAteOS    = margem !== null && craftsParaOS !== null ? margem * craftsParaOS : null;
           const profitAteMax   = margem !== null && craftsParaMax !== null ? margem * craftsParaMax : null;
 
-          return { ...item, custoMateriais, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
+          return { ...item, custoMateriais, expTotal, expSubcrafts, subcraftInfo, taxReal, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
         });
 
         const comDados  = calc.filter(i => i.temDados);
@@ -2495,11 +2555,41 @@ export default function App() {
                       return (
                         <tr key={item.nome} style={{ background: isBest ? "rgba(74,222,128,0.05)" : "transparent" }}>
                           <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item.nivel}</td>
-                          <td style={{ padding: "7px 8px", color: isBest ? green : TEXT_PRIM, fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "7px 8px", color: isBest ? green : TEXT_PRIM, fontWeight: isBest ? "bold" : "normal", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             {item.nome}
-                            <div style={{ fontSize: 9, color: TEXT_DIM, fontWeight: "normal", marginTop: 2 }}>
-                              {item.materiais.map(m => `${m.qtd}× ${m.nome}`).join(" · ")}
+                            <div style={{ marginTop: 4 }}>
+                              {item.materiais.map(m => {
+                                const hasRecipe = !!findRecipe(m.nome);
+                                const scOn = isSubcraft(item.nome, m.nome);
+                                const sc = item.subcraftInfo?.[m.nome];
+                                return (
+                                  <div key={m.nome} style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                                    {hasRecipe && !m.isGemstone ? (
+                                      <button onClick={() => toggleSC(item.nome, m.nome)}
+                                        title={scOn ? (lang==="en"?"Switch to market price":"Usar preço de mercado") : (lang==="en"?"Craft this material":"Craftar este material")}
+                                        style={{ background: scOn ? "rgba(196,160,80,0.2)" : "rgba(255,255,255,0.05)", border: `1px solid ${scOn ? "rgba(196,160,80,0.5)" : "rgba(255,255,255,0.1)"}`, borderRadius: 3, color: scOn ? gold : TEXT_DIM, padding: "1px 5px", cursor: "pointer", fontSize: 9, fontFamily: "'Space Mono',monospace", flexShrink: 0, lineHeight: 1.4 }}>
+                                        {scOn ? "⚒️" : "🛒"}
+                                      </button>
+                                    ) : (
+                                      <span style={{ width: 22, display: "inline-block" }} />
+                                    )}
+                                    <span style={{ fontSize: 9, color: scOn ? gold : TEXT_DIM }}>
+                                      {m.qtd}× {m.nome}
+                                      {scOn && sc && (
+                                        <span style={{ color: "rgba(96,165,250,0.6)", marginLeft: 4 }}>
+                                          ({sc.craftsNeeded} craft{sc.craftsNeeded > 1 ? "s" : ""} · +{sc.exp} EXP)
+                                        </span>
+                                      )}
+                                    </span>
+                                  </div>
+                                );
+                              })}
                             </div>
+                            {item.expSubcrafts > 0 && (
+                              <div style={{ fontSize: 9, color: blue, marginTop: 4 }}>
+                                EXP total: {fmtInt(item.expTotal)} ({fmtInt(item.exp)} + {fmtInt(item.expSubcrafts)} sub)
+                              </div>
+                            )}
                           </td>
                           <td style={{ padding: "7px 8px", textAlign: "center", color: TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)" }}>{item.qty}x</td>
                           <td style={{ padding: "7px 8px", textAlign: "right", color: item.custoMateriais > 0 ? TEXT_PRIM : TEXT_DIM, borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
