@@ -2407,7 +2407,11 @@ export default function App() {
           const profitAteOS    = margem !== null && craftsParaOS !== null ? margem * craftsParaOS : null;
           const profitAteMax   = margem !== null && craftsParaMax !== null ? margem * craftsParaMax : null;
 
-          return { ...item, custoMateriais, expTotal, expSubcrafts, subcraftInfo, taxReal, taxSilver, taxQUEST_valor, taxQUESTAtivo, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax };
+          // Custo total acumulado até OS / MAX (inclui sub-crafts)
+          const custoAteOS  = craftsParaOS  !== null ? custoTotal * craftsParaOS  : null;
+          const custoAteMax = craftsParaMax !== null ? custoTotal * craftsParaMax : null;
+
+          return { ...item, custoMateriais, expTotal, expSubcrafts, subcraftInfo, taxReal, taxSilver, taxQUEST_valor, taxQUESTAtivo, custoTotal, precoVenda, receitaTotal, temDados, margem, margemPct, margemEXP, craftsParaOS, craftsParaMax, profitAteOS, profitAteMax, custoAteOS, custoAteMax };
         });
 
         const comDados  = calc.filter(i => i.temDados);
@@ -2569,7 +2573,7 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {["Nv", "Item", "Qtd", lang==="en"?"Mat. Cost":"Custo Mat.", `Tax S/Q (+${extraTaxPct}%)`, lang==="en"?"Total Cost":"Custo Total", lang==="en"?"Sell Price (un)":"Preço Venda (un)", lang==="en"?"Revenue":"Receita", lang==="en"?"Margin":"Margem", lang==="en"?"Margin %":"Margem %", "Silver/EXP", "Crafts → OS", lang==="en"?"Profit to OS":"Profit até OS", "Crafts → MAX", lang==="en"?"Profit to MAX":"Profit até MAX"].map(h => (
+                      {["Nv", "Item", "Qtd", lang==="en"?"Mat. Cost":"Custo Mat.", `Tax S/Q (+${extraTaxPct}%)`, lang==="en"?"Total Cost":"Custo Total", lang==="en"?"Sell Price (un)":"Preço Venda (un)", lang==="en"?"Revenue":"Receita", lang==="en"?"Margin":"Margem", lang==="en"?"Margin %":"Margem %", "Silver/EXP", "Crafts → OS", lang==="en"?"Cost to OS":"Custo até OS", lang==="en"?"Profit to OS":"Profit até OS", "Crafts → MAX", lang==="en"?"Cost to MAX":"Custo até MAX", lang==="en"?"Profit to MAX":"Profit até MAX"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 8px", textAlign: "center", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
@@ -2644,7 +2648,14 @@ export default function App() {
                             </div>
                           </td>
                           <td style={{ padding: "7px 8px", textAlign: "right", color: item.custoMateriais > 0 ? orange : TEXT_DIM, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
-                            {item.custoMateriais > 0 ? fmtInt(item.custoTotal) : "—"}
+                            {item.custoMateriais > 0 ? (
+                              item.taxQUESTAtivo ? (
+                                <div>
+                                  <div style={{ color: orange }}>{fmtInt(item.custoMateriais)} silver</div>
+                                  <div style={{ color: purple, fontSize: 10, fontWeight: "normal" }}>+ {item.taxQUEST_valor.toFixed(6)} Q</div>
+                                </div>
+                              ) : fmtInt(item.custoTotal)
+                            ) : "—"}
                           </td>
                           <td style={{ padding: "6px 8px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             <NumInput value={item.precoVenda} onChange={v => setCraftPrice(item.nome, v)} min={0}
@@ -2683,6 +2694,22 @@ export default function App() {
                           <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
                             {craftOversupply >= 100
                               ? <span style={{ color: TEXT_DIM }}>—</span>
+                              : item.custoAteOS !== null
+                                ? <div>
+                                    <div style={{ color: red, fontWeight: "bold" }}>{fmtInt(item.custoAteOS)}</div>
+                                    {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
+                                      <div key={matNome} style={{ fontSize: 9, color: "rgba(248,113,113,0.5)", marginTop: 2 }}>
+                                        ↳ {fmtInt(item.craftsParaOS * sc.custo)} {matNome}
+                                      </div>
+                                    ))}
+                                  </div>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
+
+                          {/* Profit total até OS */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 100
+                              ? <span style={{ color: TEXT_DIM }}>—</span>
                               : item.profitAteOS !== null
                                 ? <div>
                                     <span style={{ color: pc(item.profitAteOS), fontWeight: "bold" }}>{item.profitAteOS >= 0 ? "+" : ""}{fmtInt(item.profitAteOS)}</span>
@@ -2705,6 +2732,22 @@ export default function App() {
                                     {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
                                       <div key={matNome} style={{ fontSize: 9, color: "rgba(96,165,250,0.35)", marginTop: 2 }}>
                                         ↳ {fmtInt(item.craftsParaMax * sc.craftsNeeded)} {matNome}
+                                      </div>
+                                    ))}
+                                  </div>
+                                : <span style={{ color: TEXT_DIM }}>—</span>}
+                          </td>
+
+                          {/* Profit total até MAX */}
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                            {craftOversupply >= 500
+                              ? <span style={{ color: TEXT_DIM }}>—</span>
+                              : item.custoAteMax !== null
+                                ? <div>
+                                    <div style={{ color: red }}>{fmtInt(item.custoAteMax)}</div>
+                                    {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
+                                      <div key={matNome} style={{ fontSize: 9, color: "rgba(248,113,113,0.35)", marginTop: 2 }}>
+                                        ↳ {fmtInt(item.craftsParaMax * sc.custo)} {matNome}
                                       </div>
                                     ))}
                                   </div>
