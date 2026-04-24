@@ -2278,9 +2278,13 @@ export default function App() {
       {/* TAB: CALIBRAÇÃO */}
       {tab === "crafting" && (() => {
         const extraTaxPct = Math.min(100, Math.floor(craftOversupply / 10) * 2);
-        const itens = (CRAFTING_DB[craftProfTab] || []).filter(i =>
+        const todosItens = CRAFTING_DB[craftProfTab] || [];
+        const itens = todosItens.filter(i =>
           !craftSubcat || craftSubcat === "all" || (i.subcategoria || "Geral") === craftSubcat
         );
+
+        // Subcategorias derivadas da lista COMPLETA (não filtrada)
+        const subcats = [...new Set(todosItens.map(i => i.subcategoria || "Geral"))];
 
         // Cheapest gemstone helper
         const cheapestGem = () => {
@@ -2301,9 +2305,6 @@ export default function App() {
 
         // Materiais únicos (excluindo isGemstone — exibidos separadamente)
         const matsUnicos = [...new Set(itens.flatMap(i => i.materiais.filter(m => !m.isGemstone).map(m => m.nome)))].sort();
-
-        // Subcategorias únicas na ordem em que aparecem
-        const subcats = [...new Set(itens.map(i => i.subcategoria || "Geral"))];
 
         const calc = itens.map(item => {
           const custoMateriais = item.materiais.reduce((acc, m) => acc + m.qtd * getMatPreco(m), 0);
@@ -2358,12 +2359,16 @@ export default function App() {
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Profissão</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    {Object.keys(CRAFTING_DB).map(p => (
-                      <button key={p} onClick={() => setCraftProfTab(p)}
-                        style={{ background: craftProfTab === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : BG_CARD, border: `1px solid ${craftProfTab === p ? gold : "rgba(196,160,80,0.2)"}`, borderRadius: 6, color: craftProfTab === p ? "#000" : TEXT_DIM, padding: "5px 12px", cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: craftProfTab === p ? "bold" : "normal", textAlign: "left", whiteSpace: "nowrap" }}>
-                        {PROF_ICONS[p]} {p}
+                    {Object.keys(CRAFTING_DB).map(p => {
+                      const emDesenv = !["Blacksmithing", "Cooking"].includes(p);
+                      return (
+                      <button key={p}
+                        onClick={() => { if (!emDesenv) { setCraftProfTab(p); setCraftSubcat("all"); } }}
+                        style={{ background: craftProfTab === p ? `linear-gradient(135deg, ${gold}, #8a6a20)` : emDesenv ? "rgba(0,0,0,0.15)" : BG_CARD, border: `1px solid ${craftProfTab === p ? gold : emDesenv ? "rgba(255,255,255,0.04)" : "rgba(196,160,80,0.2)"}`, borderRadius: 6, color: craftProfTab === p ? "#000" : emDesenv ? "rgba(255,255,255,0.2)" : TEXT_DIM, padding: "5px 12px", cursor: emDesenv ? "not-allowed" : "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: craftProfTab === p ? "bold" : "normal", textAlign: "left", whiteSpace: "nowrap", opacity: emDesenv ? 0.5 : 1 }}>
+                        {PROF_ICONS[p]} {p}{emDesenv ? " 🔒" : ""}
                       </button>
-                    ))}
+                    );
+                  })}
                   </div>
                 </div>
               </div>
