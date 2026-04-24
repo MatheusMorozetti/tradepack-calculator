@@ -118,7 +118,51 @@ const TR = {
     infMarketFee: "Taxa do mercado (%)",
     infBestNow: "✅ Melhor custo-benefício atual",
 
-    // TRADEPACK CONTEÚDO
+    // FAQ
+    faqLabel: "Dúvidas Frequentes",
+    faqTitle: "Perguntas que todo player tem",
+    faqs: [
+      {
+        q: "Como funciona a sincronização de preços do plano Guilda e Amigos?",
+        a: "Quando você insere o preço de um material na aba Crafting, ele é salvo em tempo real para todos os membros da sua guilda ou grupo de amigos. Qualquer membro pode atualizar os valores e todos veem a mudança instantaneamente, sem precisar recarregar a página."
+      },
+      {
+        q: "Por que eu pago 4% de taxa ao vender no mercado?",
+        a: "O jogo cobra 4% do valor de venda quando você anuncia um item no mercado. Na compra você não paga taxa — ela é cobrada apenas na venda/anúncio. O RavenLab aplica esse desconto automaticamente na coluna Receita quando o toggle de taxa de mercado está ativo."
+      },
+      {
+        q: "O que é a taxa de 4% do Exchange?",
+        a: "Ao converter silver em QUEST (ou QUEST em silver) no Currency Exchange do jogo, você paga 4% de taxa em ambas as direções. Por isso o QUEST que você recebe é sempre ligeiramente menor do que o valor bruto calculado. Você pode ativar ou desativar essa taxa por aba."
+      },
+      {
+        q: "Como funciona o saque de QUEST e os 20% de taxa?",
+        a: "Para sacar QUEST do jogo para a carteira, o jogo cobra aproximadamente 20% do valor total em silver. Se você tem Fee Credit acumulado (por ter gastado QUEST no jogo), esse valor é descontado antes do cálculo da taxa. Configure o seu Fee Credit na seção de Taxas de Saque."
+      },
+      {
+        q: "Como pagar a taxa de crafting em QUEST com desconto?",
+        a: "Cada receita de crafting tem a opção de pagar a taxa em Silver ou em QUEST. Ao pagar em QUEST, você tem 20% de desconto sobre o valor em silver (esse desconto é fixo do jogo). Clique no botão S/Q em cada linha da tabela de crafting para alternar o modo."
+      },
+      {
+        q: "O que é o Pool Rate e como calibrar?",
+        a: "O Pool Rate é a taxa de conversão entre IM (Influence Mercantil) e QUEST. Ele varia semanalmente conforme o volume do servidor. Para calibrar: toda sexta-feira, insira o QUEST que você recebeu no chest na aba Calibração e clique em Aplicar. O RavenLab calcula o pool rate real automaticamente."
+      },
+      {
+        q: "Como funciona o sub-craft de materiais no Oversupply?",
+        a: "Na aba Crafting, materiais que possuem receita própria mostram um botão 🛒/⚒️. Ao ativar ⚒️, o custo daquele material passa a ser calculado com base na receita de produção (em vez do preço de mercado), incluindo o EXP dos crafts extras no total. Isso afeta o custo até o oversupply e o profit acumulado."
+      },
+      {
+        q: "Como funciona a previsão de QUEST da próxima sexta?",
+        a: "Na aba Calibração, a seção de Previsão calcula automaticamente o QUEST esperado usando sua IM total configurada (Expedição + Packs) multiplicada pelo Pool Rate atual. O resultado mostra o valor bruto e líquido após as taxas de exchange e saque."
+      },
+      {
+        q: "Como pago minha assinatura?",
+        a: "O pagamento é feito diretamente em silver no jogo — sem cartão, sem cadastro externo. Após o pagamento, o acesso é liberado manualmente em até 24 horas. Entre em contato com o Matz para combinar."
+      },
+      {
+        q: "Posso usar o RavenLab em mais de um dispositivo?",
+        a: "Por segurança, o RavenLab permite apenas uma sessão ativa por vez. Se você fizer login em outro dispositivo, a sessão anterior é encerrada automaticamente."
+      },
+    ],
     packConfig: "Configuração do Pack", packSelected: "Pack Selecionado",
     packsPerWeek: "Packs por Semana", silverPerPack: "Silver/Pack Entregue",
     silverHint: "Varia por demanda/rota", imBaseAuto: "IM Base/Pack (Automático)",
@@ -268,7 +312,51 @@ const TR = {
     infMarketFee: "Market fee (%)",
     infBestNow: "✅ Best value right now",
 
-    // TRADEPACK CONTENT
+    // FAQ
+    faqLabel: "FAQ",
+    faqTitle: "Questions every player asks",
+    faqs: [
+      {
+        q: "How does price sync work for Guild and Friends plans?",
+        a: "When you enter a material price in the Crafting tab, it's saved in real time for all members of your guild or friend group. Any member can update values and everyone sees the change instantly without refreshing the page."
+      },
+      {
+        q: "Why do I pay a 4% fee when selling on the market?",
+        a: "The game charges 4% of the sell price when you list an item on the market. You don't pay a fee when buying — it's only charged on the sell/listing side. RavenLab applies this discount automatically in the Revenue column when the market tax toggle is active."
+      },
+      {
+        q: "What is the 4% Exchange fee?",
+        a: "When converting silver to QUEST (or QUEST to silver) in the game's Currency Exchange, you pay a 4% fee in both directions. That's why the QUEST you receive is always slightly less than the gross calculated value. You can enable or disable this fee per tab."
+      },
+      {
+        q: "How does the QUEST withdrawal fee work?",
+        a: "To withdraw QUEST from the game to your wallet, the game charges approximately 20% of the total value in silver. If you have accumulated Fee Credit (from spending QUEST in-game), that amount is deducted before calculating the fee. Configure your Fee Credit in the Withdrawal Fee section."
+      },
+      {
+        q: "How do I pay crafting tax in QUEST with a discount?",
+        a: "Each crafting recipe has the option to pay the tax in Silver or QUEST. Paying in QUEST gives you a 20% discount on the silver value (this discount is fixed by the game). Click the S/Q button on each row in the crafting table to switch modes."
+      },
+      {
+        q: "What is the Pool Rate and how do I calibrate it?",
+        a: "The Pool Rate is the conversion rate between IM (Mercantile Influence) and QUEST. It varies weekly based on server volume. To calibrate: every Friday, enter the QUEST you received from the chest in the Calibration tab and click Apply. RavenLab calculates the real pool rate automatically."
+      },
+      {
+        q: "How does sub-crafting work in Oversupply?",
+        a: "In the Crafting tab, materials that have their own recipe show a 🛒/⚒️ button. When you activate ⚒️, that material's cost is calculated based on its production recipe (instead of market price), including EXP from the extra crafts in the total. This affects the cost to oversupply and accumulated profit."
+      },
+      {
+        q: "How does the QUEST forecast work?",
+        a: "In the Calibration tab, the Forecast section automatically calculates expected QUEST using your configured total IM (Expedition + Packs) multiplied by the current Pool Rate. The result shows gross and net values after exchange and withdrawal fees."
+      },
+      {
+        q: "How do I pay for my subscription?",
+        a: "Payment is made directly in silver in-game — no card, no external signup. After payment, access is granted manually within 24 hours. Contact Matz to arrange it."
+      },
+      {
+        q: "Can I use RavenLab on more than one device?",
+        a: "For security, RavenLab only allows one active session at a time. If you log in on another device, the previous session is automatically terminated."
+      },
+    ],
     packConfig: "Pack Configuration", packSelected: "Selected Pack",
     packsPerWeek: "Packs per Week", silverPerPack: "Silver/Pack Delivered",
     silverHint: "Varies by demand/route", imBaseAuto: "Base IM/Pack (Automatic)",
@@ -374,6 +462,25 @@ function NumInput({ value, onChange, min = 0, max, style, placeholder, format, d
     />
   );
 }
+// ── FAQ ITEM ───────────────────────────────────────────────────────────────
+function FaqItem({ q, a }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ border: "1px solid rgba(96,165,250,0.08)", borderRadius: 10, overflow: "hidden", marginBottom: 4, transition: "all 0.2s" }}>
+      <button onClick={() => setOpen(o => !o)}
+        style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: open ? "rgba(30,58,95,0.4)" : "rgba(8,15,30,0.8)", border: "none", padding: "18px 24px", cursor: "pointer", fontFamily: "'Space Mono', monospace", textAlign: "left", gap: 16 }}>
+        <span style={{ fontSize: 12, color: open ? "#e0eaf8" : "rgba(224,234,248,0.7)", fontWeight: open ? "bold" : "normal", letterSpacing: "0.02em", lineHeight: 1.5 }}>{q}</span>
+        <span style={{ color: open ? "#c4a050" : "rgba(96,165,250,0.4)", fontSize: 16, flexShrink: 0, transition: "transform 0.2s", transform: open ? "rotate(45deg)" : "rotate(0deg)" }}>+</span>
+      </button>
+      {open && (
+        <div style={{ background: "rgba(13,21,37,0.6)", padding: "16px 24px 20px", borderTop: "1px solid rgba(96,165,250,0.08)" }}>
+          <p style={{ fontSize: 12, color: "rgba(143,160,184,0.75)", lineHeight: 1.9, margin: 0, fontFamily: "'Space Mono', monospace" }}>{a}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── LANDING PAGE ──────────────────────────────────────────────────────────
 function LangToggle({ lang, setLang }) {
   return (
@@ -524,6 +631,19 @@ function LandingPage({ onEnter, lang, setLang }) {
         </div>
         <div style={{ textAlign: "center", marginTop: 32, fontSize: 10, color: "rgba(143,160,184,0.35)", letterSpacing: "0.1em", lineHeight: 1.8 }}>
           {t.pricingNote}
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section style={{ position: "relative", zIndex: 1, padding: "80px 48px", maxWidth: 860, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <div style={{ fontSize: 10, color: "rgba(96,165,250,0.45)", letterSpacing: "0.25em", textTransform: "uppercase", marginBottom: 12 }}>{t.faqLabel}</div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: "#e0eaf8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>{t.faqTitle}</h2>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {t.faqs.map((faq, i) => (
+            <FaqItem key={i} q={faq.q} a={faq.a} />
+          ))}
         </div>
       </section>
 
