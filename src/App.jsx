@@ -1282,6 +1282,7 @@ export default function App() {
   const DIAS_SEMANA    = ["Qui", "Sex", "Sáb", "Dom", "Seg", "Ter", "Qua"];
   const DIAS_SEMANA_EN = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
   const [luckCoinSilver, setLuckCoinSilver] = useState(8749000);
+  const [luckCoinSaldo, setLuckCoinSaldo]   = useState(0); // saldo atual de LC
   const [expGemas, setExpGemas]             = useState(Array(7).fill(0));
   const [expEntradas, setExpEntradas]       = useState(Array(7).fill(0)); // 0=só free, 1=+1 extra, 2=+2 extras
   const [expJoias, setExpJoias]             = useState(0); // informativo apenas
@@ -1640,6 +1641,7 @@ export default function App() {
         if (s.taxQUESTDesconto !== undefined) setTaxQUESTDesconto(s.taxQUESTDesconto);
         if (s.craftPassivas !== undefined) setCraftPassivas(s.craftPassivas);
         if (s.luckCoinSilver !== undefined) setLuckCoinSilver(s.luckCoinSilver);
+        if (s.luckCoinSaldo !== undefined) setLuckCoinSaldo(s.luckCoinSaldo);
         if (s.expGemas !== undefined) setExpGemas(s.expGemas);
         if (s.expEntradas !== undefined) setExpEntradas(s.expEntradas);
         if (s.expJoias !== undefined) setExpJoias(s.expJoias);
@@ -1678,7 +1680,7 @@ export default function App() {
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
             craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
-            luckCoinSilver, expGemas, expEntradas, expJoias,
+            luckCoinSilver, luckCoinSaldo, expGemas, expEntradas, expJoias,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1698,7 +1700,7 @@ export default function App() {
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
     craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
-    luckCoinSilver, expGemas, expEntradas, expJoias,
+    luckCoinSilver, luckCoinSaldo, expGemas, expEntradas, expJoias,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -2380,27 +2382,48 @@ export default function App() {
       {/* TAB: MATERIAIS */}
       {tab === "expedicao" && (() => {
         // ── Custos de Lucky Coin e Munk Snack ──────────────────────────────
-        const custoPorSnack     = (luckCoinSilver * 15) / 10; // 15 LC = 1 bundle = 10 snacks
-        const custoEntrada1     = 12 * custoPorSnack;          // 1ª entrada extra
-        const custoEntrada2     = 33 * custoPorSnack;          // 2ª entrada extra
-        const custoEntradaFree  = 50000;                       // entrada gratuita diária
+        const custoPorSnack    = (luckCoinSilver * 15) / 10;
+        const custoEntrada1    = 12 * custoPorSnack;
+        const custoEntrada2    = 33 * custoPorSnack;
+        const custoEntradaFree = 50000;
 
-        // Preço LC no store oficial (silver equivalente usando questToSilver e questUSD)
-        // 20 LC = $8 → $0.40/coin → silver = 0.40 / questUSD * questToSilver
-        const lcOfficialUSD = 0.40; // melhor pacote: 2275 LC = $800 → $0.3516/coin
-        const lcBestUSD     = (800 / 2275);
-        const lcOfficialSilver = questUSD > 0 ? (lcBestUSD / questUSD) * questToSilver : 0;
-        const mktMaisBarato = luckCoinSilver < lcOfficialSilver || lcOfficialSilver === 0;
+        // Melhor pacote oficial (menor custo/LC em silver equivalente)
+        const pacotesOficiais = [
+          { qty: 20, usd: 8 }, { qty: 105, usd: 40 },
+          { qty: 550, usd: 200 }, { qty: 2275, usd: 800 }
+        ].map(p => ({
+          ...p,
+          silverEquiv: questUSD > 0 ? ((p.usd / p.qty) / questUSD) * questToSilver : 0
+        }));
+        const melhorPacote = pacotesOficiais.filter(p => p.silverEquiv > 0)
+          .reduce((a, b) => a.silverEquiv < b.silverEquiv ? a : b, { qty: 20, usd: 8, silverEquiv: 0 });
 
-        // ── Registro semanal ──────────────────────────────────────────────
-        const totalGemasWeek   = expGemas.reduce((a, b) => a + b, 0);
-        const mediaGemasDay    = totalGemasWeek / 7;
-        const mediaGemasMes    = mediaGemasDay * 30;
+        // LC necessárias na semana (cada bundle = 15 LC)
+        const bundlesNecessarios = expEntradas.reduce((acc, e) => acc + (e >= 1 ? 1 : 0) + (e >= 2 ? 1 : 0), 0);
+        const lcNecessarias      = bundlesNecessarios * 15;
+        const lcFaltando         = Math.max(0, lcNecessarias - luckCoinSaldo);
+        const pacotesNecessarios = lcFaltando > 0 ? Math.ceil(lcFaltando / melhorPacote.qty) : 0;
+        const lcSaldoRestante    = luckCoinSaldo + (pacotesNecessarios * melhorPacote.qty) - lcNecessarias;
+        const custoLCReal        = lcFaltando > 0
+          ? (melhorPacote.silverEquiv > 0 && melhorPacote.silverEquiv < luckCoinSilver)
+            ? pacotesNecessarios * melhorPacote.usd / questUSD * questToSilver // loja oficial
+            : lcFaltando * luckCoinSilver  // mercado
+          : 0;
+        const mktMaisBarato = melhorPacote.silverEquiv === 0 || luckCoinSilver <= melhorPacote.silverEquiv;
 
-        // Custo semanal (entradas)
+        // Break-even por dia — só custo das EXTRAS (free é inevitável)
+        const breakEvenDia = expEntradas.map((e, i) => {
+          const custoExtras = (e >= 1 ? custoEntrada1 : 0) + (e >= 2 ? custoEntrada2 : 0);
+          const gemaDia     = expGemas[i];
+          const pagou       = gemaDia >= custoExtras;
+          const sobra       = gemaDia - custoExtras;
+          return { custoExtras, gemaDia, pagou, sobra, temExtras: e > 0 };
+        });
+
+        // Custo semanal total (entradas)
         let custoTotalEntradas = 0;
         expEntradas.forEach(e => {
-          custoTotalEntradas += custoEntradaFree; // entrada free sempre
+          custoTotalEntradas += custoEntradaFree;
           if (e >= 1) custoTotalEntradas += custoEntrada1;
           if (e >= 2) custoTotalEntradas += custoEntrada2;
         });
@@ -2446,7 +2469,7 @@ export default function App() {
 
             {/* LUCKY COIN */}
             <Section title={lang==="en"?"Lucky Coin — Cost Analysis":"Lucky Coin — Análise de Custo"} icon="🪙" borderColor="rgba(196,160,80,0.4)">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 20 }}>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
                     {lang==="en"?"Market Price (silver/coin)":"Preço de Mercado (silver/coin)"}
@@ -2454,17 +2477,38 @@ export default function App() {
                   <NumInput value={luckCoinSilver} onChange={setLuckCoinSilver} min={0}
                     style={{ background: BG_CARD, border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
                   <div style={{ fontSize: 10, color: dim, marginTop: 4 }}>
-                    {lang==="en"?"Price to buy 1 Lucky Coin on the in-game market":"Preço para comprar 1 Lucky Coin no mercado do jogo"}
+                    {lang==="en"?"Price to buy 1 Lucky Coin on market":"Preço de 1 Lucky Coin no mercado"}
                   </div>
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
-                    {lang==="en"?"Market Cost per Snack":"Custo por Snack (mercado)"}
+                    {lang==="en"?"Current LC Balance":"Saldo Atual de LC"}
                   </div>
-                  <div style={{ background: BG_CARD, border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "8px 12px" }}>
-                    <div style={{ color: orange, fontSize: 14, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(custoPorSnack)} silver</div>
-                    <div style={{ color: dim, fontSize: 10, marginTop: 4 }}>15 LC → 1 bundle → 10 snacks</div>
+                  <NumInput value={luckCoinSaldo} onChange={setLuckCoinSaldo} min={0}
+                    style={{ background: BG_CARD, border: "1px solid rgba(167,139,250,0.3)", borderRadius: 6, color: purple, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                  <div style={{ fontSize: 10, color: dim, marginTop: 4 }}>
+                    {lang==="en"?"LC available from previous weeks":"LC disponíveis de semanas anteriores"}
                   </div>
+                </div>
+                <div style={{ background: BG_CARD, border: `1px solid ${lcFaltando > 0 ? "rgba(248,113,113,0.3)" : "rgba(74,222,128,0.3)"}`, borderRadius: 8, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 10, color: dim, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    {lang==="en"?"Weekly LC Summary":"Resumo de LC da Semana"}
+                  </div>
+                  <div style={{ fontSize: 11, color: dim, lineHeight: 2 }}>
+                    <div>{lang==="en"?"Need:":"Precisa:"} <span style={{ color: TEXT_PRIM, fontWeight: "bold" }}>{lcNecessarias} LC</span> ({bundlesNecessarios} bundles)</div>
+                    <div>{lang==="en"?"Balance:":"Saldo:"} <span style={{ color: purple }}>{luckCoinSaldo} LC</span></div>
+                    <div>{lang==="en"?"To buy:":"Comprar:"} <span style={{ color: lcFaltando > 0 ? orange : green }}>{lcFaltando} LC</span>
+                      {lcFaltando > 0 && <span style={{ color: dim, fontSize: 9 }}> → {pacotesNecessarios}× {lang==="en"?"pack of":"pacote de"} {melhorPacote.qty}</span>}
+                    </div>
+                    <div>{lang==="en"?"Leftover:":"Sobra:"} <span style={{ color: green, fontWeight: "bold" }}>{lcSaldoRestante} LC</span> {lang==="en"?"(next week)":"(semana seguinte)"}</div>
+                  </div>
+                  {lcFaltando > 0 && (
+                    <div style={{ marginTop: 8, fontSize: 10, color: orange }}>
+                      {lang==="en"
+                        ? `Buy ${pacotesNecessarios}× ${melhorPacote.qty} LC pack${pacotesNecessarios > 1 ? "s" : ""} ($${melhorPacote.usd * pacotesNecessarios})`
+                        : `Comprar ${pacotesNecessarios}× pacote de ${melhorPacote.qty} LC ($${melhorPacote.usd * pacotesNecessarios})`}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2592,16 +2636,17 @@ export default function App() {
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                   <thead>
                     <tr>
-                      {[lang==="en"?"Day":"Dia", lang==="en"?"Gem Silver":"Silver Gemas", lang==="en"?"Extra Entries":"Entradas Extras", lang==="en"?"Entry Cost":"Custo Entradas", lang==="en"?"Net (gems - cost)":"Líquido (gemas - custo)"].map(h => (
+                      {[lang==="en"?"Day":"Dia", lang==="en"?"Gem Silver":"Silver Gemas", lang==="en"?"Extra Entries":"Entradas Extras", lang==="en"?"Extra Cost":"Custo Extras", lang==="en"?"Extras paid off?":"Extras se pagaram?", lang==="en"?"Net (gems - cost)":"Líquido (gemas - custo)"].map(h => (
                         <th key={h} style={{ color: gold, padding: "8px 12px", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", textAlign: "center" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {dias.map((dia, i) => {
-                      const entradas = expEntradas[i];
-                      const custoDia = custoEntradaFree + (entradas >= 1 ? custoEntrada1 : 0) + (entradas >= 2 ? custoEntrada2 : 0);
+                      const entradas  = expEntradas[i];
+                      const custoDia  = custoEntradaFree + (entradas >= 1 ? custoEntrada1 : 0) + (entradas >= 2 ? custoEntrada2 : 0);
                       const liquidoDia = expGemas[i] - custoDia;
+                      const be        = breakEvenDia[i];
                       return (
                         <tr key={dia}>
                           <td style={{ padding: "8px 12px", textAlign: "center", color: blue, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{dia}</td>
@@ -2618,11 +2663,27 @@ export default function App() {
                                 </button>
                               ))}
                             </div>
-                            <div style={{ fontSize: 9, color: dim, marginTop: 3 }}>
-                              {entradas === 0 ? (lang==="en"?"free only":"só free") : `+${entradas} extra`}
-                            </div>
                           </td>
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(custoDia)}</td>
+                          {/* Custo apenas das EXTRAS */}
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: be.temExtras ? red : dim, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            {be.temExtras ? fmtInt(be.custoExtras) : "—"}
+                          </td>
+                          {/* Break-even das extras */}
+                          <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            {!be.temExtras
+                              ? <span style={{ color: dim, fontSize: 10 }}>—</span>
+                              : expGemas[i] === 0
+                                ? <span style={{ color: dim, fontSize: 10 }}>{lang==="en"?"no gems":"sem gemas"}</span>
+                                : <div>
+                                    <div style={{ color: be.pagou ? green : red, fontWeight: "bold", fontSize: 11 }}>
+                                      {be.pagou ? "✅" : "❌"} {be.pagou ? (lang==="en"?"PAID OFF":"COMPENSOU") : (lang==="en"?"NOT YET":"NÃO PAGOU")}
+                                    </div>
+                                    <div style={{ color: pc(be.sobra), fontSize: 9, marginTop: 2 }}>
+                                      {be.sobra >= 0 ? "+" : ""}{fmtInt(be.sobra)} silver
+                                    </div>
+                                  </div>}
+                          </td>
+                          {/* Líquido total (gemas - custo total incluindo free) */}
                           <td style={{ padding: "8px 12px", textAlign: "center", color: pc(liquidoDia), fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                             {expGemas[i] > 0 ? `${liquidoDia >= 0 ? "+" : ""}${fmtInt(liquidoDia)}` : "—"}
                           </td>
@@ -2634,7 +2695,10 @@ export default function App() {
                       <td style={{ padding: "10px 12px", color: gold, fontWeight: "bold", fontSize: 10, textTransform: "uppercase" }}>Total</td>
                       <td style={{ padding: "10px 12px", textAlign: "center", color: gold, fontWeight: "bold" }}>{fmtInt(totalGemasWeek)}</td>
                       <td style={{ padding: "10px 12px", textAlign: "center", color: dim, fontSize: 10 }}>{expEntradas.reduce((a,b)=>a+b,0)} extras</td>
-                      <td style={{ padding: "10px 12px", textAlign: "center", color: red, fontWeight: "bold" }}>{fmtInt(custoTotalEntradas)}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: red, fontWeight: "bold" }}>{fmtInt(breakEvenDia.reduce((a,b)=>a+b.custoExtras,0))}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: dim, fontSize: 10 }}>
+                        {breakEvenDia.filter(b=>b.temExtras&&b.pagou).length}/{breakEvenDia.filter(b=>b.temExtras).length} {lang==="en"?"days paid off":"dias compensaram"}
+                      </td>
                       <td style={{ padding: "10px 12px", textAlign: "center", color: pc(lucroSemana), fontWeight: "bold" }}>{lucroSemana >= 0 ? "+" : ""}{fmtInt(lucroSemana)}</td>
                     </tr>
                   </tbody>
