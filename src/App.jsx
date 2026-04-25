@@ -1260,7 +1260,7 @@ export default function App() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [lang, setLang] = useState("ptBR");
-  const TUTORIAL_VIDEO_ID = "0uBNBgmDjN0";
+  const TUTORIAL_VIDEO_ID = "cwqri68Q6YI";
 
   // Estados de Crafting / Oversupply
   const [craftPlayerLevel, setCraftPlayerLevel] = useState(50);
@@ -1272,6 +1272,10 @@ export default function App() {
   const [subcraftToggles, setSubcraftToggles]   = useState({});
   const [taxQUESTToggles, setTaxQUESTToggles]   = useState({});
   const [taxQUESTDesconto, setTaxQUESTDesconto] = useState(20);
+  // passivas de EXP por profissão: { Blacksmithing: { p3: 0, p5: 0 }, ... }
+  const [craftPassivas, setCraftPassivas]       = useState(
+    Object.fromEntries(Object.keys(CRAFTING_DB).map(p => [p, { p3: 0, p5: 0 }]))
+  );
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
   // GUILDA — preços compartilhados em tempo real
@@ -1626,6 +1630,7 @@ export default function App() {
         if (s.subcraftToggles !== undefined) setSubcraftToggles(s.subcraftToggles);
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxQUESTDesconto !== undefined) setTaxQUESTDesconto(s.taxQUESTDesconto);
+        if (s.craftPassivas !== undefined) setCraftPassivas(s.craftPassivas);
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
@@ -1660,7 +1665,7 @@ export default function App() {
             huntInfusionQtd, huntInfusionPreco, huntNPC,
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto,
+            craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1679,7 +1684,7 @@ export default function App() {
     huntHorasDia, huntAddonQtd, huntAddonPreco, huntInfusionQtd, huntInfusionPreco, huntNPC,
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
-    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto,
+    craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -2553,6 +2558,11 @@ export default function App() {
           };
         };
 
+        // Bônus de EXP das passivas da profissão atual
+        const passivas      = craftPassivas[craftProfTab] || { p3: 0, p5: 0 };
+        const bonusEXPpct   = (passivas.p3 * 3) + (passivas.p5 * 5); // % total aditivo
+        const bonusEXPmult  = 1 + bonusEXPpct / 100;
+
         const calc = itens.map(item => {
           let custoMateriais = 0;
           let expSubcrafts   = 0;
@@ -2571,7 +2581,7 @@ export default function App() {
             custoMateriais += m.qtd * getMatPreco(m);
           });
 
-          const expTotal   = item.exp + expSubcrafts;
+          const expTotal   = (item.exp + expSubcrafts) * bonusEXPmult;
           const taxBase        = item.baseTax * (1 + extraTaxPct / 100);
           const taxQUESTAtivo  = isTaxQUEST(item.nome);
           // Modo QUEST: desconto de taxQUESTDesconto% na tax, pago em QUEST
@@ -2624,6 +2634,65 @@ export default function App() {
                 {guildSyncing && <span style={{ color: gold, fontSize: 10 }}>⟳ {lang==="en"?"syncing...":"sincronizando..."}</span>}
               </div>
             )}
+
+            {/* PASSIVAS DE EXP */}
+            <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 10, padding: "14px 18px", marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <div style={{ fontSize: 10, color: purple, letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                  ✨ {lang==="en" ? `EXP Passives — ${craftProfTab}` : `Passivas de EXP — ${craftProfTab}`}
+                </div>
+                {bonusEXPpct > 0 && (
+                  <div style={{ background: "rgba(167,139,250,0.15)", border: "1px solid rgba(167,139,250,0.4)", borderRadius: 5, padding: "2px 10px", fontSize: 10, color: purple, fontWeight: "bold" }}>
+                    +{bonusEXPpct}% EXP
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "flex-end" }}>
+                {/* 4 passivas de +3% */}
+                <div>
+                  <div style={{ fontSize: 9, color: TEXT_DIM, marginBottom: 6, letterSpacing: "0.08em" }}>+3% EXP ({lang==="en"?"max 4":"máx 4"})</div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[1,2,3,4].map(n => {
+                      const ativo = (craftPassivas[craftProfTab]?.p3 || 0) >= n;
+                      return (
+                        <button key={n} onClick={() => {
+                          const cur = craftPassivas[craftProfTab]?.p3 || 0;
+                          const novo = cur === n ? n - 1 : n;
+                          setCraftPassivas(p => ({ ...p, [craftProfTab]: { ...(p[craftProfTab] || {}), p3: novo } }));
+                        }}
+                          style={{ width: 32, height: 32, borderRadius: 6, background: ativo ? "rgba(167,139,250,0.25)" : "rgba(0,0,0,0.3)", border: `1px solid ${ativo ? "rgba(167,139,250,0.6)" : "rgba(255,255,255,0.08)"}`, color: ativo ? purple : TEXT_DIM, cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: ativo ? "bold" : "normal" }}>
+                          {n}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* 2 passivas de +5% */}
+                <div>
+                  <div style={{ fontSize: 9, color: TEXT_DIM, marginBottom: 6, letterSpacing: "0.08em" }}>+5% EXP ({lang==="en"?"max 2":"máx 2"})</div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[1,2].map(n => {
+                      const ativo = (craftPassivas[craftProfTab]?.p5 || 0) >= n;
+                      return (
+                        <button key={n} onClick={() => {
+                          const cur = craftPassivas[craftProfTab]?.p5 || 0;
+                          const novo = cur === n ? n - 1 : n;
+                          setCraftPassivas(p => ({ ...p, [craftProfTab]: { ...(p[craftProfTab] || {}), p5: novo } }));
+                        }}
+                          style={{ width: 32, height: 32, borderRadius: 6, background: ativo ? "rgba(167,139,250,0.25)" : "rgba(0,0,0,0.3)", border: `1px solid ${ativo ? "rgba(167,139,250,0.6)" : "rgba(255,255,255,0.08)"}`, color: ativo ? purple : TEXT_DIM, cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: ativo ? "bold" : "normal" }}>
+                          {n}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{ fontSize: 10, color: TEXT_DIM, lineHeight: 1.6 }}>
+                  {lang==="en"
+                    ? `Click to activate · EXP multiplier: ×${bonusEXPmult.toFixed(2)}`
+                    : `Clique para ativar · Multiplicador EXP: ×${bonusEXPmult.toFixed(2)}`}
+                </div>
+              </div>
+            </div>
 
             {/* CONFIG TOPO */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 16, marginBottom: 20, alignItems: "start" }}>
