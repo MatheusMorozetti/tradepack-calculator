@@ -2429,6 +2429,10 @@ export default function App() {
         });
 
         // QUEST da IM das expedições
+        const totalGemasWeek = expGemas.reduce((a, b) => a + b, 0);
+        const mediaGemasDay  = totalGemasWeek / 7;
+        const mediaGemasMes  = mediaGemasDay * 30;
+
         const questExpSem    = imExpSemana * poolRate;
         const questExpLiq    = applySaque(applyExchQ(questExpSem, taxExchHunt));
         const usdExpSem      = questExpLiq * questUSD;
