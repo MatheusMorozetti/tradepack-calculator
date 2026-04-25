@@ -1961,14 +1961,14 @@ export default function App() {
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secFazendoPacks2}</div>
             <div style={{ color: green, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: green, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + silver + QUEST ✅":"Expedição + silver + QUEST ✅"}</div>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"silver + QUEST ✅":"silver + QUEST ✅"}</div>
           </div>
           {/* Vendendo materiais */}
           <div style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secVendendo2}</div>
             <div style={{ color: orange, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
             <div style={{ color: orange, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"Expedition + market sale ✅":"Expedição + venda no mkt ✅"}</div>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"market sale ✅":"venda no mkt ✅"}</div>
           </div>
           {/* Diferença */}
           <div style={{ background: r.diferenca_mes >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferenca_mes >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
@@ -1980,8 +1980,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-          <Stat label={TR[lang].expedition} value={`+${fmtUSD(r.expUSD_mes)}/mês`} sub={`+${fmtUSD(r.expUSD_sem)}/sem · ${fmtInt(joiasTotal)} 💎`} color={blue} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
           <Stat label="IM Packs/sem" value={fmtInt(r.imTotal_semana)} sub={`${r.packsSemanais} packs`} color={gold} />
           <Stat label="QUEST IM líq." value={`${fmt(r.questLiq_sem)}/sem`} sub={`${fmt(r.questLiq_mes)}/mês · -${fmt(r.questCerts_sem)} Q certs`} color={pc(r.questLiq_sem)} />
           <Stat label="Delta vs Vender Mat." value={`${r.deltaQUEST >= 0 ? "+" : ""}${fmt(r.deltaQUEST)} Q`} sub={TR[lang].perPack} color={pc(r.deltaQUEST)} highlight={r.deltaQUEST >= 0} warn={r.deltaQUEST < 0} />
@@ -2132,18 +2131,6 @@ export default function App() {
                 <Stat label={TR[lang].certCostLabel} value={`-${fmt(r.certCusto_Q)} Q`} sub={`-${fmtInt(r.certCusto_S)} silver`} color={red} warn />
                 <Stat label="QUEST IM líq./sem" value={`${fmt(r.questLiq_sem)} Q`} sub={`${fmtUSD(r.questLiq_sem * questUSD)}/sem`} color={pc(r.questLiq_sem)} />
                 <Stat label="QUEST IM líq./mês" value={`${fmt(r.questLiq_mes)} Q`} sub={`${fmtUSD(r.questLiq_mes * questUSD)}/mês`} color={pc(r.questLiq_mes)} highlight />
-              </div>
-            </Section>
-
-            <Section title={TR[lang].expedition} icon="⚔️">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                <Field label={`💎 ${TR[lang].gemsAccum}`} value={joiasTotal} onChange={setJoiasTotal} step={10} suffix="joias" hint={lang === "en" ? "Total accumulated (no reset)" : "Total acumulado (não reseta)"} />
-                <Field label={TR[lang].imExpWeek} value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" hint={lang === "en" ? "Your real data: 4,312,920" : "Seu dado real: 4.312.920"} color={green} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-                <Stat label={TR[lang].imExpWeek} value={fmtInt(r.expIM)} />
-                <Stat label={lang==="en"?"QUEST/week":"QUEST/sem"} value={`${fmt(r.expQUEST_sem)} Q`} sub={`${fmtUSD(r.expUSD_sem)}/sem`} color={blue} />
-                <Stat label={lang==="en"?"USD/month":"USD/mês"} value={`+${fmtUSD(r.expUSD_mes)}`} sub={`${fmt(r.expQUEST_mes)} Q/mês`} color={blue} highlight />
               </div>
             </Section>
 
@@ -2459,45 +2446,131 @@ export default function App() {
 
             {/* LUCKY COIN */}
             <Section title={lang==="en"?"Lucky Coin — Cost Analysis":"Lucky Coin — Análise de Custo"} icon="🪙" borderColor="rgba(196,160,80,0.4)">
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
                 <div>
                   <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
                     {lang==="en"?"Market Price (silver/coin)":"Preço de Mercado (silver/coin)"}
                   </div>
                   <NumInput value={luckCoinSilver} onChange={setLuckCoinSilver} min={0}
                     style={{ background: BG_CARD, border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
-                </div>
-                <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "14px 16px" }}>
-                  <div style={{ fontSize: 10, color: dim, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                    {lang==="en"?"Official Store vs Market":"Loja Oficial vs Mercado"}
+                  <div style={{ fontSize: 10, color: dim, marginTop: 4 }}>
+                    {lang==="en"?"Price to buy 1 Lucky Coin on the in-game market":"Preço para comprar 1 Lucky Coin no mercado do jogo"}
                   </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+                    {lang==="en"?"Market Cost per Snack":"Custo por Snack (mercado)"}
+                  </div>
+                  <div style={{ background: BG_CARD, border: "1px solid rgba(255,255,255,0.06)", borderRadius: 6, padding: "8px 12px" }}>
+                    <div style={{ color: orange, fontSize: 14, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(custoPorSnack)} silver</div>
+                    <div style={{ color: dim, fontSize: 10, marginTop: 4 }}>15 LC → 1 bundle → 10 snacks</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* VEREDICTO — Onde comprar */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                  {lang==="en"?"Where to buy Lucky Coins?":"Onde comprar Lucky Coins?"}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                   {[
                     { qty: 20,   usd: 8   },
                     { qty: 105,  usd: 40  },
                     { qty: 550,  usd: 200 },
                     { qty: 2275, usd: 800 },
                   ].map(p => {
-                    const usdPerCoin   = p.usd / p.qty;
-                    const silverEquiv  = questUSD > 0 ? (usdPerCoin / questUSD) * questToSilver : 0;
-                    const maisBarato   = silverEquiv < luckCoinSilver;
+                    const usdPerCoin    = p.usd / p.qty;
+                    const silverEquiv   = questUSD > 0 ? (usdPerCoin / questUSD) * questToSilver : 0;
+                    const maisBarato    = silverEquiv > 0 && silverEquiv < luckCoinSilver;
+                    const mktMaisBarato = luckCoinSilver <= silverEquiv || silverEquiv === 0;
                     return (
-                      <div key={p.qty} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                        <span style={{ color: dim, fontSize: 10 }}>{p.qty} LC = ${p.usd}</span>
-                        <span style={{ color: dim, fontSize: 10 }}>${(usdPerCoin).toFixed(4)}/coin</span>
-                        <span style={{ color: silverEquiv === 0 ? dim : maisBarato ? green : red, fontSize: 10, fontWeight: maisBarato ? "bold" : "normal" }}>
-                          {silverEquiv > 0 ? `≈ ${fmtInt(silverEquiv)} silver ${maisBarato ? "✓" : ""}` : "—"}
-                        </span>
+                      <div key={p.qty} style={{ background: maisBarato ? "rgba(74,222,128,0.08)" : "rgba(0,0,0,0.2)", border: `1px solid ${maisBarato ? "rgba(74,222,128,0.35)" : "rgba(255,255,255,0.06)"}`, borderRadius: 8, padding: "12px 10px", textAlign: "center" }}>
+                        <div style={{ color: maisBarato ? green : dim, fontSize: 10, fontWeight: "bold", marginBottom: 4 }}>{p.qty} LC</div>
+                        <div style={{ color: maisBarato ? green : TEXT_PRIM, fontSize: 13, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>${p.usd}</div>
+                        <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>${usdPerCoin.toFixed(3)}/coin</div>
+                        {silverEquiv > 0 && (
+                          <div style={{ color: maisBarato ? green : red, fontSize: 9, marginTop: 4, fontWeight: maisBarato ? "bold" : "normal" }}>
+                            ≈ {fmtInt(silverEquiv)} silver {maisBarato ? "✓ MAIS BARATO" : ""}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
-                  <div style={{ marginTop: 10, padding: "8px 10px", background: mktMaisBarato ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)", border: `1px solid ${mktMaisBarato ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"}`, borderRadius: 6, fontSize: 10, color: mktMaisBarato ? green : red }}>
-                    {mktMaisBarato
-                      ? (lang==="en"?"✅ Market is cheaper than official store":"✅ Mercado mais barato que a loja oficial")
-                      : (lang==="en"?"🛒 Official store is cheaper — use the 2275 LC pack":"🛒 Loja oficial mais barata — use o pacote de 2275 LC")}
-                  </div>
+                </div>
+                {/* Veredicto final */}
+                {(() => {
+                  const melhorPacote = [
+                    { qty: 20, usd: 8 }, { qty: 105, usd: 40 }, { qty: 550, usd: 200 }, { qty: 2275, usd: 800 }
+                  ].map(p => ({ ...p, silverEquiv: questUSD > 0 ? ((p.usd/p.qty) / questUSD) * questToSilver : 0 }))
+                   .filter(p => p.silverEquiv > 0)
+                   .reduce((a, b) => a.silverEquiv < b.silverEquiv ? a : b, { silverEquiv: Infinity, qty: 0, usd: 0 });
+
+                  const mktGanha = luckCoinSilver <= melhorPacote.silverEquiv;
+                  return (
+                    <div style={{ marginTop: 10, padding: "12px 16px", background: mktGanha ? "rgba(96,165,250,0.08)" : "rgba(74,222,128,0.08)", border: `1px solid ${mktGanha ? "rgba(96,165,250,0.25)" : "rgba(74,222,128,0.25)"}`, borderRadius: 8, fontSize: 11, color: mktGanha ? blue : green }}>
+                      {mktGanha
+                        ? (lang==="en"
+                            ? `✅ Buy on market — cheaper than the official store (${fmtInt(luckCoinSilver)} vs ${fmtInt(melhorPacote.silverEquiv)} silver/coin)`
+                            : `✅ Compre no mercado — mais barato que a loja oficial (${fmtInt(luckCoinSilver)} vs ${fmtInt(melhorPacote.silverEquiv)} silver/coin)`)
+                        : (lang==="en"
+                            ? `✅ Buy from official store — ${melhorPacote.qty} LC pack for $${melhorPacote.usd} (≈ ${fmtInt(melhorPacote.silverEquiv)} silver/coin vs ${fmtInt(luckCoinSilver)} on market)`
+                            : `✅ Compre na loja oficial — pacote de ${melhorPacote.qty} LC por $${melhorPacote.usd} (≈ ${fmtInt(melhorPacote.silverEquiv)} silver/coin vs ${fmtInt(luckCoinSilver)} no mercado)`)}
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* REVENDA DE LUCKY COINS */}
+              <div style={{ background: "rgba(167,139,250,0.05)", border: "1px solid rgba(167,139,250,0.2)", borderRadius: 10, padding: "14px 18px" }}>
+                <div style={{ fontSize: 10, color: purple, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
+                  💰 {lang==="en"?"Lucky Coin Resell Analysis":"Análise de Revenda de Lucky Coins"}
+                </div>
+                <div style={{ fontSize: 10, color: dim, marginBottom: 14, lineHeight: 1.7 }}>
+                  {lang==="en"
+                    ? "Buy from official store → Sell on market (−4% market fee). Is it profitable?"
+                    : "Comprar na loja oficial → Vender no mercado (−4% taxa de mercado). Vale a pena?"}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                  {[
+                    { qty: 20,   usd: 8   },
+                    { qty: 105,  usd: 40  },
+                    { qty: 550,  usd: 200 },
+                    { qty: 2275, usd: 800 },
+                  ].map(p => {
+                    const custoUSD      = p.usd;
+                    const custoSilver   = questUSD > 0 ? (custoUSD / questUSD) * questToSilver : 0;
+                    const receitaBruta  = luckCoinSilver * p.qty;
+                    const receitaLiq    = receitaBruta * 0.96; // 4% market fee
+                    const lucro         = receitaLiq - custoSilver;
+                    const roi           = custoSilver > 0 ? (lucro / custoSilver) * 100 : 0;
+                    const compensa      = lucro > 0;
+                    return (
+                      <div key={p.qty} style={{ background: compensa ? "rgba(74,222,128,0.07)" : "rgba(248,113,113,0.07)", border: `1px solid ${compensa ? "rgba(74,222,128,0.25)" : "rgba(248,113,113,0.25)"}`, borderRadius: 8, padding: "12px 10px", textAlign: "center" }}>
+                        <div style={{ color: dim, fontSize: 9, marginBottom: 6 }}>{p.qty} LC · ${p.usd}</div>
+                        <div style={{ color: dim, fontSize: 9 }}>{lang==="en"?"Cost:":"Custo:"} {custoSilver > 0 ? fmtInt(custoSilver) : "—"} <span style={{ opacity: 0.5 }}>silver</span></div>
+                        <div style={{ color: dim, fontSize: 9 }}>{lang==="en"?"Revenue (−4%):":"Receita (−4%):"} {fmtInt(receitaLiq)}</div>
+                        <div style={{ color: pc(lucro), fontSize: 14, fontWeight: "bold", fontFamily: "'Space Mono',monospace", marginTop: 6 }}>
+                          {lucro >= 0 ? "+" : ""}{custoSilver > 0 ? fmtInt(lucro) : "—"}
+                        </div>
+                        <div style={{ color: pc(roi), fontSize: 9, marginTop: 2 }}>
+                          {custoSilver > 0 ? `ROI: ${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%` : "—"}
+                        </div>
+                        <div style={{ color: compensa ? green : red, fontSize: 9, fontWeight: "bold", marginTop: 4 }}>
+                          {custoSilver > 0 ? (compensa ? (lang==="en"?"✓ PROFIT":"✓ LUCRO") : (lang==="en"?"✗ LOSS":"✗ PREJUÍZO")) : "—"}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{ fontSize: 10, color: dim, marginTop: 10, lineHeight: 1.6 }}>
+                  ⚠️ {lang==="en"
+                    ? "Resell profitability depends on your QUEST price and exchange rate. Update Market & Pool values to get accurate results."
+                    : "A lucratividade de revenda depende do preço do QUEST e da taxa de câmbio. Atualize os valores de Mercado & Pool para resultados precisos."}
                 </div>
               </div>
 
+              {/* Custo por entrada */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 16 }}>
                 {[
                   { label: lang==="en"?"Cost per Snack":"Custo por Snack", val: custoPorSnack, hint: "15 LC = 1 bundle = 10 snacks" },
