@@ -1278,6 +1278,14 @@ export default function App() {
   );
   const [gemPrices, setGemPrices] = useState({ Amethyst: 0, Topaz: 0, Emerald: 0, Ruby: 0, Sapphire: 0, Citrine: 0 });
 
+  // ── EXPEDIÇÃO ────────────────────────────────────────────────────────────
+  const DIAS_SEMANA    = ["Qui", "Sex", "Sáb", "Dom", "Seg", "Ter", "Qua"];
+  const DIAS_SEMANA_EN = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
+  const [luckCoinSilver, setLuckCoinSilver] = useState(8749000);
+  const [expGemas, setExpGemas]             = useState(Array(7).fill(0));
+  const [expEntradas, setExpEntradas]       = useState(Array(7).fill(0)); // 0=só free, 1=+1 extra, 2=+2 extras
+  const [expJoias, setExpJoias]             = useState(0); // informativo apenas
+
   // GUILDA — preços compartilhados em tempo real
   const [guildId, setGuildId]           = useState(null);
   const [guildPlan, setGuildPlan]       = useState(null); // 'guild' | 'friends' | null
@@ -1631,6 +1639,10 @@ export default function App() {
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxQUESTDesconto !== undefined) setTaxQUESTDesconto(s.taxQUESTDesconto);
         if (s.craftPassivas !== undefined) setCraftPassivas(s.craftPassivas);
+        if (s.luckCoinSilver !== undefined) setLuckCoinSilver(s.luckCoinSilver);
+        if (s.expGemas !== undefined) setExpGemas(s.expGemas);
+        if (s.expEntradas !== undefined) setExpEntradas(s.expEntradas);
+        if (s.expJoias !== undefined) setExpJoias(s.expJoias);
         if (s.taxQUESTToggles !== undefined) setTaxQUESTToggles(s.taxQUESTToggles);
         if (s.taxMktTradepack !== undefined) setTaxMktTradepack(s.taxMktTradepack);
         if (s.taxMktMateriais !== undefined) setTaxMktMateriais(s.taxMktMateriais);
@@ -1666,6 +1678,7 @@ export default function App() {
             mineHorasDia, mineOres, mineGems,
             infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
             craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
+            luckCoinSilver, expGemas, expEntradas, expJoias,
             taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
             taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit,
           },
@@ -1685,6 +1698,7 @@ export default function App() {
     mineHorasDia, mineOres, mineGems,
     infusionPrecos, infusionTargetEXP, infusionQtdHora, infusionCompra,
     craftPlayerLevel, craftOversupply, craftPrices, craftMaterialPrices, gemPrices, subcraftToggles, taxQUESTToggles, taxQUESTDesconto, craftPassivas,
+    luckCoinSilver, expGemas, expEntradas, expJoias,
     taxMktTradepack, taxMktMateriais, taxMktCrafting, taxMktInfusion,
     taxExchTradepack, taxExchHunt, taxSaqueAtivo, taxSaquePct, feeCredit]);
 
@@ -1831,6 +1845,7 @@ export default function App() {
   const tabs = [
     { id: "tradepack",   label: TR[lang].tabTradepack },
     { id: "comparativo", label: TR[lang].tabHunt },
+    { id: "expedicao",   label: lang==="en"?"🗺️ Expedition":"🗺️ Expedição" },
     { id: "mercado",     label: TR[lang].tabMateriais },
     { id: "infusion",    label: TR[lang].tabInfusion },
     { id: "crafting",    label: TR[lang].tabCrafting },
@@ -2376,6 +2391,249 @@ export default function App() {
       )}
 
       {/* TAB: MATERIAIS */}
+      {tab === "expedicao" && (() => {
+        // ── Custos de Lucky Coin e Munk Snack ──────────────────────────────
+        const custoPorSnack     = (luckCoinSilver * 15) / 10; // 15 LC = 1 bundle = 10 snacks
+        const custoEntrada1     = 12 * custoPorSnack;          // 1ª entrada extra
+        const custoEntrada2     = 33 * custoPorSnack;          // 2ª entrada extra
+        const custoEntradaFree  = 50000;                       // entrada gratuita diária
+
+        // Preço LC no store oficial (silver equivalente usando questToSilver e questUSD)
+        // 20 LC = $8 → $0.40/coin → silver = 0.40 / questUSD * questToSilver
+        const lcOfficialUSD = 0.40; // melhor pacote: 2275 LC = $800 → $0.3516/coin
+        const lcBestUSD     = (800 / 2275);
+        const lcOfficialSilver = questUSD > 0 ? (lcBestUSD / questUSD) * questToSilver : 0;
+        const mktMaisBarato = luckCoinSilver < lcOfficialSilver || lcOfficialSilver === 0;
+
+        // ── Registro semanal ──────────────────────────────────────────────
+        const totalGemasWeek   = expGemas.reduce((a, b) => a + b, 0);
+        const mediaGemasDay    = totalGemasWeek / 7;
+        const mediaGemasMes    = mediaGemasDay * 30;
+
+        // Custo semanal (entradas)
+        let custoTotalEntradas = 0;
+        expEntradas.forEach(e => {
+          custoTotalEntradas += custoEntradaFree; // entrada free sempre
+          if (e >= 1) custoTotalEntradas += custoEntrada1;
+          if (e >= 2) custoTotalEntradas += custoEntrada2;
+        });
+
+        // QUEST da IM das expedições
+        const questExpSem    = imExpSemana * poolRate;
+        const questExpLiq    = applySaque(applyExchQ(questExpSem, taxExchHunt));
+        const usdExpSem      = questExpLiq * questUSD;
+        const usdExpMes      = usdExpSem * (30 / 7);
+
+        // ROI líquido
+        const receitaSemana  = totalGemasWeek + usdExpSem * questToSilver; // silver equiv total
+        const lucroSemana    = totalGemasWeek - custoTotalEntradas;
+        const lucroMes       = lucroSemana * (30 / 7);
+
+        const dias = lang === "en" ? DIAS_SEMANA_EN : DIAS_SEMANA;
+
+        return (
+          <div>
+            {/* ROI NO TOPO */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+              <div style={{ background: "rgba(196,160,80,0.07)", border: "1px solid rgba(196,160,80,0.25)", borderRadius: 12, padding: "16px 18px", textAlign: "center" }}>
+                <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"Gems — Week":"Gemas — Semana"}</div>
+                <div style={{ color: gold, fontSize: 20, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(totalGemasWeek)}</div>
+                <div style={{ color: dim, fontSize: 9, marginTop: 4 }}>silver</div>
+              </div>
+              <div style={{ background: "rgba(248,113,113,0.07)", border: "1px solid rgba(248,113,113,0.25)", borderRadius: 12, padding: "16px 18px", textAlign: "center" }}>
+                <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"Entry Cost — Week":"Custo Entradas — Semana"}</div>
+                <div style={{ color: red, fontSize: 20, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(custoTotalEntradas)}</div>
+                <div style={{ color: dim, fontSize: 9, marginTop: 4 }}>silver</div>
+              </div>
+              <div style={{ background: pc(lucroSemana) === green ? "rgba(74,222,128,0.07)" : "rgba(248,113,113,0.07)", border: `1px solid ${pc(lucroSemana) === green ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: "16px 18px", textAlign: "center" }}>
+                <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"Net Profit — Week":"Lucro Líq. — Semana"}</div>
+                <div style={{ color: pc(lucroSemana), fontSize: 20, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{lucroSemana >= 0 ? "+" : ""}{fmtInt(lucroSemana)}</div>
+                <div style={{ color: dim, fontSize: 9, marginTop: 4 }}>silver</div>
+              </div>
+              <div style={{ background: "rgba(167,139,250,0.07)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 12, padding: "16px 18px", textAlign: "center" }}>
+                <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{lang==="en"?"QUEST IM — Week":"QUEST IM — Semana"}</div>
+                <div style={{ color: purple, fontSize: 20, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmt(questExpLiq, 2)}</div>
+                <div style={{ color: dim, fontSize: 9, marginTop: 4 }}>≈ {fmtUSD(usdExpSem)}</div>
+              </div>
+            </div>
+
+            {/* LUCKY COIN */}
+            <Section title={lang==="en"?"Lucky Coin — Cost Analysis":"Lucky Coin — Análise de Custo"} icon="🪙" borderColor="rgba(196,160,80,0.4)">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: TEXT_DIM, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>
+                    {lang==="en"?"Market Price (silver/coin)":"Preço de Mercado (silver/coin)"}
+                  </div>
+                  <NumInput value={luckCoinSilver} onChange={setLuckCoinSilver} min={0}
+                    style={{ background: BG_CARD, border: "1px solid rgba(196,160,80,0.3)", borderRadius: 6, color: gold, padding: "8px 12px", fontSize: 14, width: "100%", fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                </div>
+                <div style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 10, color: dim, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                    {lang==="en"?"Official Store vs Market":"Loja Oficial vs Mercado"}
+                  </div>
+                  {[
+                    { qty: 20,   usd: 8   },
+                    { qty: 105,  usd: 40  },
+                    { qty: 550,  usd: 200 },
+                    { qty: 2275, usd: 800 },
+                  ].map(p => {
+                    const usdPerCoin   = p.usd / p.qty;
+                    const silverEquiv  = questUSD > 0 ? (usdPerCoin / questUSD) * questToSilver : 0;
+                    const maisBarato   = silverEquiv < luckCoinSilver;
+                    return (
+                      <div key={p.qty} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                        <span style={{ color: dim, fontSize: 10 }}>{p.qty} LC = ${p.usd}</span>
+                        <span style={{ color: dim, fontSize: 10 }}>${(usdPerCoin).toFixed(4)}/coin</span>
+                        <span style={{ color: silverEquiv === 0 ? dim : maisBarato ? green : red, fontSize: 10, fontWeight: maisBarato ? "bold" : "normal" }}>
+                          {silverEquiv > 0 ? `≈ ${fmtInt(silverEquiv)} silver ${maisBarato ? "✓" : ""}` : "—"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  <div style={{ marginTop: 10, padding: "8px 10px", background: mktMaisBarato ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)", border: `1px solid ${mktMaisBarato ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)"}`, borderRadius: 6, fontSize: 10, color: mktMaisBarato ? green : red }}>
+                    {mktMaisBarato
+                      ? (lang==="en"?"✅ Market is cheaper than official store":"✅ Mercado mais barato que a loja oficial")
+                      : (lang==="en"?"🛒 Official store is cheaper — use the 2275 LC pack":"🛒 Loja oficial mais barata — use o pacote de 2275 LC")}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 16 }}>
+                {[
+                  { label: lang==="en"?"Cost per Snack":"Custo por Snack", val: custoPorSnack, hint: "15 LC = 1 bundle = 10 snacks" },
+                  { label: lang==="en"?"1st Extra Entry (12 snacks)":"1ª Entrada Extra (12 snacks)", val: custoEntrada1, hint: "" },
+                  { label: lang==="en"?"2nd Extra Entry (33 snacks)":"2ª Entrada Extra (33 snacks)", val: custoEntrada2, hint: "" },
+                ].map(c => (
+                  <div key={c.label} style={{ background: BG_CARD, border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px", textAlign: "center" }}>
+                    <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{c.label}</div>
+                    <div style={{ color: orange, fontSize: 14, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(c.val)}</div>
+                    <div style={{ color: dim, fontSize: 9, marginTop: 4 }}>silver{c.hint ? ` · ${c.hint}` : ""}</div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* REGISTRO SEMANAL */}
+            <Section title={lang==="en"?"Weekly Record (Thu → Thu)":"Registro Semanal (Qui → Qui)"} icon="📅" borderColor="rgba(96,165,250,0.4)">
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                  <thead>
+                    <tr>
+                      {[lang==="en"?"Day":"Dia", lang==="en"?"Gem Silver":"Silver Gemas", lang==="en"?"Extra Entries":"Entradas Extras", lang==="en"?"Entry Cost":"Custo Entradas", lang==="en"?"Net (gems - cost)":"Líquido (gemas - custo)"].map(h => (
+                        <th key={h} style={{ color: gold, padding: "8px 12px", fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid rgba(196,160,80,0.2)", textAlign: "center" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dias.map((dia, i) => {
+                      const entradas = expEntradas[i];
+                      const custoDia = custoEntradaFree + (entradas >= 1 ? custoEntrada1 : 0) + (entradas >= 2 ? custoEntrada2 : 0);
+                      const liquidoDia = expGemas[i] - custoDia;
+                      return (
+                        <tr key={dia}>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: blue, fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{dia}</td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <NumInput value={expGemas[i]} onChange={v => setExpGemas(p => p.map((x,j) => j===i ? v : x))} min={0}
+                              style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(196,160,80,0.2)", borderRadius: 5, color: gold, padding: "5px 10px", fontSize: 12, width: 130, fontFamily: "'Space Mono',monospace", outline: "none", textAlign: "right" }} />
+                          </td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
+                              {[0,1,2].map(n => (
+                                <button key={n} onClick={() => setExpEntradas(p => p.map((x,j) => j===i ? n : x))}
+                                  style={{ width: 28, height: 28, borderRadius: 5, background: entradas === n ? "rgba(96,165,250,0.2)" : "rgba(0,0,0,0.3)", border: `1px solid ${entradas === n ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.07)"}`, color: entradas === n ? blue : dim, cursor: "pointer", fontFamily: "'Space Mono',monospace", fontSize: 10, fontWeight: entradas === n ? "bold" : "normal" }}>
+                                  {n}
+                                </button>
+                              ))}
+                            </div>
+                            <div style={{ fontSize: 9, color: dim, marginTop: 3 }}>
+                              {entradas === 0 ? (lang==="en"?"free only":"só free") : `+${entradas} extra`}
+                            </div>
+                          </td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: red, borderBottom: "1px solid rgba(255,255,255,0.04)" }}>{fmtInt(custoDia)}</td>
+                          <td style={{ padding: "8px 12px", textAlign: "center", color: pc(liquidoDia), fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            {expGemas[i] > 0 ? `${liquidoDia >= 0 ? "+" : ""}${fmtInt(liquidoDia)}` : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {/* Totais */}
+                    <tr style={{ background: "rgba(255,255,255,0.02)" }}>
+                      <td style={{ padding: "10px 12px", color: gold, fontWeight: "bold", fontSize: 10, textTransform: "uppercase" }}>Total</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: gold, fontWeight: "bold" }}>{fmtInt(totalGemasWeek)}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: dim, fontSize: 10 }}>{expEntradas.reduce((a,b)=>a+b,0)} extras</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: red, fontWeight: "bold" }}>{fmtInt(custoTotalEntradas)}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", color: pc(lucroSemana), fontWeight: "bold" }}>{lucroSemana >= 0 ? "+" : ""}{fmtInt(lucroSemana)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Projeções */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginTop: 16 }}>
+                {[
+                  { label: lang==="en"?"Daily Average":"Média Diária", val: mediaGemasDay, color: blue },
+                  { label: lang==="en"?"Weekly Total":"Total Semanal", val: totalGemasWeek, color: gold },
+                  { label: lang==="en"?"Monthly Avg":"Média Mensal", val: mediaGemasMes, color: purple },
+                ].map(s => (
+                  <div key={s.label} style={{ background: BG_CARD, border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, padding: "12px 14px", textAlign: "center" }}>
+                    <div style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>{s.label}</div>
+                    <div style={{ color: s.color, fontSize: 16, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>{fmtInt(s.val)}</div>
+                    <div style={{ color: dim, fontSize: 9, marginTop: 2 }}>silver</div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            {/* IM E QUEST */}
+            <Section title={lang==="en"?"Expedition IM & QUEST":"IM & QUEST da Expedição"} icon="⚡" borderColor="rgba(167,139,250,0.4)">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+                <Field label={lang==="en"?"Expedition IM/week":"IM Expedição/semana"} value={imExpSemana} onChange={setImExpSemana} step={100000} suffix="IM" color={blue}
+                  hint={lang==="en"?"From Jewels collected in runs":"Jewels coletadas nas runs"} />
+                <div style={{ background: BG_CARD, border: "1px solid rgba(167,139,250,0.2)", borderRadius: 8, padding: "14px 16px" }}>
+                  <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                    {lang==="en"?"QUEST from IM":"QUEST da IM"}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <div>
+                      <div style={{ color: dim, fontSize: 9 }}>{lang==="en"?"Gross/week":"Bruto/sem"}</div>
+                      <div style={{ color: purple, fontSize: 14, fontWeight: "bold" }}>{fmt(questExpSem, 4)}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: dim, fontSize: 9 }}>{lang==="en"?"Net/week":"Líquido/sem"}</div>
+                      <div style={{ color: green, fontSize: 14, fontWeight: "bold" }}>{fmt(questExpLiq, 4)}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: dim, fontSize: 9 }}>USD/sem</div>
+                      <div style={{ color: green, fontSize: 14, fontWeight: "bold" }}>{fmtUSD(usdExpSem)}</div>
+                    </div>
+                    <div>
+                      <div style={{ color: dim, fontSize: 9 }}>USD/mês</div>
+                      <div style={{ color: green, fontSize: 14, fontWeight: "bold" }}>{fmtUSD(usdExpMes)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Joias — informativo */}
+              <div style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: 8, padding: "12px 16px" }}>
+                <div style={{ fontSize: 10, color: dim, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  💎 {lang==="en"?"Jewels (informational only)":"Joias (apenas informativo)"}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <NumInput value={expJoias} onChange={setExpJoias} min={0}
+                    style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, color: TEXT_DIM, padding: "6px 12px", fontSize: 14, width: 160, fontFamily: "'Space Mono',monospace", outline: "none" }} />
+                  <span style={{ color: dim, fontSize: 10, lineHeight: 1.6 }}>
+                    {lang==="en"
+                      ? "Jewels feed IM and the leaderboard ranking. Rate unknown — not used in calculations."
+                      : "Joias alimentam a IM e o ranking de expedições. Taxa desconhecida — não afeta os cálculos."}
+                  </span>
+                </div>
+              </div>
+            </Section>
+          </div>
+        );
+      })()}
+
       {tab === "mercado" && (
         <div>
           <Section title={`${lang==="en"?"Revenue & Market":"Receita & Mercado"} — ${packSelecionado}`} icon="💰" accent>
