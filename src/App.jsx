@@ -896,7 +896,7 @@ function LoginScreen({ onLogin, onBack, lang }) {
 
 const fmt = (n, d = 2) => n == null ? "—" : n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmtInt = (n) => Math.round(n).toLocaleString("pt-BR");
-const fmtUSD = (n) => `$${fmt(Math.abs(n), 3)}`;
+const fmtUSD = (n) => n < 0 ? `-$${fmt(Math.abs(n), 3)}` : `$${fmt(n, 3)}`;
 const green = "#4ade80", red = "#f87171", gold = "#c4a050", blue = "#60a5fa", dim = "#8fa0b8", purple = "#a78bfa", orange = "#fb923c";
 const pc = (v) => v > 0 ? green : v < 0 ? red : "#e0eaf8";
 
@@ -1962,7 +1962,7 @@ export default function App() {
 
         {/* VEREDICTO — banner grande e claro */}
         {(() => {
-          const diff = r.profitReal_mes - r.profitAlt_mes;
+          const diff = r.diferenca_mes; // profitReal_mes - profitAlt_mes
           const packGanha = diff > 0;
           const empate = Math.abs(diff) < 0.5;
           return (
@@ -1978,8 +1978,8 @@ export default function App() {
                     ? (lang==="en"?"Both strategies yield similar results":"Ambas as estratégias geram resultados similares")
                     : packGanha
                       ? (lang==="en"
-                          ? `Packs generate ${fmtUSD(Math.abs(diff))}/month MORE than selling materials`
-                          : `Packs geram ${fmtUSD(Math.abs(diff))}/mês A MAIS que vender os materiais`)
+                          ? `Packs generate ${fmtUSD(diff)}/month MORE than selling materials`
+                          : `Packs geram ${fmtUSD(diff)}/mês A MAIS que vender os materiais`)
                       : (lang==="en"
                           ? `Selling materials generates ${fmtUSD(Math.abs(diff))}/month MORE than making packs`
                           : `Vender materiais gera ${fmtUSD(Math.abs(diff))}/mês A MAIS que fazer os packs`)}
@@ -1987,10 +1987,10 @@ export default function App() {
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <div style={{ fontSize: 10, color: dim, marginBottom: 6 }}>
-                  📦 {fmtUSD(r.profitReal_mes)}/mês &nbsp;|&nbsp; 💰 {fmtUSD(r.profitAlt_mes)}/mês
+                  📦 {fmtUSD(r.profitReal_mes)}/mês &nbsp;|&nbsp; 💰 {r.profitAlt_mes >= 0 ? "+" : ""}{fmtUSD(r.profitAlt_mes)}/mês
                 </div>
-                <div style={{ fontSize: 14, color: empate ? gold : packGanha ? green : blue, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>
-                  {empate ? "=" : packGanha ? `+${fmtUSD(diff)}` : `-${fmtUSD(Math.abs(diff))}`} /mês {lang==="en"?"in favor of packs":"a favor dos packs"}
+                <div style={{ fontSize: 14, color: packGanha ? green : blue, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>
+                  {packGanha ? "+" : "-"}{fmtUSD(Math.abs(diff))}/mês {lang==="en"?"in favor of packs":"a favor dos packs"}
                 </div>
               </div>
             </div>
@@ -2006,11 +2006,11 @@ export default function App() {
             <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"silver + QUEST ✅":"silver + QUEST ✅"}</div>
           </div>
           {/* Vendendo materiais */}
-          <div style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
+          <div style={{ background: r.profitAlt_mes >= 0 ? "rgba(251,146,60,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.profitAlt_mes >= 0 ? "rgba(251,146,60,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secVendendo2}</div>
-            <div style={{ color: orange, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
-            <div style={{ color: orange, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
-            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"market sale ✅":"venda no mkt ✅"}</div>
+            <div style={{ color: pc(r.profitAlt_mes), fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.profitAlt_mes >= 0 ? "+" : ""}{fmtUSD(r.profitAlt_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
+            <div style={{ color: pc(r.profitAlt_sem), fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>{r.profitAlt_sem >= 0 ? "+" : ""}{fmtUSD(r.profitAlt_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
+            <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"market sale":"venda no mkt"} {r.profitAlt_mes >= 0 ? "✅" : "❌"}</div>
           </div>
           {/* Diferença */}
           <div style={{ background: r.diferenca_mes >= 0 ? "rgba(74,222,128,0.06)" : "rgba(248,113,113,0.06)", border: `1px solid ${r.diferenca_mes >= 0 ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.3)"}`, borderRadius: 12, padding: 16, textAlign: "center" }}>
