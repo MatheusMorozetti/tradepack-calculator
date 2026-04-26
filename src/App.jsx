@@ -2013,7 +2013,7 @@ export default function App() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <Field label={TR[lang].packsPerWeek} value={qtdPacks} onChange={setQtdPacks} step={1} />
                 <Field label="Silver/pack entregue" value={silverPorPack} onChange={setSilverPorPack} step={1000} suffix="silver" hint={TR[lang].silverHint} />
-                <Field label={TR[lang].certCost} value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" />
+                <Field label={TR[lang].certCost} value={custoCert} onChange={setCustoCert} step="0.05" suffix="QUEST" decimals={4} />
                 <div>
                   <label style={{ display: "block", color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 5 }}>IM base/pack (automático)</label>
                   <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 6, padding: "8px 12px" }}>
