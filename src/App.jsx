@@ -1186,16 +1186,18 @@ function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, co
     setLocalValue(String(final));
   };
 
-  // Display inteligente: mais casas decimais para valores pequenos
+  // Display inteligente: usa decimals se passado, senão detecta automaticamente
   const displayValue = focused
     ? localValue
     : value === 0
       ? "0"
-      : value < 0.01 && value > 0
-        ? value.toFixed(decimals ?? 8)
-        : value < 1 && value > 0
-          ? value.toFixed(decimals ?? 4)
-          : fmtInt(value);
+      : decimals !== undefined
+        ? value.toFixed(decimals)
+        : value < 0.01 && value > 0
+          ? value.toFixed(8)
+          : value < 1 && value > 0
+            ? value.toFixed(4)
+            : fmtInt(value);
 
   return (
     <div style={{ marginBottom: 14 }}>
@@ -1954,9 +1956,47 @@ export default function App() {
         </div>
       )}
 
-      {/* RESULTADO PRINCIPAL — 3 CENÁRIOS */}
+      {/* RESULTADO PRINCIPAL — VEREDICTO + CENÁRIOS */}
       <div style={{ background: BG_CARD, border: "1px solid rgba(96,165,250,0.1)", borderRadius: 16, padding: "20px 24px", marginBottom: 20 }}>
         <div style={{ fontSize: 10, color: gold, letterSpacing: "0.2em", textTransform: "uppercase", textAlign: "center", marginBottom: 14 }}>{TR[lang].secComparativo2}</div>
+
+        {/* VEREDICTO — banner grande e claro */}
+        {(() => {
+          const diff = r.profitReal_mes - r.profitAlt_mes;
+          const packGanha = diff > 0;
+          const empate = Math.abs(diff) < 0.5;
+          return (
+            <div style={{ background: empate ? "rgba(196,160,80,0.08)" : packGanha ? "rgba(74,222,128,0.07)" : "rgba(96,165,250,0.07)", border: `2px solid ${empate ? "rgba(196,160,80,0.4)" : packGanha ? "rgba(74,222,128,0.4)" : "rgba(96,165,250,0.4)"}`, borderRadius: 12, padding: "18px 24px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: "bold", color: empate ? gold : packGanha ? green : blue, fontFamily: "'Space Mono',monospace", marginBottom: 6 }}>
+                  {empate ? "⚖️ EMPATE" : packGanha
+                    ? (lang==="en"?"✅ MAKING PACKS IS BETTER":"✅ FAZER OS PACKS COMPENSA")
+                    : (lang==="en"?"💰 SELLING MATERIALS IS BETTER":"💰 VENDER OS MATERIAIS COMPENSA")}
+                </div>
+                <div style={{ fontSize: 11, color: dim, lineHeight: 1.7 }}>
+                  {empate
+                    ? (lang==="en"?"Both strategies yield similar results":"Ambas as estratégias geram resultados similares")
+                    : packGanha
+                      ? (lang==="en"
+                          ? `Packs generate ${fmtUSD(Math.abs(diff))}/month MORE than selling materials`
+                          : `Packs geram ${fmtUSD(Math.abs(diff))}/mês A MAIS que vender os materiais`)
+                      : (lang==="en"
+                          ? `Selling materials generates ${fmtUSD(Math.abs(diff))}/month MORE than making packs`
+                          : `Vender materiais gera ${fmtUSD(Math.abs(diff))}/mês A MAIS que fazer os packs`)}
+                </div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ fontSize: 10, color: dim, marginBottom: 6 }}>
+                  📦 {fmtUSD(r.profitReal_mes)}/mês &nbsp;|&nbsp; 💰 {fmtUSD(r.profitAlt_mes)}/mês
+                </div>
+                <div style={{ fontSize: 14, color: empate ? gold : packGanha ? green : blue, fontFamily: "'Space Mono',monospace", fontWeight: "bold" }}>
+                  {empate ? "=" : packGanha ? `+${fmtUSD(diff)}` : `-${fmtUSD(Math.abs(diff))}`} /mês {lang==="en"?"in favor of packs":"a favor dos packs"}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
           {/* Fazendo os packs */}
           <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
