@@ -1793,7 +1793,7 @@ export default function App() {
     const profitReal_sem = totalUSD_sem;
     const profitReal_mes = totalUSD_mes;
 
-    const questAlt_sem = applySaque(expQUEST_sem_bruto + applyExchQ(lucroVendaMkt / questToSilver, taxExchTradepack));
+    const questAlt_sem = applySaque(expQUEST_sem_bruto + applyExchQ((lucroVendaMkt * packsSemanais) / questToSilver, taxExchTradepack));
     const profitAlt_sem = questAlt_sem * questUSD;
     const profitAlt_mes = profitAlt_sem * MES;
 
