@@ -2001,8 +2001,8 @@ export default function App() {
           {/* Fazendo os packs */}
           <div style={{ background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.3)", borderRadius: 12, padding: 16, textAlign: "center" }}>
             <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{TR[lang].secFazendoPacks2}</div>
-            <div style={{ color: green, fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>+{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
-            <div style={{ color: green, fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>+{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
+            <div style={{ color: pc(r.profitReal_mes), fontSize: 26, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>{r.profitReal_mes >= 0 ? "+" : ""}{fmtUSD(r.profitReal_mes)}<span style={{ fontSize: 13, fontFamily: "'Space Mono', monospace" }}>/mês</span></div>
+            <div style={{ color: pc(r.profitReal_sem), fontSize: 15, fontFamily: "'Space Mono', monospace", marginTop: 4 }}>{r.profitReal_sem >= 0 ? "+" : ""}{fmtUSD(r.profitReal_sem)}<span style={{ fontSize: 11 }}>/sem</span></div>
             <div style={{ color: "rgba(143,160,184,0.55)", fontSize: 10, marginTop: 6, lineHeight: 1.6 }}>{lang==="en"?"silver + QUEST ✅":"silver + QUEST ✅"}</div>
           </div>
           {/* Vendendo materiais */}
