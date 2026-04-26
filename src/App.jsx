@@ -2688,8 +2688,15 @@ export default function App() {
                                   </div>}
                           </td>
                           {/* Líquido total (gemas - custo total incluindo free) */}
-                          <td style={{ padding: "8px 12px", textAlign: "center", color: pc(liquidoDia), fontWeight: "bold", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                            {expGemas[i] > 0 ? `${liquidoDia >= 0 ? "+" : ""}${fmtInt(liquidoDia)}` : "—"}
+                          <td style={{ padding: "8px 12px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                            {expGemas[i] > 0
+                              ? <div>
+                                  <div style={{ color: pc(liquidoDia), fontWeight: "bold" }}>{liquidoDia >= 0 ? "+" : ""}{fmtInt(liquidoDia)}</div>
+                                  <div style={{ color: liquidoDia > 0 ? green : red, fontSize: 9, marginTop: 2 }}>
+                                    {fmtUSD(toUSD(Math.max(0, liquidoDia), taxExchHunt, taxSaqueAtivo))}
+                                  </div>
+                                </div>
+                              : <span style={{ color: dim }}>—</span>}
                           </td>
                         </tr>
                       );
@@ -2703,7 +2710,12 @@ export default function App() {
                       <td style={{ padding: "10px 12px", textAlign: "center", color: dim, fontSize: 10 }}>
                         {breakEvenDia.filter(b=>b.temExtras&&b.pagou).length}/{breakEvenDia.filter(b=>b.temExtras).length} {lang==="en"?"days paid off":"dias compensaram"}
                       </td>
-                      <td style={{ padding: "10px 12px", textAlign: "center", color: pc(lucroSemana), fontWeight: "bold" }}>{lucroSemana >= 0 ? "+" : ""}{fmtInt(lucroSemana)}</td>
+                      <td style={{ padding: "10px 12px", textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                        <div style={{ color: pc(lucroSemana), fontWeight: "bold" }}>{lucroSemana >= 0 ? "+" : ""}{fmtInt(lucroSemana)}</div>
+                        <div style={{ color: lucroSemana > 0 ? green : red, fontSize: 9, marginTop: 2 }}>
+                          {fmtUSD(toUSD(Math.max(0, lucroSemana), taxExchHunt, taxSaqueAtivo))}
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
