@@ -1739,11 +1739,10 @@ export default function App() {
     // QUEST líquido semanal antes do saque
     const questLiq_sem_bruto = questIM_sem - questCerts_sem;
 
-    // Silver dos packs (valor entregue − custo produção)
-    // Se vende no market: aplica 4% mkt. Se entrega: sem taxa.
+    // Silver recebido pela entrega dos packs (custo de produção é separado)
     const silverLiq_sem = packsSemanais * (taxMktTradepack
-      ? applyMkt(silverPorPack, true) - custoProducaoTotal
-      : silverLiqPorPack);
+      ? applyMkt(silverPorPack, true)
+      : silverPorPack);
 
     // Silver → QUEST via exchange (4% exchange fee)
     const questSilverPacks_sem = applyExchQ(silverLiq_sem / questToSilver, taxExchTradepack);
@@ -1755,8 +1754,8 @@ export default function App() {
     const totalQUEST_sem_bruto = expQUEST_sem_bruto + questLiq_sem_bruto + questSilverPacks_sem;
     const totalQUEST_mes_bruto = totalQUEST_sem_bruto * MES;
 
-    // Aplica taxa de saque
-    const totalQUEST_sem = applySaque(totalQUEST_sem_bruto);
+    // Aplica taxa de saque (só em valores positivos)
+    const totalQUEST_sem = totalQUEST_sem_bruto > 0 ? applySaque(totalQUEST_sem_bruto) : totalQUEST_sem_bruto;
     const totalQUEST_mes = totalQUEST_sem * MES;
 
     // ── FIX DO BUG: USD = QUEST × questUSD (não silver × questUSD) ──────────
@@ -1787,7 +1786,7 @@ export default function App() {
     const imBreaakevenEnhanced = poolRate > 0 ? questNecessarioPorPack / (poolRate * 2) : 0;
 
     // Estratégias comparativas
-    const silverPacks_sem = packsSemanais * silverLiqPorPack;
+    const silverPacks_sem = packsSemanais * silverPorPack; // silver bruto recebido
     const silverPacks_mes = silverPacks_sem * MES;
     const lucroVenderMkt_sem = packsSemanais * lucroVendaMkt;
     const lucroVenderMkt_mes = lucroVenderMkt_sem * MES;
@@ -1795,7 +1794,9 @@ export default function App() {
     const profitReal_sem = totalUSD_sem;
     const profitReal_mes = totalUSD_mes;
 
-    const questAlt_sem = applySaque(expQUEST_sem_bruto + applyExchQ((lucroVendaMkt * packsSemanais) / questToSilver, taxExchTradepack));
+    // applySaque só em valores positivos — saque não faz sentido em negativo
+    const questAlt_bruto = expQUEST_sem_bruto + applyExchQ((lucroVendaMkt * packsSemanais) / questToSilver, taxExchTradepack);
+    const questAlt_sem = questAlt_bruto > 0 ? applySaque(questAlt_bruto) : questAlt_bruto;
     const profitAlt_sem = questAlt_sem * questUSD;
     const profitAlt_mes = profitAlt_sem * MES;
 
@@ -3395,15 +3396,22 @@ export default function App() {
                           </td>
 
                           {/* Crafts → Oversupply (100%) */}
-                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             {craftOversupply >= 100
                               ? <span style={{ color: red, fontSize: 10 }}>{lang==="en"?"already in OS":TR[lang].osAlready}</span>
                               : item.craftsParaOS !== null
                                 ? <div>
                                     <span style={{ color: orange, fontWeight: "bold" }}>{fmtInt(item.craftsParaOS)}</span>
+                                    {/* Sub-crafts */}
                                     {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
                                       <div key={matNome} style={{ fontSize: 9, color: "rgba(96,165,250,0.55)", marginTop: 2 }}>
                                         ↳ {fmtInt(item.craftsParaOS * sc.craftsNeeded)} {matNome}
+                                      </div>
+                                    ))}
+                                    {/* Materiais base */}
+                                    {item.materiais.filter(m => !m.isGemstone && !item.subcraftInfo?.[m.nome]).map(m => (
+                                      <div key={m.nome} style={{ fontSize: 9, color: "rgba(143,160,184,0.35)", marginTop: 1 }}>
+                                        ↳ {fmtInt(item.craftsParaOS * m.qtd)} {m.nome}
                                       </div>
                                     ))}
                                   </div>
@@ -3443,15 +3451,22 @@ export default function App() {
                           </td>
 
                           {/* Crafts → MAX (500%) */}
-                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)", whiteSpace: "nowrap" }}>
+                          <td style={{ padding: "7px 8px", textAlign: "right", borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                             {craftOversupply >= 500
                               ? <span style={{ color: red, fontSize: 10 }}>MAX</span>
                               : item.craftsParaMax !== null
                                 ? <div>
                                     <span style={{ color: TEXT_DIM }}>{fmtInt(item.craftsParaMax)}</span>
+                                    {/* Sub-crafts */}
                                     {Object.entries(item.subcraftInfo || {}).map(([matNome, sc]) => (
                                       <div key={matNome} style={{ fontSize: 9, color: "rgba(96,165,250,0.35)", marginTop: 2 }}>
                                         ↳ {fmtInt(item.craftsParaMax * sc.craftsNeeded)} {matNome}
+                                      </div>
+                                    ))}
+                                    {/* Materiais base */}
+                                    {item.materiais.filter(m => !m.isGemstone && !item.subcraftInfo?.[m.nome]).map(m => (
+                                      <div key={m.nome} style={{ fontSize: 9, color: "rgba(143,160,184,0.2)", marginTop: 1 }}>
+                                        ↳ {fmtInt(item.craftsParaMax * m.qtd)} {m.nome}
                                       </div>
                                     ))}
                                   </div>
