@@ -5312,8 +5312,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* RESULTADO PRINCIPAL — VEREDICTO + CENÁRIOS */}
-      <div
+      {/* RESULTADO PRINCIPAL — VEREDICTO + CENÁRIOS (preview com blur) */}
+      <div style={{ position: "relative" }}>
+        <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", opacity: 0.6 }}>
+        <div
         style={{
           background: BG_CARD,
           border: "1px solid rgba(96,165,250,0.1)",
@@ -5531,6 +5533,18 @@ export default function App() {
             highlight={r.deltaQUEST >= 0}
             warn={r.deltaQUEST < 0}
           />
+        </div>
+      </div>
+        </div> {/* fecha blur div */}
+        {/* Overlay Em Breve */}
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(5,8,16,0.55)", borderRadius: 16, zIndex: 2 }}>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>🔒</div>
+          <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: "bold", color: "rgba(255,255,255,0.4)", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 6 }}>
+            {lang === "en" ? "Coming Soon" : "Em Breve"}
+          </div>
+          <div style={{ fontSize: 10, color: "rgba(143,160,184,0.4)", fontFamily: "'Space Mono', monospace" }}>
+            {lang === "en" ? "Strategy comparison will be available soon" : "O comparativo de estratégias estará disponível em breve"}
+          </div>
         </div>
       </div>
 
@@ -6069,7 +6083,9 @@ export default function App() {
             </div>
           </div>
 
-          {/* Comparativo Hunt vs Tradepack */}
+          {/* Comparativo Hunt vs Tradepack — preview com blur */}
+          <div style={{ position: "relative" }}>
+            <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", opacity: 0.6 }}>
           <Section
             title={`📊 ${lang === "en" ? "Hunt vs Tradepack — Monthly Comparison" : "Hunt vs Tradepack — Comparativo Mensal"}`}
             icon="⚖️"
@@ -6146,6 +6162,18 @@ export default function App() {
               ))}
             </div>
           </Section>
+            </div> {/* fecha blur */}
+            {/* Overlay Em Breve */}
+            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "rgba(5,8,16,0.55)", borderRadius: 12, zIndex: 2 }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>🔒</div>
+              <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 11, fontWeight: "bold", color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4 }}>
+                {lang === "en" ? "Coming Soon" : "Em Breve"}
+              </div>
+              <div style={{ fontSize: 10, color: "rgba(143,160,184,0.35)", fontFamily: "'Space Mono', monospace" }}>
+                {lang === "en" ? "Tradepack comparison available soon" : "Comparativo com Tradepack disponível em breve"}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
