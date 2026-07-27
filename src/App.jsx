@@ -5463,8 +5463,9 @@ export default function App() {
   const [matsOverride, setMatsOverride] = useState({});
   const [matsQUEST, setMatsQUEST] = useState({});
   // Fonte de cada material: 'plantado' (usa custoProducao) ou 'mkt' (usa precoMkt).
-  // Padrão 'plantado' pra manter o comportamento anterior — troque por material
-  // conforme você realmente compra ou planta/farma aquele item.
+  // Padrão 'mkt' — na prática a grande maioria dos tradepacks é montada com
+  // materiais comprados no mercado, então esse é o cenário mais comum. Troque
+  // por material conforme você realmente planta/farma aquele item específico.
   const [matsFonte, setMatsFonte] = useState({});
   const getMat = (nome, campo) =>
     matsOverride[nome]?.[campo] !== undefined
@@ -5473,7 +5474,7 @@ export default function App() {
   const setMat = (nome, campo, val) =>
     setMatsOverride((prev) => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
   const toggleQUEST = (nome) => setMatsQUEST((prev) => ({ ...prev, [nome]: !prev[nome] }));
-  const getFonte = (nome) => matsFonte[nome] || "plantado";
+  const getFonte = (nome) => matsFonte[nome] || "mkt";
   const setFonte = (nome, fonte) => setMatsFonte((prev) => ({ ...prev, [nome]: fonte }));
   const toggleFonte = (nome) => setFonte(nome, getFonte(nome) === "mkt" ? "plantado" : "mkt");
   // Custo efetivo de 1 unidade do material, respeitando a fonte escolhida
@@ -5990,6 +5991,73 @@ export default function App() {
 
     return rotas.sort((a, b) => b.lucro - a.lucro);
   }, [packSelecionado, packDemandas, modificadoresTotal, r.custoProducaoTotal]);
+
+  // Melhor Pack (Geral): mesma ideia do ranking acima, mas comparando TODOS os
+  // packs entre si — não só o selecionado. Um pack só entra no ranking quando:
+  //   1) pelo menos 1 destino tem % de demanda confirmado (packDemandas), e
+  //   2) todo material com fonte "mercado" (o padrão) tem precoMkt > 0.
+  // Materiais com fonte "plantado" nunca bloqueiam o cálculo, porque custo 0
+  // é um valor legítimo pra material obtido de graça. Packs que não atendem
+  // os critérios entram na lista de "incompletos" com o que falta preencher,
+  // em vez de simplesmente sumirem do ranking ou entrarem com número errado.
+  const melhorPackGeral = useMemo(() => {
+    const completos = [];
+    const incompletos = [];
+
+    Object.keys(PACKS).forEach((packNome) => {
+      const mats = PACKS[packNome].materiais;
+
+      const materiaisFaltando = mats
+        .filter((m) => getFonte(m.nome) === "mkt" && getMat(m.nome, "precoMkt") <= 0)
+        .map((m) => m.nome);
+
+      const custoProducaoTotal = mats.reduce((acc, m) => acc + m.qtd * getCustoReal(m.nome), 0);
+
+      const demandasDoPack = packDemandas[packNome] || {};
+      const destinosInformados = TRADEPOSTS.filter((d) => {
+        const bruto = demandasDoPack[d];
+        return bruto !== undefined && bruto !== "";
+      });
+
+      if (materiaisFaltando.length > 0 || destinosInformados.length === 0) {
+        incompletos.push({
+          packNome,
+          materiaisFaltando,
+          semPercentual: destinosInformados.length === 0,
+          custoProducaoTotal,
+        });
+        return;
+      }
+
+      // Melhor combinação origem × destino, só entre os destinos com % confirmado
+      let melhor = null;
+      destinosInformados.forEach((destino) => {
+        const demanda = Number(demandasDoPack[destino]);
+        TRADEPOSTS.forEach((origem) => {
+          if (origem === destino) return;
+          const distancia = getTradepostSteps(origem, destino);
+          if (distancia === null) return;
+          const silver = calcularSilverTradepack(distancia, demanda, modificadoresTotal);
+          const lucro = silver - custoProducaoTotal;
+          if (!melhor || lucro > melhor.lucro) {
+            melhor = { origem, destino, distancia, demanda, silver, lucro };
+          }
+        });
+      });
+
+      if (melhor) {
+        completos.push({
+          packNome,
+          custoProducaoTotal,
+          imGerado: melhor.silver * 10,
+          ...melhor,
+        });
+      }
+    });
+
+    completos.sort((a, b) => b.lucro - a.lucro);
+    return { completos, incompletos };
+  }, [packDemandas, matsOverride, matsQUEST, matsFonte, modificadoresTotal]);
 
   const tabs = [
     { id: "tradepack", label: TR[lang].tabTradepack },
@@ -6725,6 +6793,141 @@ export default function App() {
                 {lang === "en"
                   ? "Demand is per pack + destination, independent of departure. Unfilled destinations assume 100% (baseline, shown in italic) until you confirm the real value in-game."
                   : "A demanda é por pack + destino, independente da partida. Destinos não preenchidos assumem 100% (padrão, em itálico) até você confirmar o valor real no jogo."}
+              </div>
+            </div>
+
+            {/* Melhor Pack (Geral) — compara TODOS os packs entre si, não só o selecionado */}
+            <div
+              style={{
+                background: BG_CARD,
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: 14,
+              }}
+            >
+              <div
+                style={{
+                  color: dim,
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}
+              >
+                🧮 {lang === "en" ? "Best Pack (All Packs)" : "Melhor Pack (Todos os Packs)"}
+              </div>
+
+              {melhorPackGeral.completos.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 620, margin: "0 auto" }}>
+                  {melhorPackGeral.completos.slice(0, 5).map((p, i) => (
+                    <div
+                      key={p.packNome}
+                      onClick={() => {
+                        setPackSelecionado(p.packNome);
+                        setPackOrigem(p.origem);
+                        setPackDestino(p.destino);
+                      }}
+                      style={{
+                        border: `1px solid ${i === 0 ? gold : "rgba(196,160,80,0.2)"}`,
+                        background: i === 0 ? "rgba(196,160,80,0.08)" : "transparent",
+                        borderRadius: 8,
+                        padding: "10px 12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, gap: 8 }}>
+                        <span style={{ fontSize: 12, fontWeight: "bold", color: i === 0 ? gold : TEXT_PRIM }}>
+                          {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {p.packNome}
+                        </span>
+                        <span style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", fontFamily: "'Space Mono', monospace", textAlign: "right" }}>
+                          {p.origem} → {p.destino} · {fmtInt(p.distancia)} steps · {p.demanda}%
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12 }}>
+                        <span style={{ color: dim }}>Silver: </span>
+                        <span style={{ color: gold, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.silver)}</span>
+                        <span style={{ color: dim }}> · {lang === "en" ? "Mat. cost: " : "Custo mat.: "}</span>
+                        <span style={{ color: TEXT_PRIM, fontFamily: "'Space Mono', monospace" }}>{fmtInt(p.custoProducaoTotal)}</span>
+                        <span style={{ color: dim }}> · {lang === "en" ? "Profit: " : "Lucro: "}</span>
+                        <span
+                          style={{
+                            color: p.lucro >= 0 ? green : red,
+                            fontFamily: "'Space Mono', monospace",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {fmtInt(p.lucro)}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 10, color: "rgba(143,160,184,0.5)", marginTop: 2 }}>
+                        IM: {fmtInt(p.imGerado)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: "rgba(143,160,184,0.6)", textAlign: "center", padding: "8px 0" }}>
+                  {lang === "en"
+                    ? "No pack has enough data yet to enter the ranking — fill in the missing data below."
+                    : "Nenhum pack tem dados suficientes ainda pra entrar no ranking — preencha os dados faltantes abaixo."}
+                </div>
+              )}
+
+              {melhorPackGeral.incompletos.length > 0 && (
+                <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(196,160,80,0.15)" }}>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: "rgba(143,160,184,0.55)",
+                      marginBottom: 8,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    ⚠️ {lang === "en" ? "Missing data" : "Dados faltando"}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxWidth: 620, margin: "0 auto" }}>
+                    {melhorPackGeral.incompletos.map((p) => (
+                      <div
+                        key={p.packNome}
+                        onClick={() => setPackSelecionado(p.packNome)}
+                        style={{
+                          border: "1px solid rgba(248,113,113,0.25)",
+                          background: "rgba(248,113,113,0.05)",
+                          borderRadius: 6,
+                          padding: "8px 10px",
+                          cursor: "pointer",
+                          fontSize: 11,
+                        }}
+                      >
+                        <span style={{ color: TEXT_PRIM, fontWeight: "bold" }}>{p.packNome}</span>
+                        <div
+                          style={{
+                            color: "rgba(248,113,113,0.85)",
+                            marginTop: 2,
+                            fontFamily: "'Space Mono', monospace",
+                            fontSize: 10.5,
+                          }}
+                        >
+                          {p.semPercentual &&
+                            (lang === "en" ? "missing: demand % (any destination)" : "falta: % de demanda (algum destino)")}
+                          {p.semPercentual && p.materiaisFaltando.length > 0 && " · "}
+                          {p.materiaisFaltando.length > 0 &&
+                            (lang === "en"
+                              ? `missing market price: ${p.materiaisFaltando.join(", ")}`
+                              : `falta preço de mercado: ${p.materiaisFaltando.join(", ")}`)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {lang === "en"
+                  ? "Compares every pack against every other, using each pack's confirmed demand % and market material prices. Click a ranked pack to load it above; click an incomplete one to jump to its config and fill in what's missing."
+                  : "Compara todos os packs entre si, usando o % de demanda confirmado e os preços de mercado dos materiais de cada um. Clique num pack do ranking pra carregá-lo acima; clique num incompleto pra ir até a config dele e preencher o que falta."}
               </div>
             </div>
 
