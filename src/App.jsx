@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "./supabase";
 
 const TR = {
@@ -5557,79 +5557,93 @@ export default function App() {
       if (s.lang !== undefined) setLang(s.lang);
     } catch {}
     setSettingsLoaded(true);
+    setDataLoading(false);
   }, []);
+
+  // Monta o snapshot atual de TODAS as configurações — usado tanto pelo
+  // auto-save com debounce (2s) quanto pelo flush imediato ao sair da
+  // página, então os dois caminhos gravam exatamente o mesmo formato.
+  const buildSettingsSnapshot = () => ({
+    poolRate,
+    questUSD,
+    questToSilver,
+    calQUEST,
+    imExpSemana,
+    joiasTotal,
+    packSelecionado,
+    qtdPacks,
+    distanciaPack,
+    packOrigem,
+    packDestino,
+    packDemandas,
+    modBartering1On,
+    modBartering2On,
+    modPlunderingOn,
+    modStolenOn,
+    qtdEnhanced,
+    enhancerStock,
+    enhancerGanhos,
+    custoCert,
+    matsOverride,
+    matsQUEST,
+    matsFonte,
+    huntHorasDia,
+    huntAddonQtd,
+    huntAddonPreco,
+    huntInfusionQtd,
+    huntInfusionPreco,
+    huntNPC,
+    mineHorasDia,
+    mineOres,
+    mineGems,
+    infusionPrecos,
+    infusionTargetEXP,
+    infusionQtdHora,
+    infusionCompra,
+    craftPlayerLevel,
+    craftOversupply,
+    craftPrices,
+    craftMaterialPrices,
+    gemPrices,
+    subcraftToggles,
+    taxQUESTToggles,
+    taxQUESTDesconto,
+    luckCoinSilver,
+    luckCoinSaldo,
+    expGemas,
+    expEntradas,
+    expJoias,
+    taxMktTradepack,
+    taxMktMateriais,
+    taxMktCrafting,
+    taxMktInfusion,
+    taxExchTradepack,
+    taxExchHunt,
+    taxSaqueAtivo,
+    taxSaquePct,
+    feeCredit,
+    lang,
+  });
+
+  // Ref sempre atualizada com o snapshot mais recente (a cada render) — é o
+  // que o flush de saída lê, sem precisar recriar listeners a cada mudança.
+  const settingsSnapshotRef = useRef(buildSettingsSnapshot());
+  useEffect(() => {
+    settingsSnapshotRef.current = buildSettingsSnapshot();
+  });
+
+  const flushSave = () => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsSnapshotRef.current));
+    } catch {}
+  };
 
   // Auto-save no localStorage 2s após qualquer mudança
   useEffect(() => {
     if (!settingsLoaded) return;
     setSaving(true);
     const timeout = setTimeout(() => {
-      try {
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({
-            poolRate,
-            questUSD,
-            questToSilver,
-            calQUEST,
-            imExpSemana,
-            joiasTotal,
-            packSelecionado,
-            qtdPacks,
-            distanciaPack,
-            packOrigem,
-            packDestino,
-            packDemandas,
-            modBartering1On,
-            modBartering2On,
-            modPlunderingOn,
-            modStolenOn,
-            qtdEnhanced,
-            enhancerStock,
-            enhancerGanhos,
-            custoCert,
-            matsOverride,
-            matsQUEST,
-            matsFonte,
-            huntHorasDia,
-            huntAddonQtd,
-            huntAddonPreco,
-            huntInfusionQtd,
-            huntInfusionPreco,
-            huntNPC,
-            mineHorasDia,
-            mineOres,
-            mineGems,
-            infusionPrecos,
-            infusionTargetEXP,
-            infusionQtdHora,
-            infusionCompra,
-            craftPlayerLevel,
-            craftOversupply,
-            craftPrices,
-            craftMaterialPrices,
-            gemPrices,
-            subcraftToggles,
-            taxQUESTToggles,
-            taxQUESTDesconto,
-            luckCoinSilver,
-            luckCoinSaldo,
-            expGemas,
-            expEntradas,
-            expJoias,
-            taxMktTradepack,
-            taxMktMateriais,
-            taxMktCrafting,
-            taxMktInfusion,
-            taxExchTradepack,
-            taxExchHunt,
-            taxSaqueAtivo,
-            taxSaquePct,
-            feeCredit,
-            lang,
-          })
-        );
-      } catch {}
+      flushSave();
       setSaving(false);
     }, 2000);
     return () => {
@@ -5699,6 +5713,27 @@ export default function App() {
     lang,
     settingsLoaded,
   ]);
+
+  // Flush imediato ao sair da página (fechar aba, recarregar, trocar de app,
+  // minimizar) — evita perder mudanças feitas nos últimos 2s antes do
+  // debounce do auto-save disparar. 'visibilitychange' cobre mobile/troca de
+  // aba (mais confiável que beforeunload nesses casos); 'pagehide' cobre
+  // fechar/recarregar no desktop.
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    const onHide = () => flushSave();
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flushSave();
+    };
+    window.addEventListener("pagehide", onHide);
+    window.addEventListener("beforeunload", onHide);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", onHide);
+      window.removeEventListener("beforeunload", onHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [settingsLoaded]);
 
   const r = useMemo(() => {
     const MES = 30 / 7;
