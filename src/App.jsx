@@ -5954,7 +5954,7 @@ export default function App() {
     { id: "tradepack", label: TR[lang].tabTradepack },
     { id: "comparativo", label: TR[lang].tabHunt },
     { id: "expedicao", label: lang === "en" ? "🗺️ Expedition" : "🗺️ Expedição" },
-    { id: "mercado", label: TR[lang].tabMateriais, locked: true },
+    { id: "mercado", label: TR[lang].tabMateriais },
     { id: "infusion", label: TR[lang].tabInfusion },
     { id: "crafting", label: TR[lang].tabCrafting },
     { id: "calibracao", label: TR[lang].tabCalibracao },
@@ -6906,203 +6906,17 @@ export default function App() {
             </div>
           </Section>
 
-          {/* Tabela Global de Materiais */}
-          <Section
-            title={`🌐 ${lang === "en" ? "Global Materials Table" : "Tabela Global de Materiais"}`}
-            icon="🌐"
-            borderColor="rgba(96,165,250,0.3)"
-          >
-            <div style={{ color: "rgba(143,160,184,0.6)", fontSize: 11, marginBottom: 12, lineHeight: 1.5 }}>
-              {lang === "en"
-                ? "Set a material's price once here and it automatically updates in every pack that uses it — no need to re-enter prices per pack."
-                : "Preencha o preço de um material aqui uma única vez e ele atualiza automaticamente em todos os packs que o utilizam — sem precisar repetir por pack."}
-            </div>
-
-            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
-              <input
-                type="text"
-                value={matGlobalSearch}
-                onChange={(e) => setMatGlobalSearch(e.target.value)}
-                placeholder={lang === "en" ? "🔍 Search material..." : "🔍 Buscar material..."}
-                style={{
-                  flex: "1 1 220px",
-                  boxSizing: "border-box",
-                  background: "rgba(0,0,0,0.4)",
-                  border: "1px solid rgba(96,165,250,0.25)",
-                  borderRadius: 8,
-                  color: TEXT_PRIM,
-                  padding: "8px 12px",
-                  fontSize: 12,
-                  fontFamily: "'Space Mono', monospace",
-                  outline: "none",
-                }}
-              />
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  color: dim,
-                  fontSize: 11,
-                  cursor: "pointer",
-                  userSelect: "none",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={matGlobalOnlyEmpty}
-                  onChange={(e) => setMatGlobalOnlyEmpty(e.target.checked)}
-                />
-                {lang === "en" ? "Only missing prices" : "Só sem preço"}
-              </label>
-              <div style={{ color: "rgba(143,160,184,0.5)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}>
-                {ALL_PACK_MATERIALS.length} {lang === "en" ? "unique materials" : "materiais únicos"}
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginBottom: 6,
-                display: "grid",
-                gridTemplateColumns: "1.2fr 0.6fr 0.7fr 0.7fr 50px 90px",
-                gap: 4,
-                position: "sticky",
-                top: 0,
-              }}
-            >
-              {[
-                lang === "en" ? "Material" : "Material",
-                lang === "en" ? "Used in" : "Usado em",
-                lang === "en" ? "Prod. cost" : "Custo prod.",
-                lang === "en" ? "Market" : "Mercado",
-                "QUEST -20%",
-                lang === "en" ? "Source" : "Fonte",
-              ].map((h) => (
-                <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  {h}
-                </span>
-              ))}
-            </div>
-
-            <div style={{ maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
-              {ALL_PACK_MATERIALS.filter((mat) => {
-                if (matGlobalSearch.trim() && !mat.nome.toLowerCase().includes(matGlobalSearch.trim().toLowerCase()))
-                  return false;
-                if (matGlobalOnlyEmpty && getMat(mat.nome, "precoMkt") > 0) return false;
-                return true;
-              }).map((mat) => {
-                const fonte = getFonte(mat.nome);
-                return (
-                <div
-                  key={mat.nome}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1.2fr 0.6fr 0.7fr 0.7fr 50px 90px",
-                    gap: 4,
-                    alignItems: "center",
-                    padding: "6px 0",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <span style={{ color: "#c0c0d0", fontSize: 12 }}>{mat.nome}</span>
-                  <span
-                    style={{ color: "rgba(143,160,184,0.55)", fontSize: 10 }}
-                    title={mat.packs.join(", ")}
-                  >
-                    {mat.packs.length} {lang === "en" ? "pack(s)" : "pack(s)"}
-                  </span>
-                  <NumInput
-                    value={getMat(mat.nome, "custoProducao")}
-                    onChange={(v) => setMat(mat.nome, "custoProducao", v)}
-                    min={0}
-                    style={{
-                      background: "rgba(0,0,0,0.4)",
-                      border: `1px solid ${fonte === "plantado" ? "rgba(74,222,128,0.4)" : "rgba(196,160,80,0.2)"}`,
-                      borderRadius: 6,
-                      color: gold,
-                      padding: "4px 8px",
-                      fontSize: 12,
-                      width: "100%",
-                      fontFamily: "'Space Mono', monospace",
-                      outline: "none",
-                    }}
-                  />
-                  <NumInput
-                    value={getMat(mat.nome, "precoMkt")}
-                    onChange={(v) => setMat(mat.nome, "precoMkt", v)}
-                    min={0}
-                    style={{
-                      background: "rgba(0,0,0,0.4)",
-                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.5)" : "rgba(96,165,250,0.2)"}`,
-                      borderRadius: 6,
-                      color: blue,
-                      padding: "4px 8px",
-                      fontSize: 12,
-                      width: "100%",
-                      fontFamily: "'Space Mono', monospace",
-                      outline: "none",
-                    }}
-                  />
-                  <div style={{ textAlign: "center" }}>
-                    <div
-                      onClick={() => toggleQUEST(mat.nome)}
-                      title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
-                      style={{
-                        display: "inline-block",
-                        width: 30,
-                        height: 18,
-                        borderRadius: 9,
-                        background: matsQUEST[mat.nome] ? "#c4a050" : "#303040",
-                        cursor: "pointer",
-                        position: "relative",
-                        transition: "background 0.2s",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: 2,
-                          left: matsQUEST[mat.nome] ? 14 : 2,
-                          width: 14,
-                          height: 14,
-                          borderRadius: "50%",
-                          background: "#f0e6c8",
-                          transition: "left 0.2s",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => toggleFonte(mat.nome)}
-                    title={
-                      lang === "en"
-                        ? "Click to switch between grown and market-bought"
-                        : "Clique pra alternar entre plantado e comprado no mercado"
-                    }
-                    style={{
-                      fontSize: 10,
-                      padding: "4px 6px",
-                      borderRadius: 6,
-                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.4)" : "rgba(74,222,128,0.4)"}`,
-                      background: fonte === "mkt" ? "rgba(96,165,250,0.1)" : "rgba(74,222,128,0.1)",
-                      color: fonte === "mkt" ? blue : green,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {fonte === "mkt" ? (lang === "en" ? "🛒 Market" : "🛒 Mercado") : lang === "en" ? "🌱 Grown" : "🌱 Plantado"}
-                  </button>
-                </div>
-              );})}
-            </div>
-          </Section>
-
           {/* Materiais do pack selecionado */}
           <Section
             title={`🧺 ${lang === "en" ? "Pack materials" : "Materiais do pack"}`}
             icon="🧺"
             borderColor="rgba(74,222,128,0.25)"
           >
+            <div style={{ color: "rgba(143,160,184,0.6)", fontSize: 11, marginBottom: 12, lineHeight: 1.5 }}>
+              {lang === "en"
+                ? "Market prices here are shared with the 💰 Materials tab — editing one updates the other. Production cost (grown/farmed) only applies here, for this pack's cost calculation."
+                : "Os preços de mercado aqui são compartilhados com a aba 💰 Materiais — editar um atualiza o outro. O custo de produção (plantado) só se aplica aqui, pro cálculo de custo deste pack."}
+            </div>
             {/* Resumo comparativo: custo atual (misto) vs comprar tudo no mkt vs plantar tudo */}
             <div
               style={{
@@ -9025,7 +8839,179 @@ export default function App() {
           );
         })()}
 
-      {tab === "mercado" && <EmBreve lang={lang} />}
+      {tab === "mercado" && (
+        <div>
+          <FormulaPanel
+            lang={lang}
+            title={lang === "en" ? "Materials" : "Materiais"}
+            descricao={
+              lang === "en"
+                ? "A single shared price list for every material used across all Tradepacks. Prices set here are market-only — production/farming cost is configured per pack in the Tradepack tab's 'Pack materials' table, since it's specific to how you personally source each item."
+                : "Uma lista de preços única e compartilhada pra todo material usado nos Tradepacks. Os preços aqui são só de mercado — o custo de produção/plantação é configurado por pack, na tabela 'Materiais do pack' da aba Tradepack, já que é específico de como você produz cada item."
+            }
+            formulas={[
+              {
+                label: lang === "en" ? "Shared market price" : "Preço de mercado compartilhado",
+                formula: "matsOverride[material].precoMkt → usado em TODOS os packs que contêm esse material",
+                nota:
+                  lang === "en"
+                    ? "Editing a price here updates it everywhere the material appears, including the Tradepack tab."
+                    : "Editar um preço aqui atualiza em todo lugar que o material aparece, incluindo a aba Tradepack.",
+              },
+            ]}
+          />
+
+          <Section
+            title={`🌐 ${TR[lang].tabMateriais}`}
+            icon="🌐"
+            borderColor="rgba(96,165,250,0.3)"
+          >
+            <div style={{ color: "rgba(143,160,184,0.6)", fontSize: 11, marginBottom: 12, lineHeight: 1.5 }}>
+              {lang === "en"
+                ? "Set a material's market price once here and it automatically updates in every pack that uses it — no need to re-enter prices per pack. Only market price lives here; production/farming cost is set per pack in the Tradepack tab."
+                : "Preencha o preço de mercado de um material aqui uma única vez e ele atualiza automaticamente em todos os packs que o utilizam — sem precisar repetir por pack. Só o preço de mercado fica aqui; o custo de produção/plantação é definido por pack, na aba Tradepack."}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <input
+                type="text"
+                value={matGlobalSearch}
+                onChange={(e) => setMatGlobalSearch(e.target.value)}
+                placeholder={lang === "en" ? "🔍 Search material..." : "🔍 Buscar material..."}
+                style={{
+                  flex: "1 1 220px",
+                  boxSizing: "border-box",
+                  background: "rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(96,165,250,0.25)",
+                  borderRadius: 8,
+                  color: TEXT_PRIM,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  fontFamily: "'Space Mono', monospace",
+                  outline: "none",
+                }}
+              />
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: dim,
+                  fontSize: 11,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={matGlobalOnlyEmpty}
+                  onChange={(e) => setMatGlobalOnlyEmpty(e.target.checked)}
+                />
+                {lang === "en" ? "Only missing prices" : "Só sem preço"}
+              </label>
+              <div style={{ color: "rgba(143,160,184,0.5)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}>
+                {ALL_PACK_MATERIALS.length} {lang === "en" ? "unique materials" : "materiais únicos"}
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginBottom: 6,
+                display: "grid",
+                gridTemplateColumns: "1.4fr 0.7fr 0.9fr 60px",
+                gap: 4,
+                position: "sticky",
+                top: 0,
+              }}
+            >
+              {[
+                lang === "en" ? "Material" : "Material",
+                lang === "en" ? "Used in" : "Usado em",
+                lang === "en" ? "Market" : "Mercado",
+                "QUEST -20%",
+              ].map((h) => (
+                <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            <div style={{ maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
+              {ALL_PACK_MATERIALS.filter((mat) => {
+                if (matGlobalSearch.trim() && !mat.nome.toLowerCase().includes(matGlobalSearch.trim().toLowerCase()))
+                  return false;
+                if (matGlobalOnlyEmpty && getMat(mat.nome, "precoMkt") > 0) return false;
+                return true;
+              }).map((mat) => (
+                <div
+                  key={mat.nome}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.4fr 0.7fr 0.9fr 60px",
+                    gap: 4,
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <span style={{ color: "#c0c0d0", fontSize: 12 }}>{mat.nome}</span>
+                  <span
+                    style={{ color: "rgba(143,160,184,0.55)", fontSize: 10 }}
+                    title={mat.packs.join(", ")}
+                  >
+                    {mat.packs.length} {lang === "en" ? "pack(s)" : "pack(s)"}
+                  </span>
+                  <NumInput
+                    value={getMat(mat.nome, "precoMkt")}
+                    onChange={(v) => setMat(mat.nome, "precoMkt", v)}
+                    min={0}
+                    style={{
+                      background: "rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(96,165,250,0.4)",
+                      borderRadius: 6,
+                      color: blue,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      width: "100%",
+                      fontFamily: "'Space Mono', monospace",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ textAlign: "center" }}>
+                    <div
+                      onClick={() => toggleQUEST(mat.nome)}
+                      title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
+                      style={{
+                        display: "inline-block",
+                        width: 30,
+                        height: 18,
+                        borderRadius: 9,
+                        background: matsQUEST[mat.nome] ? "#c4a050" : "#303040",
+                        cursor: "pointer",
+                        position: "relative",
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 2,
+                          left: matsQUEST[mat.nome] ? 14 : 2,
+                          width: 14,
+                          height: 14,
+                          borderRadius: "50%",
+                          background: "#f0e6c8",
+                          transition: "left 0.2s",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        </div>
+      )}
 
       {tab === "crafting" &&
         (() => {
