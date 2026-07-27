@@ -4410,6 +4410,89 @@ const CRAFTING_DB = {
 
 const PROF_ICONS = { Blacksmithing: "⚒️", Cooking: "🍳", Alchemy: "⚗️", Carpentry: "🪵", Weaving: "🧵" };
 
+// ── Tradeposts & distância (steps) ──────────────────────────────────────
+// Fonte: reportado in-game pela guild (pin icon no Munk Tradepost).
+// Seabreeze↔Dras Ashar e Glaceforde↔Defiance confirmados in-game pela guild.
+const TRADEPOSTS = [
+  "Darzuac", "Defiance", "Dras Ashar", "Gilead", "Glaceforde",
+  "Kar'ivir", "Margrove", "Orca Bay", "Ravencrest", "Riverend",
+  "Seabreeze", "Tarmire",
+];
+
+const TRADEPOST_STEPS = {
+  "Riverend|Margrove": 1008,
+  "Riverend|Orca Bay": 1336,
+  "Riverend|Seabreeze": 2228,
+  "Riverend|Tarmire": 1299,
+  "Riverend|Darzuac": 956,
+  "Riverend|Gilead": 2316,
+  "Riverend|Glaceforde": 1928,
+  "Riverend|Ravencrest": 650,
+  "Riverend|Defiance": 493,
+  "Riverend|Dras Ashar": 1954,
+  "Riverend|Kar'ivir": 1527,
+  "Margrove|Orca Bay": 1205,
+  "Margrove|Seabreeze": 1789,
+  "Margrove|Tarmire": 1437,
+  "Margrove|Darzuac": 1618,
+  "Margrove|Gilead": 2185,
+  "Margrove|Glaceforde": 920,
+  "Margrove|Ravencrest": 603,
+  "Margrove|Defiance": 1501,
+  "Margrove|Dras Ashar": 2616,
+  "Margrove|Kar'ivir": 2061,
+  "Orca Bay|Seabreeze": 980,
+  "Orca Bay|Tarmire": 1520,
+  "Orca Bay|Darzuac": 1701,
+  "Orca Bay|Gilead": 1068,
+  "Orca Bay|Glaceforde": 1831,
+  "Orca Bay|Ravencrest": 686,
+  "Orca Bay|Defiance": 1829,
+  "Orca Bay|Dras Ashar": 2699,
+  "Orca Bay|Kar'ivir": 2724,
+  "Seabreeze|Tarmire": 2412,
+  "Seabreeze|Darzuac": 2593,
+  "Seabreeze|Gilead": 1300,
+  "Seabreeze|Glaceforde": 1511,
+  "Seabreeze|Ravencrest": 1578,
+  "Seabreeze|Defiance": 2721,
+  "Seabreeze|Dras Ashar": 3591,
+  "Seabreeze|Kar'ivir": 3616,
+  "Tarmire|Darzuac": 991,
+  "Tarmire|Gilead": 2500,
+  "Tarmire|Glaceforde": 2201,
+  "Tarmire|Ravencrest": 834,
+  "Tarmire|Defiance": 1630,
+  "Tarmire|Dras Ashar": 1989,
+  "Tarmire|Kar'ivir": 2826,
+  "Darzuac|Gilead": 2681,
+  "Darzuac|Glaceforde": 2382,
+  "Darzuac|Ravencrest": 1015,
+  "Darzuac|Defiance": 1287,
+  "Darzuac|Dras Ashar": 1233,
+  "Darzuac|Kar'ivir": 2483,
+  "Gilead|Glaceforde": 2151,
+  "Gilead|Ravencrest": 1666,
+  "Gilead|Defiance": 2809,
+  "Gilead|Dras Ashar": 3679,
+  "Gilead|Kar'ivir": 3704,
+  "Glaceforde|Ravencrest": 1367,
+  "Glaceforde|Defiance": 2421,
+  "Glaceforde|Dras Ashar": 3380,
+  "Glaceforde|Kar'ivir": 2981,
+  "Ravencrest|Defiance": 1143,
+  "Ravencrest|Dras Ashar": 2013,
+  "Ravencrest|Kar'ivir": 2038,
+  "Defiance|Dras Ashar": 2285,
+  "Defiance|Kar'ivir": 2020,
+  "Dras Ashar|Kar'ivir": 3481,
+};
+
+function getTradepostSteps(a, b) {
+  if (!a || !b || a === b) return null;
+  return TRADEPOST_STEPS[`${a}|${b}`] ?? TRADEPOST_STEPS[`${b}|${a}`] ?? null;
+}
+
 const PACKS = {
   "Pickled Vegetables": {
     materiais: [
@@ -5164,6 +5247,12 @@ export default function App() {
   // Distância calibrada para reproduzir o valor empírico anterior (79.126 silver
   // na fórmula pré-1.0.9.5) — ajuste esse valor para a distância real da sua rota.
   const [distanciaPack, setDistanciaPack] = useState(5191);
+  const [packOrigem, setPackOrigem] = useState("");
+  const [packDestino, setPackDestino] = useState("");
+  useEffect(() => {
+    const steps = getTradepostSteps(packOrigem, packDestino);
+    if (steps !== null) setDistanciaPack(steps);
+  }, [packOrigem, packDestino]);
   const silverPorPack = calcularSilverTradepack(distanciaPack);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
@@ -5333,6 +5422,8 @@ export default function App() {
       if (s.packSelecionado !== undefined) setPackSelecionado(s.packSelecionado);
       if (s.qtdPacks !== undefined) setQtdPacks(s.qtdPacks);
       if (s.distanciaPack !== undefined) setDistanciaPack(s.distanciaPack);
+      if (s.packOrigem !== undefined) setPackOrigem(s.packOrigem);
+      if (s.packDestino !== undefined) setPackDestino(s.packDestino);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
       if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
@@ -5396,6 +5487,8 @@ export default function App() {
             packSelecionado,
             qtdPacks,
             distanciaPack,
+            packOrigem,
+            packDestino,
             qtdEnhanced,
             qtdPlunder,
             custoCert,
@@ -5456,6 +5549,8 @@ export default function App() {
     packSelecionado,
     qtdPacks,
     distanciaPack,
+    packOrigem,
+    packDestino,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -6173,6 +6268,79 @@ export default function App() {
               </div>
             </div>
 
+            {/* Seletor de rota — preenche a Distância automaticamente */}
+            <div style={{ marginBottom: 12 }}>
+              <div
+                style={{
+                  color: dim,
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
+                {lang === "en" ? "Route" : "Rota"}
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <select
+                  value={packOrigem}
+                  onChange={(e) => setPackOrigem(e.target.value)}
+                  style={{
+                    background: "rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(196,160,80,0.3)",
+                    borderRadius: 6,
+                    color: dim,
+                    padding: "6px 10px",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 12,
+                    outline: "none",
+                  }}
+                >
+                  <option value="">{lang === "en" ? "Origin…" : "Origem…"}</option>
+                  {TRADEPOSTS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ color: dim, fontSize: 12 }}>→</span>
+                <select
+                  value={packDestino}
+                  onChange={(e) => setPackDestino(e.target.value)}
+                  style={{
+                    background: "rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(196,160,80,0.3)",
+                    borderRadius: 6,
+                    color: dim,
+                    padding: "6px 10px",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 12,
+                    outline: "none",
+                  }}
+                >
+                  <option value="">{lang === "en" ? "Destination…" : "Entrega…"}</option>
+                  {TRADEPOSTS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                {packOrigem &&
+                  packDestino &&
+                  (getTradepostSteps(packOrigem, packDestino) === null ? (
+                    <span style={{ color: red, fontSize: 11 }}>
+                      {lang === "en"
+                        ? "Route not mapped — using manual value"
+                        : "Rota não mapeada — usando valor manual"}
+                    </span>
+                  ) : (
+                    <span style={{ color: gold, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>
+                      = {fmtInt(distanciaPack)} steps
+                    </span>
+                  ))}
+              </div>
+            </div>
+
             {/* Config numérica */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 8 }}>
               <Field
@@ -6182,8 +6350,8 @@ export default function App() {
                 step={1}
                 hint={
                   lang === "en"
-                    ? "Check in-game route distance (Tradepost pin icon)"
-                    : "Confira a distância da rota no jogo (ícone de pin no Tradepost)"
+                    ? "Auto-filled from route above, or check in-game (Tradepost pin icon)"
+                    : "Preenchido pela rota acima, ou confira no jogo (ícone de pin no Tradepost)"
                 }
               />
               <Field
