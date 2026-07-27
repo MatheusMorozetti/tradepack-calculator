@@ -215,6 +215,17 @@ const TR = {
     specialPacks: "Packs Especiais",
     packsEnhanced: "Packs com Enhanced",
     packsPlunder: "Packs no Plunder",
+    enhancerTitle: "Primed Tradepack Enhancers",
+    enhancerDesc:
+      "Enhancers são obtidos pelo fator sorte no jogo, não comprados. São armazenados como cargas, capacidade máxima de 100. Cada pack Enhanced consome 1 carga.",
+    enhancerGanhosLabel: "Cargas obtidas essa semana",
+    enhancerGanhosHint: "Drop por fator sorte",
+    enhancerStockLabel: "Estoque atual",
+    enhancerStockHint: "Capacidade máxima: 100 cargas",
+    enhancerDisponivel: "Disponível (estoque + ganhos)",
+    enhancerRestante: "Restante após essa semana",
+    enhancerApplyLabel: "Packs pra aplicar Enhancer",
+    enhancerApplyHint: "+100% IM por pack · consome 1 carga cada",
     breakdown: "Breakdown dos",
     packs: "packs",
     normal: "Normais",
@@ -481,6 +492,17 @@ const TR = {
     specialPacks: "Special Packs",
     packsEnhanced: "Packs with Enhanced",
     packsPlunder: "Packs in Plunder",
+    enhancerTitle: "Primed Tradepack Enhancers",
+    enhancerDesc:
+      "Enhancers are obtained by luck factor in-game, not purchased. They're stored as charges, capacity max 100. Each Enhanced pack consumes 1 charge.",
+    enhancerGanhosLabel: "Charges gained this week",
+    enhancerGanhosHint: "Luck factor drop",
+    enhancerStockLabel: "Current stock",
+    enhancerStockHint: "Max capacity: 100 charges",
+    enhancerDisponivel: "Available (stock + gained)",
+    enhancerRestante: "Remaining after this week",
+    enhancerApplyLabel: "Packs to apply Enhancer",
+    enhancerApplyHint: "+100% IM per pack · consumes 1 charge each",
     breakdown: "Breakdown of",
     packs: "packs",
     normal: "Normal",
@@ -5302,6 +5324,12 @@ export default function App() {
   const silverPorPack = calcularSilverTradepack(distanciaPack, demandaPack, modificadoresTotal);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
+  // Primed Tradepack Enhancers — obtidos por fator sorte (sem custo em QUEST),
+  // armazenados como cargas com capacidade máxima de 100. enhancerStock é o
+  // estoque persistido; enhancerGanhos são as cargas obtidas nesta semana,
+  // que se fundem automaticamente ao estoque (ver useEffect de consumo abaixo).
+  const [enhancerStock, setEnhancerStock] = useState(0);
+  const [enhancerGanhos, setEnhancerGanhos] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
 
   // HUNT — itens coletados por 1 HORA (base fixa)
@@ -5485,6 +5513,8 @@ export default function App() {
       if (s.modPlunderingOn !== undefined) setModPlunderingOn(s.modPlunderingOn);
       if (s.modStolenOn !== undefined) setModStolenOn(s.modStolenOn);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
+      if (s.enhancerStock !== undefined) setEnhancerStock(s.enhancerStock);
+      if (s.enhancerGanhos !== undefined) setEnhancerGanhos(s.enhancerGanhos);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
       if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
       if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
@@ -5555,6 +5585,8 @@ export default function App() {
             modPlunderingOn,
             modStolenOn,
             qtdEnhanced,
+            enhancerStock,
+            enhancerGanhos,
             custoCert,
             matsOverride,
             matsQUEST,
@@ -5623,6 +5655,8 @@ export default function App() {
     modStolenOn,
     silverPorPack,
     qtdEnhanced,
+    enhancerStock,
+    enhancerGanhos,
     custoCert,
     matsOverride,
     matsQUEST,
@@ -5669,7 +5703,13 @@ export default function App() {
   const r = useMemo(() => {
     const MES = 30 / 7;
     const packsSemanais = qtdPacks;
-    const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
+    // Estoque de Enhancer disponível essa semana (estoque salvo + ganhos da
+    // semana, sempre limitado à capacidade máxima de 100 cargas). Cada pack
+    // Enhanced consome 1 carga, então o número de packs enhanced nunca pode
+    // passar do que há disponível.
+    const enhancerDisponivel = Math.min(100, enhancerStock + enhancerGanhos);
+    const enhancedVal = Math.min(qtdEnhanced, packsSemanais, enhancerDisponivel);
+    const enhancerRestante = Math.max(0, enhancerDisponivel - enhancedVal);
     const packsNormais = packsSemanais - enhancedVal;
 
     const imBase = imPorPack;
@@ -5774,6 +5814,8 @@ export default function App() {
       MES,
       packsSemanais,
       enhancedVal,
+      enhancerDisponivel,
+      enhancerRestante,
       packsNormais,
       imBase,
       imNormalTotal,
@@ -5835,6 +5877,8 @@ export default function App() {
     modificadoresTotal,
     silverPorPack,
     qtdEnhanced,
+    enhancerStock,
+    enhancerGanhos,
     custoCert,
     matsOverride,
     matsQUEST,
@@ -5846,6 +5890,24 @@ export default function App() {
     taxSaquePct,
     feeCredit,
   ]);
+
+  // Auto-consumo de cargas de Enhancer — funde os ganhos da semana (fator
+  // sorte, sem custo em QUEST) no estoque persistido e desconta 1 carga por
+  // pack Enhanced aplicado, tudo automaticamente (debounce de 2s, sem botão
+  // manual). Depois de "assentar", o estoque restante vira a nova base —
+  // é um ledger contínuo, não um simulador que reseta a cada mudança.
+  useEffect(() => {
+    if (!settingsLoaded) return;
+    const t = setTimeout(() => {
+      setEnhancerStock((prevStock) => {
+        const disponivel = Math.min(100, prevStock + enhancerGanhos);
+        const consumido = Math.min(qtdEnhanced, qtdPacks, disponivel);
+        return Math.max(0, disponivel - consumido);
+      });
+      if (enhancerGanhos !== 0) setEnhancerGanhos(0);
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [qtdEnhanced, enhancerGanhos, qtdPacks, settingsLoaded]);
 
   // Melhores Pagamentos: testa TODAS as origens possíveis pra cada destino e
   // acha a melhor (a fórmula é Silver = base + distância × coef, quanto mais
@@ -6280,6 +6342,15 @@ export default function App() {
               {
                 label: lang === "en" ? "Net Silver per pack" : "Silver líquido por pack",
                 formula: "silverLíquido = Silver − custoMateriais",
+              },
+              {
+                label: lang === "en" ? "Enhancer charge stock" : "Estoque de cargas de Enhancer",
+                formula:
+                  "disponível = min(100, estoque + ganhosSemana)\nenhancedVal = min(qtdEnhanced, packs, disponível)\nrestante = disponível − enhancedVal",
+                nota:
+                  lang === "en"
+                    ? "Enhancers are luck-based drops, not purchased with QUEST. Max capacity is 100 charges; 1 charge is consumed per Enhanced pack, and applying an Enhancer doubles that pack's IM (+100%)."
+                    : "Enhancers são obtidos por fator sorte, não comprados com QUEST. Capacidade máxima de 100 cargas; 1 carga é consumida por pack Enhanced, e aplicar um Enhancer dobra o IM daquele pack (+100%).",
               },
             ]}
           />
@@ -6781,13 +6852,44 @@ export default function App() {
                 hint={lang === "en" ? "10 certificates per pack" : "10 certificados por pack"}
               />
               <Field
-                label={lang === "en" ? "Enhanced packs / week" : "Packs Enhanced / semana"}
+                label={TR[lang].enhancerApplyLabel}
                 value={qtdEnhanced}
                 onChange={setQtdEnhanced}
                 step={1}
-                hint={lang === "en" ? "+100% IM" : "+100% IM"}
+                hint={TR[lang].enhancerApplyHint}
               />
             </div>
+
+            {/* Primed Tradepack Enhancers — estoque de cargas obtidas por fator sorte */}
+            <Section title={`🧪 ${TR[lang].enhancerTitle}`} icon="🧪" borderColor="rgba(196,160,80,0.3)">
+              <div style={{ marginBottom: 10, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {TR[lang].enhancerDesc}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <Field
+                  label={TR[lang].enhancerGanhosLabel}
+                  value={enhancerGanhos}
+                  onChange={setEnhancerGanhos}
+                  step={1}
+                  hint={TR[lang].enhancerGanhosHint}
+                />
+                <Field
+                  label={TR[lang].enhancerStockLabel}
+                  value={enhancerStock}
+                  onChange={setEnhancerStock}
+                  step={1}
+                  hint={TR[lang].enhancerStockHint}
+                />
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 10 }}>
+                <Stat label={TR[lang].enhancerDisponivel} value={fmtInt(r.enhancerDisponivel)} color={gold} />
+                <Stat
+                  label={TR[lang].enhancerRestante}
+                  value={fmtInt(r.enhancerRestante)}
+                  color={r.enhancerRestante > 0 ? green : dim}
+                />
+              </div>
+            </Section>
 
             {/* Silver / IM calculados (read-only, vindos da fórmula) */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12, marginBottom: 4 }}>
