@@ -4436,9 +4436,9 @@ const PROF_ICONS = { Blacksmithing: "⚒️", Cooking: "🍳", Alchemy: "⚗️"
 // Fonte: reportado in-game pela guild (pin icon no Munk Tradepost).
 // Seabreeze↔Dras Ashar e Glaceforde↔Defiance confirmados in-game pela guild.
 const TRADEPOSTS = [
-  "Darzuac", "Defiance", "Dras Ashar", "Gilead", "Glaceforde",
-  "Kar'ivir", "Margrove", "Orca Bay", "Ravencrest", "Riverend",
-  "Seabreeze", "Tarmire",
+  "Riverend", "Margrove", "Orca Bay", "Seabreeze", "Tarmire",
+  "Darzuac", "Gilead", "Glaceforde", "Ravencrest", "Defiance",
+  "Dras Ashar", "Kar'ivir",
 ];
 
 const TRADEPOST_STEPS = {
@@ -6704,7 +6704,7 @@ export default function App() {
                   margin: "0 auto",
                 }}
               >
-                {[...TRADEPOSTS].sort().map((t) => {
+                {TRADEPOSTS.map((t) => {
                   const ehOrigem = t === packOrigem;
                   const selecionado = t === packDestino;
                   const bruto = packDemandas[packSelecionado]?.[t];
