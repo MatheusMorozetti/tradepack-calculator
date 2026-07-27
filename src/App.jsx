@@ -5236,8 +5236,12 @@ export default function App() {
   const BASE_TRADEPACK_1095 = BASE_TRADEPACK_1080 * AJUSTE_PATCH_1095; // ≈ 154.000
   const COEF_DISTANCIA_1095 = COEF_DISTANCIA_1080 * AJUSTE_PATCH_1095; // ≈ 37,4
 
-  const calcularSilverTradepack = (distancia) =>
-    Math.round(BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095);
+  // Demanda da rota: multiplicador % exibido no Tradepost, junto do pack,
+  // antes de craftar. É por rota (origem→destino) inteira e muda a cada
+  // pack/entrega — não há como automatizar, o jogador confere in-game e
+  // insere o valor observado (ou uma média, se for craftar vários de uma vez).
+  const calcularSilverTradepack = (distancia, demandaPct = 0) =>
+    Math.round((BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095) * (1 + demandaPct / 100));
 
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
   const [packSearch, setPackSearch] = useState("");
@@ -5249,11 +5253,14 @@ export default function App() {
   const [distanciaPack, setDistanciaPack] = useState(5191);
   const [packOrigem, setPackOrigem] = useState("");
   const [packDestino, setPackDestino] = useState("");
+  // % de demanda da rota, visível no Tradepost antes de craftar o pack.
+  // Positivo = rota "quente" (bônus de silver), negativo = rota saturada.
+  const [demandaPack, setDemandaPack] = useState(0);
   useEffect(() => {
     const steps = getTradepostSteps(packOrigem, packDestino);
     if (steps !== null) setDistanciaPack(steps);
   }, [packOrigem, packDestino]);
-  const silverPorPack = calcularSilverTradepack(distanciaPack);
+  const silverPorPack = calcularSilverTradepack(distanciaPack, demandaPack);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
   const [qtdPlunder, setQtdPlunder] = useState(0);
@@ -5424,6 +5431,7 @@ export default function App() {
       if (s.distanciaPack !== undefined) setDistanciaPack(s.distanciaPack);
       if (s.packOrigem !== undefined) setPackOrigem(s.packOrigem);
       if (s.packDestino !== undefined) setPackDestino(s.packDestino);
+      if (s.demandaPack !== undefined) setDemandaPack(s.demandaPack);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
       if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
@@ -5489,6 +5497,7 @@ export default function App() {
             distanciaPack,
             packOrigem,
             packDestino,
+            demandaPack,
             qtdEnhanced,
             qtdPlunder,
             custoCert,
@@ -5551,6 +5560,7 @@ export default function App() {
     distanciaPack,
     packOrigem,
     packDestino,
+    demandaPack,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -5755,6 +5765,7 @@ export default function App() {
     packSelecionado,
     qtdPacks,
     distanciaPack,
+    demandaPack,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -6125,8 +6136,8 @@ export default function App() {
             title="Tradepack"
             descricao={
               lang === "en"
-                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5. Merchant Influence (IM) is 10× the Silver value per pack."
-                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5. A Influência Mercante (IM) é 10× o valor de Silver por pack."
+                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5, then scaled by the route's demand % shown at the Tradepost before crafting. Merchant Influence (IM) is 10× the Silver value per pack."
+                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5, e depois escalada pelo % de demanda da rota exibido no Tradepost antes de craftar. A Influência Mercante (IM) é 10× o valor de Silver por pack."
             }
             formulas={[
               {
@@ -6139,6 +6150,10 @@ export default function App() {
                     ? "Patch 1.0.9.5 adjustment (+340%, official %, extrapolated coefficients)"
                     : "Ajuste do patch 1.0.9.5 (+340%, % oficial, coeficientes extrapolados)",
                 formula: "Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4)",
+              },
+              {
+                label: lang === "en" ? "Route demand (shown in-game, per delivery)" : "Demanda da rota (exibida in-game, por entrega)",
+                formula: "Silver = (154.000 + Distância × 37,4) × (1 + Demanda%)",
               },
               {
                 label: lang === "en" ? "Merchant Influence per pack" : "Influência Mercante por pack",
@@ -6390,6 +6405,18 @@ export default function App() {
                 onChange={setQtdPlunder}
                 step={1}
                 hint={lang === "en" ? "+15% IM (Plunder Channel)" : "+15% IM (Plunder Channel)"}
+              />
+              <Field
+                label={lang === "en" ? "Route demand" : "Demanda da rota"}
+                value={demandaPack}
+                onChange={setDemandaPack}
+                step={1}
+                suffix="%"
+                hint={
+                  lang === "en"
+                    ? "Check at the Tradepost before crafting — changes every delivery"
+                    : "Confira no Tradepost antes de craftar — muda a cada entrega"
+                }
               />
             </div>
 
@@ -9691,8 +9718,8 @@ export default function App() {
               }}
             >
               {lang === "en"
-                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 ≈ 154,000 + (Distance × 37.4). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
-                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
+                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (1 + Demand%) ≈ (154,000 + Distance × 37.4) × (1 + Demand%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. The route demand % is read directly from the Tradepost screen (shown next to the pack before crafting) and entered manually, since it changes every delivery. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
+                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (1 + Demanda%) ≈ (154.000 + Distância × 37,4) × (1 + Demanda%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. O % de demanda da rota é lido direto da tela do Tradepost (exibido junto do pack, antes de craftar) e inserido manualmente, já que muda a cada entrega. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
