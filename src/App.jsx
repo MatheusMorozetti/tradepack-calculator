@@ -5434,6 +5434,10 @@ export default function App() {
   const packAtual = PACKS[packSelecionado];
   const [matsOverride, setMatsOverride] = useState({});
   const [matsQUEST, setMatsQUEST] = useState({});
+  // Fonte de cada material: 'plantado' (usa custoProducao) ou 'mkt' (usa precoMkt).
+  // Padrão 'plantado' pra manter o comportamento anterior — troque por material
+  // conforme você realmente compra ou planta/farma aquele item.
+  const [matsFonte, setMatsFonte] = useState({});
   const getMat = (nome, campo) =>
     matsOverride[nome]?.[campo] !== undefined
       ? matsOverride[nome][campo]
@@ -5441,10 +5445,16 @@ export default function App() {
   const setMat = (nome, campo, val) =>
     setMatsOverride((prev) => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
   const toggleQUEST = (nome) => setMatsQUEST((prev) => ({ ...prev, [nome]: !prev[nome] }));
-  const getCustoReal = (nome) => {
-    const base = getMat(nome, "custoProducao");
+  const getFonte = (nome) => matsFonte[nome] || "plantado";
+  const setFonte = (nome, fonte) => setMatsFonte((prev) => ({ ...prev, [nome]: fonte }));
+  const toggleFonte = (nome) => setFonte(nome, getFonte(nome) === "mkt" ? "plantado" : "mkt");
+  // Custo efetivo de 1 unidade do material, respeitando a fonte escolhida
+  // (plantado usa custoProducao, mercado usa precoMkt) + desconto QUEST se ativo
+  const getCustoPorFonte = (nome, fonte) => {
+    const base = fonte === "mkt" ? getMat(nome, "precoMkt") : getMat(nome, "custoProducao");
     return matsQUEST[nome] ? base * 0.8 : base;
   };
+  const getCustoReal = (nome) => getCustoPorFonte(nome, getFonte(nome));
 
   // ── SUPABASE SETTINGS SYNC ────────────────────────────────────────────────
   const [settingsLoaded, setSettingsLoaded] = useState(false);
@@ -5478,6 +5488,7 @@ export default function App() {
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
       if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
       if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
+      if (s.matsFonte !== undefined) setMatsFonte(s.matsFonte);
       if (s.huntHorasDia !== undefined) setHuntHorasDia(s.huntHorasDia);
       if (s.huntAddonQtd !== undefined) setHuntAddonQtd(s.huntAddonQtd);
       if (s.huntAddonPreco !== undefined) setHuntAddonPreco(s.huntAddonPreco);
@@ -5547,6 +5558,7 @@ export default function App() {
             custoCert,
             matsOverride,
             matsQUEST,
+            matsFonte,
             huntHorasDia,
             huntAddonQtd,
             huntAddonPreco,
@@ -5614,6 +5626,7 @@ export default function App() {
     custoCert,
     matsOverride,
     matsQUEST,
+    matsFonte,
     huntHorasDia,
     huntAddonQtd,
     huntAddonPreco,
@@ -5668,6 +5681,12 @@ export default function App() {
     // Custos de materiais
     const mats = packAtual.materiais;
     const custoProducaoTotal = mats.reduce((acc, m) => acc + m.qtd * getCustoReal(m.nome), 0);
+    // Cenários de comparação: quanto custaria o pack se TODOS os materiais
+    // fossem comprados no mercado, vs se TODOS fossem plantados/farmados —
+    // pra ver se a mistura atual (getCustoReal, por material) compensa.
+    const custoSeTodoMkt = mats.reduce((acc, m) => acc + m.qtd * getCustoPorFonte(m.nome, "mkt"), 0);
+    const custoSeTodoPlantado = mats.reduce((acc, m) => acc + m.qtd * getCustoPorFonte(m.nome, "plantado"), 0);
+    const economiaAtualVsMkt = custoSeTodoMkt - custoProducaoTotal;
     // Valor de mercado após taxa 4% (venda no market)
     const valorMktBruto = mats.reduce((acc, m) => acc + m.qtd * getMat(m.nome, "precoMkt"), 0);
     const valorMktTotal = applyMkt(valorMktBruto, taxMktMateriais);
@@ -5762,6 +5781,9 @@ export default function App() {
       imTotal_semana,
       imEfetiva,
       custoProducaoTotal,
+      custoSeTodoMkt,
+      custoSeTodoPlantado,
+      economiaAtualVsMkt,
       valorMktTotal,
       certCusto_Q,
       certCusto_S,
@@ -5816,6 +5838,7 @@ export default function App() {
     custoCert,
     matsOverride,
     matsQUEST,
+    matsFonte,
     taxMktTradepack,
     taxMktMateriais,
     taxExchTradepack,
@@ -6839,7 +6862,7 @@ export default function App() {
               style={{
                 marginBottom: 6,
                 display: "grid",
-                gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.8fr 60px",
+                gridTemplateColumns: "1.2fr 0.6fr 0.7fr 0.7fr 50px 90px",
                 gap: 4,
                 position: "sticky",
                 top: 0,
@@ -6851,6 +6874,7 @@ export default function App() {
                 lang === "en" ? "Prod. cost" : "Custo prod.",
                 lang === "en" ? "Market" : "Mercado",
                 "QUEST -20%",
+                lang === "en" ? "Source" : "Fonte",
               ].map((h) => (
                 <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   {h}
@@ -6864,12 +6888,14 @@ export default function App() {
                   return false;
                 if (matGlobalOnlyEmpty && getMat(mat.nome, "precoMkt") > 0) return false;
                 return true;
-              }).map((mat) => (
+              }).map((mat) => {
+                const fonte = getFonte(mat.nome);
+                return (
                 <div
                   key={mat.nome}
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.8fr 60px",
+                    gridTemplateColumns: "1.2fr 0.6fr 0.7fr 0.7fr 50px 90px",
                     gap: 4,
                     alignItems: "center",
                     padding: "6px 0",
@@ -6889,7 +6915,7 @@ export default function App() {
                     min={0}
                     style={{
                       background: "rgba(0,0,0,0.4)",
-                      border: "1px solid rgba(196,160,80,0.2)",
+                      border: `1px solid ${fonte === "plantado" ? "rgba(74,222,128,0.4)" : "rgba(196,160,80,0.2)"}`,
                       borderRadius: 6,
                       color: gold,
                       padding: "4px 8px",
@@ -6905,7 +6931,7 @@ export default function App() {
                     min={0}
                     style={{
                       background: "rgba(0,0,0,0.4)",
-                      border: "1px solid rgba(96,165,250,0.2)",
+                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.5)" : "rgba(96,165,250,0.2)"}`,
                       borderRadius: 6,
                       color: blue,
                       padding: "4px 8px",
@@ -6944,8 +6970,28 @@ export default function App() {
                       />
                     </div>
                   </div>
+                  <button
+                    onClick={() => toggleFonte(mat.nome)}
+                    title={
+                      lang === "en"
+                        ? "Click to switch between grown and market-bought"
+                        : "Clique pra alternar entre plantado e comprado no mercado"
+                    }
+                    style={{
+                      fontSize: 10,
+                      padding: "4px 6px",
+                      borderRadius: 6,
+                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.4)" : "rgba(74,222,128,0.4)"}`,
+                      background: fonte === "mkt" ? "rgba(96,165,250,0.1)" : "rgba(74,222,128,0.1)",
+                      color: fonte === "mkt" ? blue : green,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fonte === "mkt" ? (lang === "en" ? "🛒 Market" : "🛒 Mercado") : lang === "en" ? "🌱 Grown" : "🌱 Plantado"}
+                  </button>
                 </div>
-              ))}
+              );})}
             </div>
           </Section>
 
@@ -6955,96 +7001,226 @@ export default function App() {
             icon="🧺"
             borderColor="rgba(74,222,128,0.25)"
           >
-            <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 60px", gap: 4 }}>
+            {/* Resumo comparativo: custo atual (misto) vs comprar tudo no mkt vs plantar tudo */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 1fr",
+                gap: 10,
+                marginBottom: 14,
+                padding: "10px 12px",
+                background: BG_CARD,
+                border: "1px solid rgba(74,222,128,0.2)",
+                borderRadius: 8,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 9, color: dim, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>
+                  {lang === "en" ? "Current cost (mix)" : "Custo atual (misto)"}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: TEXT_PRIM, fontFamily: "'Space Mono', monospace" }}>
+                  {fmtInt(r.custoProducaoTotal)}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 9, color: dim, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>
+                  {lang === "en" ? "If all bought (market)" : "Se comprar tudo (mercado)"}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: blue, fontFamily: "'Space Mono', monospace" }}>
+                  {fmtInt(r.custoSeTodoMkt)}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 9, color: dim, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 2 }}>
+                  {lang === "en" ? "If all grown/farmed" : "Se plantar tudo"}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: green, fontFamily: "'Space Mono', monospace" }}>
+                  {fmtInt(r.custoSeTodoPlantado)}
+                </div>
+              </div>
+              <div style={{ gridColumn: "1 / -1", marginTop: 4, paddingTop: 8, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+                {r.economiaAtualVsMkt > 0 ? (
+                  <span style={{ fontSize: 12, color: green }}>
+                    ✅ {lang === "en" ? "Your current mix saves " : "Sua mistura atual economiza "}
+                    <b style={{ fontFamily: "'Space Mono', monospace" }}>{fmtInt(r.economiaAtualVsMkt)}</b>
+                    {lang === "en" ? " silver vs. buying everything on the market." : " silver em relação a comprar tudo no mercado."}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 12, color: dim }}>
+                    {lang === "en"
+                      ? "Everything is set to market price right now — mark materials as 🌱 Grown below if you farm them for less."
+                      : "Tudo está marcado como preço de mercado agora — marque materiais como 🌱 Plantado abaixo se você os produz mais barato."}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Ações rápidas: aplicar fonte a todos os materiais do pack de uma vez */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+              <button
+                onClick={() => {
+                  const upd = {};
+                  packAtual.materiais.forEach((m) => (upd[m.nome] = "mkt"));
+                  setMatsFonte((prev) => ({ ...prev, ...upd }));
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(96,165,250,0.35)",
+                  background: "rgba(96,165,250,0.08)",
+                  color: blue,
+                  cursor: "pointer",
+                }}
+              >
+                🛒 {lang === "en" ? "Buy everything on market" : "Comprar tudo no mercado"}
+              </button>
+              <button
+                onClick={() => {
+                  const upd = {};
+                  packAtual.materiais.forEach((m) => (upd[m.nome] = "plantado"));
+                  setMatsFonte((prev) => ({ ...prev, ...upd }));
+                }}
+                style={{
+                  fontSize: 11,
+                  padding: "5px 10px",
+                  borderRadius: 6,
+                  border: "1px solid rgba(74,222,128,0.35)",
+                  background: "rgba(74,222,128,0.08)",
+                  color: green,
+                  cursor: "pointer",
+                }}
+              >
+                🌱 {lang === "en" ? "Grow/farm everything" : "Plantar tudo"}
+              </button>
+            </div>
+
+            <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1fr 0.5fr 0.7fr 0.7fr 50px 100px 0.75fr", gap: 4 }}>
               {[
                 lang === "en" ? "Material" : "Material",
                 lang === "en" ? "Qty" : "Qtd",
                 lang === "en" ? "Prod. cost" : "Custo prod.",
                 lang === "en" ? "Market" : "Mercado",
                 "QUEST -20%",
+                lang === "en" ? "Source" : "Fonte",
+                lang === "en" ? "Cost used" : "Custo usado",
               ].map((h) => (
                 <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                   {h}
                 </span>
               ))}
             </div>
-            {packAtual.materiais.map((m) => (
-              <div
-                key={m.nome}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 60px",
-                  gap: 4,
-                  alignItems: "center",
-                  padding: "6px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.04)",
-                }}
-              >
-                <span style={{ color: "#c0c0d0", fontSize: 12 }}>{m.nome}</span>
-                <span style={{ color: dim, fontSize: 12 }}>{fmtInt(m.qtd)}</span>
-                <NumInput
-                  value={getMat(m.nome, "custoProducao")}
-                  onChange={(v) => setMat(m.nome, "custoProducao", v)}
-                  min={0}
+            {packAtual.materiais.map((m) => {
+              const fonte = getFonte(m.nome);
+              const custoUnit = getCustoReal(m.nome);
+              return (
+                <div
+                  key={m.nome}
                   style={{
-                    background: "rgba(0,0,0,0.4)",
-                    border: "1px solid rgba(196,160,80,0.2)",
-                    borderRadius: 6,
-                    color: gold,
-                    padding: "4px 8px",
-                    fontSize: 12,
-                    width: "100%",
-                    fontFamily: "'Space Mono', monospace",
-                    outline: "none",
+                    display: "grid",
+                    gridTemplateColumns: "1fr 0.5fr 0.7fr 0.7fr 50px 100px 0.75fr",
+                    gap: 4,
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
                   }}
-                />
-                <NumInput
-                  value={getMat(m.nome, "precoMkt")}
-                  onChange={(v) => setMat(m.nome, "precoMkt", v)}
-                  min={0}
-                  style={{
-                    background: "rgba(0,0,0,0.4)",
-                    border: "1px solid rgba(96,165,250,0.2)",
-                    borderRadius: 6,
-                    color: blue,
-                    padding: "4px 8px",
-                    fontSize: 12,
-                    width: "100%",
-                    fontFamily: "'Space Mono', monospace",
-                    outline: "none",
-                  }}
-                />
-                <div style={{ textAlign: "center" }}>
-                  <div
-                    onClick={() => toggleQUEST(m.nome)}
-                    title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
+                >
+                  <span style={{ color: "#c0c0d0", fontSize: 12 }}>{m.nome}</span>
+                  <span style={{ color: dim, fontSize: 12 }}>{fmtInt(m.qtd)}</span>
+                  <NumInput
+                    value={getMat(m.nome, "custoProducao")}
+                    onChange={(v) => setMat(m.nome, "custoProducao", v)}
+                    min={0}
                     style={{
-                      display: "inline-block",
-                      width: 30,
-                      height: 18,
-                      borderRadius: 9,
-                      background: matsQUEST[m.nome] ? "#c4a050" : "#303040",
+                      background: "rgba(0,0,0,0.4)",
+                      border: `1px solid ${fonte === "plantado" ? "rgba(74,222,128,0.4)" : "rgba(196,160,80,0.2)"}`,
+                      borderRadius: 6,
+                      color: gold,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      width: "100%",
+                      fontFamily: "'Space Mono', monospace",
+                      outline: "none",
+                    }}
+                  />
+                  <NumInput
+                    value={getMat(m.nome, "precoMkt")}
+                    onChange={(v) => setMat(m.nome, "precoMkt", v)}
+                    min={0}
+                    style={{
+                      background: "rgba(0,0,0,0.4)",
+                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.5)" : "rgba(96,165,250,0.2)"}`,
+                      borderRadius: 6,
+                      color: blue,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      width: "100%",
+                      fontFamily: "'Space Mono', monospace",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ textAlign: "center" }}>
+                    <div
+                      onClick={() => toggleQUEST(m.nome)}
+                      title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
+                      style={{
+                        display: "inline-block",
+                        width: 30,
+                        height: 18,
+                        borderRadius: 9,
+                        background: matsQUEST[m.nome] ? "#c4a050" : "#303040",
+                        cursor: "pointer",
+                        position: "relative",
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 2,
+                          left: matsQUEST[m.nome] ? 14 : 2,
+                          width: 14,
+                          height: 14,
+                          borderRadius: "50%",
+                          background: "#f0e6c8",
+                          transition: "left 0.2s",
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => toggleFonte(m.nome)}
+                    title={
+                      lang === "en"
+                        ? "Click to switch between grown and market-bought"
+                        : "Clique pra alternar entre plantado e comprado no mercado"
+                    }
+                    style={{
+                      fontSize: 10,
+                      padding: "4px 6px",
+                      borderRadius: 6,
+                      border: `1px solid ${fonte === "mkt" ? "rgba(96,165,250,0.4)" : "rgba(74,222,128,0.4)"}`,
+                      background: fonte === "mkt" ? "rgba(96,165,250,0.1)" : "rgba(74,222,128,0.1)",
+                      color: fonte === "mkt" ? blue : green,
                       cursor: "pointer",
-                      position: "relative",
-                      transition: "background 0.2s",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 2,
-                        left: matsQUEST[m.nome] ? 14 : 2,
-                        width: 14,
-                        height: 14,
-                        borderRadius: "50%",
-                        background: "#f0e6c8",
-                        transition: "left 0.2s",
-                      }}
-                    />
-                  </div>
+                    {fonte === "mkt" ? (lang === "en" ? "🛒 Market" : "🛒 Mercado") : lang === "en" ? "🌱 Grown" : "🌱 Plantado"}
+                  </button>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontFamily: "'Space Mono', monospace",
+                      color: fonte === "mkt" ? blue : green,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {fmtInt(custoUnit)} × {fmtInt(m.qtd)} = {fmtInt(custoUnit * m.qtd)}
+                  </span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </Section>
 
           {/* Resultados */}
