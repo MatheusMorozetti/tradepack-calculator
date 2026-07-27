@@ -5263,23 +5263,30 @@ export default function App() {
   // Fórmula base divulgada oficialmente (patch 1.0.8, post TL de 21/05/2025):
   //   Silver = 35.000 + (Distância × 8,5)
   //
-  // Ajuste do patch 1.0.9.5 (16/06/2026): changelog oficial declara aumento
-  // de "aproximadamente 340%" (fator ×4,4) no valor-base e no escalonamento
-  // por distância. A Tavernlight NÃO divulgou os coeficientes exatos novos,
-  // então aplicamos o fator ×4,4 sobre a fórmula anterior:
+  // Ajuste do patch 1.0.9.5 (16/06/2026): changelog oficial declarou aumento
+  // de "aproximadamente 340%" (fator ×4,4), mas a Tavernlight NÃO divulgou os
+  // coeficientes exatos novos — então o ×4,4 era uma extrapolação nossa.
   //
-  //   Silver = (35.000 + Distância × 8,5) × 4,4
-  //          ≈ 154.000 + (Distância × 37,4)
+  // ── RECALIBRADO EM 27/07/2026 COM DADO REAL ─────────────────────────────
+  // Entrega confirmada: Kabbar's Omelets, rota Darzuac→Gilead (2.681 steps),
+  // Demanda Local 147% confirmada, sem modificadores ativos.
+  // Previsto com ×4,4: 373.776 silver. Recebido de fato: 294.899 silver.
+  // Fator real implícito: 294.899 ÷ 1,47 ÷ (35.000 + 2.681×8,5) ≈ 3,47
+  // (ou seja, o ×4,4 superestimava o silver em ~27%).
   //
-  // ⚠️ Isso é uma EXTRAPOLAÇÃO (+340% aplicado uniformemente à fórmula antiga),
-  // não os coeficientes reais publicados pela TL. Vale só para packs criados
-  // a partir de 16/06/2026. Recalibrar assim que houver dado real pós-patch.
+  //   Silver = (35.000 + Distância × 8,5) × 3,47
+  //          ≈ 121.450 + (Distância × 29,5)
+  //
+  // ⚠️ Ainda é uma calibração baseada em 1 (um) ponto real — assume que só o
+  // fator uniforme mudou e que base/coeficiente continuam escalando juntos.
+  // Recalibrar de novo (e idealmente resolver base e coeficiente em separado
+  // via 2+ pontos em distâncias bem diferentes) assim que houver mais dados.
   // ══════════════════════════════════════════════════════════════════════
   const BASE_TRADEPACK_1080 = 35000; // base oficial pré-1.0.9.5 (post TL 21/05/2025)
   const COEF_DISTANCIA_1080 = 8.5; // coeficiente oficial pré-1.0.9.5 (post TL 21/05/2025)
-  const AJUSTE_PATCH_1095 = 4.4; // +340% (changelog oficial 16/06/2026), fator não confirmado com precisão
-  const BASE_TRADEPACK_1095 = BASE_TRADEPACK_1080 * AJUSTE_PATCH_1095; // ≈ 154.000
-  const COEF_DISTANCIA_1095 = COEF_DISTANCIA_1080 * AJUSTE_PATCH_1095; // ≈ 37,4
+  const AJUSTE_PATCH_1095 = 3.47; // recalibrado c/ dado real 27/07/2026 (era 4.4 / "+340%" extrapolado, superestimava ~27%)
+  const BASE_TRADEPACK_1095 = BASE_TRADEPACK_1080 * AJUSTE_PATCH_1095; // ≈ 121.450
+  const COEF_DISTANCIA_1095 = COEF_DISTANCIA_1080 * AJUSTE_PATCH_1095; // ≈ 29,5
 
   // Demanda LOCAL: % exibido no Tradepost por destino, visto ao abrir o menu
   // de tradepack (tecla T) → selecionar o pack → clicar na seta/caret, que
@@ -6438,8 +6445,8 @@ export default function App() {
             title="Tradepack"
             descricao={
               lang === "en"
-                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5, scaled by the destination's Local Demand % (shown at the Tradepost before crafting), then by any active Modifiers (Bartering, Plundering, Stolen). Merchant Influence (IM) is 10× the Silver value per pack."
-                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5, escalada pela Demanda Local % do destino (exibida no Tradepost antes de craftar), e depois pelos Modificadores ativos (Bartering, Plundering, Stolen). A Influência Mercante (IM) é 10× o valor de Silver por pack."
+                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by a patch 1.0.9.5 factor (recalibrated 07/27/2026 from real delivery data, ≈+247% instead of the originally extrapolated +340%), scaled by the destination's Local Demand % (shown at the Tradepost before crafting), then by any active Modifiers (Bartering, Plundering, Stolen). Merchant Influence (IM) is 10× the Silver value per pack."
+                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada por um fator do patch 1.0.9.5 (recalibrado em 27/07/2026 com dado real de entrega, ≈+247% em vez do +340% extrapolado originalmente), escalada pela Demanda Local % do destino (exibida no Tradepost antes de craftar), e depois pelos Modificadores ativos (Bartering, Plundering, Stolen). A Influência Mercante (IM) é 10× o valor de Silver por pack."
             }
             formulas={[
               {
@@ -6449,23 +6456,23 @@ export default function App() {
               {
                 label:
                   lang === "en"
-                    ? "Patch 1.0.9.5 adjustment (+340%, official %, extrapolated coefficients)"
-                    : "Ajuste do patch 1.0.9.5 (+340%, % oficial, coeficientes extrapolados)",
-                formula: "Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4)",
+                    ? "Patch 1.0.9.5 adjustment (recalibrated 07/27/2026 with real delivery data, ≈+247%; was +340% extrapolated)"
+                    : "Ajuste do patch 1.0.9.5 (recalibrado em 27/07/2026 com dado real de entrega, ≈+247%; era +340% extrapolado)",
+                formula: "Silver = (35.000 + Distância × 8,5) × 3,47 ≈ 121.450 + (Distância × 29,5)",
               },
               {
                 label:
                   lang === "en"
                     ? "Local demand (per pack + destination, shown in-game: T → pack → caret; 100% = baseline)"
                     : "Demanda local (por pack + destino, exibida in-game: T → pack → seta; 100% = padrão)",
-                formula: "Silver = (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100)",
+                formula: "Silver = (121.450 + Distância × 29,5) × (DemandaLocal% ÷ 100)",
               },
               {
                 label:
                   lang === "en"
                     ? "Modifiers (Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20% — stack additively)"
                     : "Modificadores (Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20% — somam entre si)",
-                formula: "Silver = (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100) × (1 + Modificadores%)",
+                formula: "Silver = (121.450 + Distância × 29,5) × (DemandaLocal% ÷ 100) × (1 + Modificadores%)",
               },
               {
                 label: lang === "en" ? "Merchant Influence per pack" : "Influência Mercante por pack",
@@ -10595,8 +10602,8 @@ export default function App() {
               }}
             >
               {lang === "en"
-                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (LocalDemand% ÷ 100) × (1 + Modifiers%) ≈ (154,000 + Distance × 37.4) × (LocalDemand% ÷ 100) × (1 + Modifiers%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Local Demand is per pack + destination, read directly from the in-game Tradepack menu (T → pack → caret icon) and saved per destination for reuse; 100% is the baseline (no change) — unfilled destinations default to 100% until you confirm the real value. Modifiers are fixed checkboxes applied to the pack\u2019s final sale value and stack additively: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
-                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (DemandaLocal% ÷ 100) × (1 + Modificadores%) ≈ (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100) × (1 + Modificadores%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. A Demanda Local é por pack + destino, lida direto do menu de tradepack in-game (T → pack → ícone de seta) e salva por destino pra reaproveitar; 100% é o padrão (sem alteração) — destinos não preenchidos assumem 100% até você confirmar o valor real. Os Modificadores são checkboxes fixos aplicados sobre a venda final do pack e somam entre si: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
+                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 3.47 × (LocalDemand% ÷ 100) × (1 + Modifiers%) ≈ (121,450 + Distance × 29.5) × (LocalDemand% ÷ 100) × (1 + Modifiers%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The 1.0.9.5 changelog (06/16/2026) only disclosed an aggregate "+340%" figure, not new exact coefficients, so the ×4.4 first used here was our extrapolation. It was recalibrated on 07/27/2026 to ×3.47 (≈+247%) using a real confirmed delivery (Darzuac→Gilead, 2,681 steps, 147% Local Demand, no modifiers: predicted 373,776 silver vs 294,899 actually received). This is still based on a single real data point — it will be refined further as more deliveries at different distances are logged. Local Demand is per pack + destination, read directly from the in-game Tradepack menu (T → pack → caret icon) and saved per destination for reuse; 100% is the baseline (no change) — unfilled destinations default to 100% until you confirm the real value. Modifiers are fixed checkboxes applied to the pack\u2019s final sale value and stack additively: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and keep recalibrating as more post-patch data comes in.'
+                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 3,47 × (DemandaLocal% ÷ 100) × (1 + Modificadores%) ≈ (121.450 + Distância × 29,5) × (DemandaLocal% ÷ 100) × (1 + Modificadores%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O changelog do 1.0.9.5 (16/06/2026) só divulgou o percentual agregado \"+340%\", não os novos coeficientes exatos — então o ×4,4 usado originalmente era uma extrapolação nossa. Foi recalibrado em 27/07/2026 para ×3,47 (≈+247%) usando uma entrega real confirmada (Darzuac→Gilead, 2.681 steps, Demanda Local 147%, sem modificadores: previsto 373.776 silver vs 294.899 recebido de fato). Isso ainda é baseado em um único ponto real de dado — vai ser refinado conforme mais entregas em distâncias diferentes forem registradas. A Demanda Local é por pack + destino, lida direto do menu de tradepack in-game (T → pack → ícone de seta) e salva por destino pra reaproveitar; 100% é o padrão (sem alteração) — destinos não preenchidos assumem 100% até você confirmar o valor real. Os Modificadores são checkboxes fixos aplicados sobre a venda final do pack e somam entre si: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e continue recalibrando conforme mais dados pós-patch chegarem."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
