@@ -5613,7 +5613,314 @@ export default function App() {
       </div>
 
       {/* TAB: TRADEPACK */}
-      {tab === "tradepack" && <EmBreve lang={lang} />}
+      {tab === "tradepack" && (
+        <div>
+          <FormulaPanel
+            lang={lang}
+            title="Tradepack"
+            descricao={
+              lang === "en"
+                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5. Merchant Influence (IM) is 10× the Silver value per pack."
+                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5. A Influência Mercante (IM) é 10× o valor de Silver por pack."
+            }
+            formulas={[
+              {
+                label: lang === "en" ? "Base formula (patch 1.0.8, official)" : "Fórmula base (patch 1.0.8, oficial)",
+                formula: "Silver = 35.000 + (Distância × 8,5)",
+              },
+              {
+                label:
+                  lang === "en"
+                    ? "Patch 1.0.9.5 adjustment (+340%, official %, extrapolated coefficients)"
+                    : "Ajuste do patch 1.0.9.5 (+340%, % oficial, coeficientes extrapolados)",
+                formula: "Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4)",
+              },
+              {
+                label: lang === "en" ? "Merchant Influence per pack" : "Influência Mercante por pack",
+                formula: "IM = Silver × 10",
+              },
+              {
+                label: lang === "en" ? "Net Silver per pack" : "Silver líquido por pack",
+                formula: "silverLíquido = Silver − custoMateriais",
+              },
+            ]}
+          />
+
+          <Section
+            title={`📦 ${lang === "en" ? "Tradepack Configuration" : "Configuração do Tradepack"}`}
+            icon="📦"
+            borderColor="rgba(196,160,80,0.3)"
+          >
+            {/* Seletor de pack */}
+            <div style={{ marginBottom: 16 }}>
+              <div
+                style={{
+                  color: dim,
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                }}
+              >
+                {lang === "en" ? "Pack" : "Pack"}
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {Object.keys(PACKS).map((nome) => (
+                  <button
+                    key={nome}
+                    onClick={() => setPackSelecionado(nome)}
+                    style={{
+                      background: packSelecionado === nome ? `linear-gradient(135deg, ${gold}, #8a6a20)` : "rgba(0,0,0,0.4)",
+                      border: `1px solid ${packSelecionado === nome ? gold : "rgba(196,160,80,0.3)"}`,
+                      borderRadius: 8,
+                      color: packSelecionado === nome ? "#000" : dim,
+                      padding: "8px 14px",
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 12,
+                      fontWeight: packSelecionado === nome ? "bold" : "normal",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {nome}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Config numérica */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 8 }}>
+              <Field
+                label={lang === "en" ? "Distance (tiles)" : "Distância (tiles)"}
+                value={distanciaPack}
+                onChange={setDistanciaPack}
+                step={1}
+                hint={
+                  lang === "en"
+                    ? "Check in-game route distance (Tradepost pin icon)"
+                    : "Confira a distância da rota no jogo (ícone de pin no Tradepost)"
+                }
+              />
+              <Field
+                label={lang === "en" ? "Packs / week" : "Packs / semana"}
+                value={qtdPacks}
+                onChange={setQtdPacks}
+                step={1}
+              />
+              <Field
+                label={lang === "en" ? "Certificate cost" : "Custo do certificado"}
+                value={custoCert}
+                onChange={setCustoCert}
+                step={0.1}
+                suffix="QUEST"
+                hint={lang === "en" ? "10 certificates per pack" : "10 certificados por pack"}
+              />
+              <Field
+                label={lang === "en" ? "Enhanced packs / week" : "Packs Enhanced / semana"}
+                value={qtdEnhanced}
+                onChange={setQtdEnhanced}
+                step={1}
+                hint={lang === "en" ? "+100% IM" : "+100% IM"}
+              />
+              <Field
+                label={lang === "en" ? "Plunder packs / week" : "Packs no Plunder / semana"}
+                value={qtdPlunder}
+                onChange={setQtdPlunder}
+                step={1}
+                hint={lang === "en" ? "+15% IM (Plunder Channel)" : "+15% IM (Plunder Channel)"}
+              />
+            </div>
+
+            {/* Silver / IM calculados (read-only, vindos da fórmula) */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12, marginBottom: 4 }}>
+              <Stat
+                label={lang === "en" ? "Silver / pack (formula)" : "Silver / pack (fórmula)"}
+                value={fmtInt(silverPorPack)}
+                color={gold}
+              />
+              <Stat
+                label={lang === "en" ? "Merchant Influence / pack" : "Influência Mercante / pack"}
+                value={fmtInt(imPorPack)}
+                color={blue}
+              />
+            </div>
+          </Section>
+
+          {/* Materiais do pack selecionado */}
+          <Section
+            title={`🧺 ${lang === "en" ? "Pack materials" : "Materiais do pack"}`}
+            icon="🧺"
+            borderColor="rgba(74,222,128,0.25)"
+          >
+            <div style={{ marginBottom: 6, display: "grid", gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 60px", gap: 4 }}>
+              {[
+                lang === "en" ? "Material" : "Material",
+                lang === "en" ? "Qty" : "Qtd",
+                lang === "en" ? "Prod. cost" : "Custo prod.",
+                lang === "en" ? "Market" : "Mercado",
+                "QUEST -20%",
+              ].map((h) => (
+                <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+            {packAtual.materiais.map((m) => (
+              <div
+                key={m.nome}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1.2fr 0.8fr 0.8fr 0.8fr 60px",
+                  gap: 4,
+                  alignItems: "center",
+                  padding: "6px 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                }}
+              >
+                <span style={{ color: "#c0c0d0", fontSize: 12 }}>{m.nome}</span>
+                <span style={{ color: dim, fontSize: 12 }}>{fmtInt(m.qtd)}</span>
+                <NumInput
+                  value={getMat(m.nome, "custoProducao")}
+                  onChange={(v) => setMat(m.nome, "custoProducao", v)}
+                  min={0}
+                  style={{
+                    background: "rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(196,160,80,0.2)",
+                    borderRadius: 6,
+                    color: gold,
+                    padding: "4px 8px",
+                    fontSize: 12,
+                    width: "100%",
+                    fontFamily: "'Space Mono', monospace",
+                    outline: "none",
+                  }}
+                />
+                <NumInput
+                  value={getMat(m.nome, "precoMkt")}
+                  onChange={(v) => setMat(m.nome, "precoMkt", v)}
+                  min={0}
+                  style={{
+                    background: "rgba(0,0,0,0.4)",
+                    border: "1px solid rgba(96,165,250,0.2)",
+                    borderRadius: 6,
+                    color: blue,
+                    padding: "4px 8px",
+                    fontSize: 12,
+                    width: "100%",
+                    fontFamily: "'Space Mono', monospace",
+                    outline: "none",
+                  }}
+                />
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    onClick={() => toggleQUEST(m.nome)}
+                    title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
+                    style={{
+                      display: "inline-block",
+                      width: 30,
+                      height: 18,
+                      borderRadius: 9,
+                      background: matsQUEST[m.nome] ? "#c4a050" : "#303040",
+                      cursor: "pointer",
+                      position: "relative",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 2,
+                        left: matsQUEST[m.nome] ? 14 : 2,
+                        width: 14,
+                        height: 14,
+                        borderRadius: "50%",
+                        background: "#f0e6c8",
+                        transition: "left 0.2s",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </Section>
+
+          {/* Resultados */}
+          <Section
+            title={`💰 ${lang === "en" ? "Tradepack results" : "Resultado do Tradepack"}`}
+            icon="💰"
+            borderColor="rgba(196,160,80,0.3)"
+          >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+              <div
+                style={{
+                  background: "rgba(196,160,80,0.06)",
+                  border: "1px solid rgba(196,160,80,0.3)",
+                  borderRadius: 12,
+                  padding: 16,
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
+                  {lang === "en" ? "Profit / week" : "Profit / semana"}
+                </div>
+                <div style={{ color: pc(r.profitReal_sem), fontSize: 24, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
+                  {r.profitReal_sem >= 0 ? "+" : ""}
+                  {fmtUSD(r.profitReal_sem)}
+                </div>
+              </div>
+              <div
+                style={{
+                  background: "rgba(196,160,80,0.06)",
+                  border: "1px solid rgba(196,160,80,0.3)",
+                  borderRadius: 12,
+                  padding: 16,
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ color: dim, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
+                  {lang === "en" ? "Profit / month" : "Profit / mês"}
+                </div>
+                <div style={{ color: pc(r.profitReal_mes), fontSize: 24, fontFamily: "'Cinzel', serif", fontWeight: 700 }}>
+                  {r.profitReal_mes >= 0 ? "+" : ""}
+                  {fmtUSD(r.profitReal_mes)}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
+              <Stat
+                label={lang === "en" ? "Material cost / pack" : "Custo material / pack"}
+                value={fmtInt(r.custoProducaoTotal)}
+              />
+              <Stat
+                label={lang === "en" ? "Certificate cost / pack" : "Custo certificado / pack"}
+                value={`${fmt(r.certCusto_Q, 1)} QUEST`}
+              />
+              <Stat
+                label={lang === "en" ? "Net Silver / pack" : "Silver líquido / pack"}
+                value={fmtInt(r.silverLiqPorPack)}
+                color={pc(r.silverLiqPorPack)}
+              />
+              <Stat
+                label={lang === "en" ? "Total IM / week" : "IM total / semana"}
+                value={fmtInt(r.imTotal_semana)}
+                color={blue}
+              />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <Stat
+                label={lang === "en" ? "IM break-even (no Enhanced)" : "IM break-even (sem Enhanced)"}
+                value={fmtInt(r.imBreakeven)}
+                sub={lang === "en" ? "min. IM/pack to profit" : "IM/pack mínima pra dar lucro"}
+              />
+              <Stat
+                label={lang === "en" ? "IM break-even (Enhanced)" : "IM break-even (Enhanced)"}
+                value={fmtInt(r.imBreaakevenEnhanced)}
+              />
+            </div>
+          </Section>
+        </div>
+      )}
 
       {/* TAB: HUNT */}
       {tab === "comparativo" && (
