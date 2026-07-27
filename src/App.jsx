@@ -5223,6 +5223,29 @@ export default function App() {
   const [poolRate, setPoolRate] = useState(0.0000264);
   const [questUSD, setQuestUSD] = useState(0.0042);
   const [questToSilver, setQuestToSilver] = useState(65018);
+  const [questPriceLoading, setQuestPriceLoading] = useState(false);
+  const [questPriceError, setQuestPriceError] = useState(null);
+  const [questPriceUpdatedAt, setQuestPriceUpdatedAt] = useState(null);
+
+  const fetchQuestPriceUSD = async () => {
+    setQuestPriceLoading(true);
+    setQuestPriceError(null);
+    try {
+      const resp = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=ravenquest&vs_currencies=usd"
+      );
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const data = await resp.json();
+      const price = data?.ravenquest?.usd;
+      if (typeof price !== "number") throw new Error("no price");
+      setQuestUSD(price);
+      setQuestPriceUpdatedAt(new Date());
+    } catch (e) {
+      setQuestPriceError(lang === "en" ? "Failed to fetch price" : "Falha ao buscar preço");
+    } finally {
+      setQuestPriceLoading(false);
+    }
+  };
 
   // CALIBRAÇÃO
   const [calQUEST, setCalQUEST] = useState(386);
@@ -10587,6 +10610,68 @@ export default function App() {
               />
             </div>
 
+            {/* Silver <> QUEST e preço do QUEST em USD */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
+              <Field
+                label={TR[lang].silverPerQUEST}
+                value={questToSilver}
+                onChange={setQuestToSilver}
+                step={1}
+                suffix="Silver"
+                hint={
+                  lang === "en"
+                    ? "From the in-game Currency Exchange (e.g. 6,221 Silver ⇄ 1 QUEST)"
+                    : "Do Currency Exchange in-game (ex: 6.221 Silver ⇄ 1 QUEST)"
+                }
+              />
+              <Field
+                label={TR[lang].questPrice}
+                value={questUSD}
+                onChange={setQuestUSD}
+                step="any"
+                decimals={6}
+                suffix="USD"
+                hint={lang === "en" ? "Market price of 1 QUEST in USD" : "Preço de mercado de 1 QUEST em USD"}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <button
+                onClick={fetchQuestPriceUSD}
+                disabled={questPriceLoading}
+                style={{
+                  width: "100%",
+                  background: "linear-gradient(135deg, rgba(96,165,250,0.18), rgba(96,165,250,0.06))",
+                  border: "1px solid rgba(96,165,250,0.4)",
+                  borderRadius: 8,
+                  color: blue,
+                  padding: "9px",
+                  cursor: questPriceLoading ? "default" : "pointer",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 11,
+                  letterSpacing: "0.05em",
+                  opacity: questPriceLoading ? 0.6 : 1,
+                }}
+              >
+                {questPriceLoading
+                  ? lang === "en"
+                    ? "⏳ Fetching..."
+                    : "⏳ Buscando..."
+                  : lang === "en"
+                    ? "🔄 Fetch QUEST price (CoinGecko)"
+                    : "🔄 Buscar preço do QUEST (CoinGecko)"}
+              </button>
+              {questPriceError && (
+                <div style={{ color: red, fontSize: 10, marginTop: 6 }}>{questPriceError}</div>
+              )}
+              {!questPriceError && questPriceUpdatedAt && (
+                <div style={{ color: "rgba(143,160,184,0.5)", fontSize: 10, marginTop: 6 }}>
+                  {lang === "en" ? "Updated at" : "Atualizado às"}{" "}
+                  {questPriceUpdatedAt.toLocaleTimeString(lang === "en" ? "en-US" : "pt-BR")}
+                </div>
+              )}
+            </div>
+
             {/* IM Total automática */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
               <div
@@ -10681,7 +10766,7 @@ export default function App() {
                 letterSpacing: "0.06em",
               }}
             >
-              ${lang === "en" ? "✅ Apply Pool Rate:" : "✅ Aplicar Pool Rate:"}{" "}
+              {lang === "en" ? "✅ Apply Pool Rate:" : "✅ Aplicar Pool Rate:"}{" "}
               {(calQUEST / (imExpSemana + r.imTotal_semana)).toFixed(8)}
             </button>
           </Section>
@@ -10937,15 +11022,24 @@ export default function App() {
                 QUEST recebido: <span style={{ color: green }}>{fmtInt(calQUEST)}</span>
               </div>
               <div>
-                ${lang === "en" ? "Active Pool Rate:" : "Pool Rate ativo:"}{" "}
+                {lang === "en" ? "Active Pool Rate:" : "Pool Rate ativo:"}{" "}
                 <span style={{ color: green }}>{poolRate.toFixed(8)}</span>
+              </div>
+              <div>
+                {lang === "en" ? "Silver per QUEST:" : "Silver por QUEST:"}{" "}
+                <span style={{ color: green }}>{fmtInt(questToSilver)}</span>
+              </div>
+              <div>
+                {lang === "en" ? "QUEST price:" : "Preço do QUEST:"}{" "}
+                <span style={{ color: green }}>${questUSD.toFixed(6)}</span>
               </div>
               <div>
                 IM/Pack: <span style={{ color: green }}>silver × 10 (automático)</span>
               </div>
               <div style={{ marginTop: 8, color: "rgba(143,160,184,0.45)" }}>
-                lang==="en"?"Update every Friday after payment — enter the QUEST received and click Apply.":"Atualize
-                toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar."
+                {lang === "en"
+                  ? "Update every Friday after payment — enter the QUEST received and click Apply."
+                  : "Atualize toda sexta após o pagamento — insira o QUEST recebido e clique em Aplicar."}
               </div>
             </div>
           </Section>
