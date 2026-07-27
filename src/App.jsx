@@ -5243,15 +5243,20 @@ export default function App() {
   // por qualquer jogador naquele posto. Guardamos por pack+destino pra você
   // reaproveitar o último valor visto sem redigitar toda vez.
   //
+  // IMPORTANTE sobre a escala: no jogo, 100% é o valor NORMAL/baseline (visto
+  // no site de referência: valores tipo 103%, 106%, 150% — nunca perto de 0).
+  // Então a demanda entra como multiplicador direto (demandaPct/100), não como
+  // "1 + demandaPct/100". Sem dado do jogador, assumimos 100% (neutro).
+  //
   // Modificadores: bônus percentuais de talento/canal que empilham sobre o
   // valor final (confirmado pelo jogador que todos somam). Valores fixos:
   // Bartering I (+5%), Bartering II (+10%), Plundering (+10%) e
   // Stolen (-20%) — todos aplicados sobre a venda final do pack, via
   // checkboxes simples, sem % editável.
-  const calcularSilverTradepack = (distancia, demandaPct = 0, modificadoresPct = 0) =>
+  const calcularSilverTradepack = (distancia, demandaPct = 100, modificadoresPct = 0) =>
     Math.round(
       (BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095) *
-        (1 + demandaPct / 100) *
+        (demandaPct / 100) *
         (1 + modificadoresPct / 100)
     );
 
@@ -5281,7 +5286,8 @@ export default function App() {
     const steps = getTradepostSteps(packOrigem, packDestino);
     if (steps !== null) setDistanciaPack(steps);
   }, [packOrigem, packDestino]);
-  const demandaPack = packDemandas[packSelecionado]?.[packDestino] ?? 0;
+  // 100 = neutro (padrão do jogo) quando o jogador ainda não informou o real
+  const demandaPack = packDemandas[packSelecionado]?.[packDestino] ?? 100;
   const setDemandaDestino = (destino, valor) => {
     setPackDemandas((prev) => ({
       ...prev,
@@ -5818,23 +5824,20 @@ export default function App() {
     feeCredit,
   ]);
 
-  // Melhores Pagamentos: para cada destino com demanda preenchida, testa TODAS
-  // as origens possíveis e acha a melhor (a fórmula é Silver = base + distância
-  // × coef, então quanto mais longe a origem, maior o valor — mas calculamos
-  // literalmente todas as combinações, sem assumir isso de antemão). Cada linha
-  // do ranking é uma rota independente — não presume ida e volta pela mesma
-  // origem, já que às vezes vale mais a pena seguir pra outro destino em vez
-  // de voltar.
+  // Melhores Pagamentos: testa TODAS as origens possíveis pra cada destino e
+  // acha a melhor (a fórmula é Silver = base + distância × coef, quanto mais
+  // longe a origem, maior o valor — calculamos literalmente todas as combi-
+  // nações). Cada linha do ranking é uma rota independente — não presume ida
+  // e volta pela mesma origem. Destinos sem % informado entram com 100
+  // (neutro/padrão do jogo), marcados como "estimado" no ranking.
   const melhoresRotas = useMemo(() => {
     const demandasDoPack = packDemandas[packSelecionado] || {};
-    const destinosComDemanda = TRADEPOSTS.filter((t) => {
-      const v = demandasDoPack[t];
-      return v !== undefined && v !== "";
-    });
 
     const rotas = [];
-    destinosComDemanda.forEach((destino) => {
-      const demanda = Number(demandasDoPack[destino]);
+    TRADEPOSTS.forEach((destino) => {
+      const bruto = demandasDoPack[destino];
+      const informado = bruto !== undefined && bruto !== "";
+      const demanda = informado ? Number(bruto) : 100;
       let melhor = null;
       TRADEPOSTS.forEach((origem) => {
         if (origem === destino) return;
@@ -5850,6 +5853,7 @@ export default function App() {
         rotas.push({
           destino,
           demanda,
+          informado,
           origem: melhor.origem,
           distancia: melhor.distancia,
           silver: melhor.silver,
@@ -6235,16 +6239,16 @@ export default function App() {
               {
                 label:
                   lang === "en"
-                    ? "Local demand (per pack + destination, shown in-game: T → pack → caret)"
-                    : "Demanda local (por pack + destino, exibida in-game: T → pack → seta)",
-                formula: "Silver = (154.000 + Distância × 37,4) × (1 + DemandaLocal%)",
+                    ? "Local demand (per pack + destination, shown in-game: T → pack → caret; 100% = baseline)"
+                    : "Demanda local (por pack + destino, exibida in-game: T → pack → seta; 100% = padrão)",
+                formula: "Silver = (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100)",
               },
               {
                 label:
                   lang === "en"
                     ? "Modifiers (Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20% — stack additively)"
                     : "Modificadores (Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20% — somam entre si)",
-                formula: "Silver = (154.000 + Distância × 37,4) × (1 + DemandaLocal%) × (1 + Modificadores%)",
+                formula: "Silver = (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100) × (1 + Modificadores%)",
               },
               {
                 label: lang === "en" ? "Merchant Influence per pack" : "Influência Mercante por pack",
@@ -6422,31 +6426,19 @@ export default function App() {
                   ))}
                 </select>
                 <span style={{ color: gold, fontSize: 14 }}>→</span>
-                <select
-                  value={packDestino}
-                  onChange={(e) => setPackDestino(e.target.value)}
+                <span
                   style={{
-                    colorScheme: "dark",
                     background: "#0d1525",
-                    border: `1px solid ${packDestino ? gold : "rgba(196,160,80,0.4)"}`,
+                    border: `1px solid ${packDestino ? gold : "rgba(196,160,80,0.2)"}`,
                     borderRadius: 6,
-                    color: TEXT_PRIM,
+                    color: packDestino ? TEXT_PRIM : dim,
                     padding: "8px 12px",
                     fontFamily: "'Space Mono', monospace",
                     fontSize: 13,
-                    outline: "none",
-                    cursor: "pointer",
                   }}
                 >
-                  <option value="" style={{ background: "#0d1525", color: dim }}>
-                    {lang === "en" ? "Destination…" : "Entrega…"}
-                  </option>
-                  {TRADEPOSTS.map((t) => (
-                    <option key={t} value={t} style={{ background: "#0d1525", color: TEXT_PRIM }}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                  {packDestino || (lang === "en" ? "pick below…" : "escolha abaixo…")}
+                </span>
                 {packOrigem &&
                   packDestino &&
                   (getTradepostSteps(packOrigem, packDestino) === null ? (
@@ -6462,7 +6454,9 @@ export default function App() {
                   ))}
               </div>
               <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
-                {lang === "en" ? "Distance used in the formula: " : "Distância usada na fórmula: "}
+                {lang === "en"
+                  ? "Destination is picked from the Local Demands list or the Best Payouts ranking below. Distance used in the formula: "
+                  : "O destino é escolhido na lista de Demandas Locais ou no ranking de Melhores Pagamentos abaixo. Distância usada na fórmula: "}
                 <span style={{ color: dim, fontFamily: "'Space Mono', monospace" }}>{fmtInt(distanciaPack)} steps</span>
               </div>
             </div>
@@ -6510,7 +6504,9 @@ export default function App() {
                 {[...TRADEPOSTS].sort().map((t) => {
                   const ehOrigem = t === packOrigem;
                   const selecionado = t === packDestino;
-                  const valor = packDemandas[packSelecionado]?.[t] ?? "";
+                  const bruto = packDemandas[packSelecionado]?.[t];
+                  const informado = bruto !== undefined && bruto !== "";
+                  const valor = informado ? bruto : 100;
                   const steps = packOrigem && !ehOrigem ? getTradepostSteps(packOrigem, t) : null;
                   return (
                     <div
@@ -6563,13 +6559,20 @@ export default function App() {
                           value={valor}
                           onFocus={(e) => e.target.select()}
                           onChange={(e) => setDemandaDestino(t, e.target.value === "" ? "" : Number(e.target.value))}
-                          placeholder="100"
+                          title={
+                            informado
+                              ? undefined
+                              : lang === "en"
+                                ? "Estimated (100 = baseline) — click to enter the real value"
+                                : "Estimado (100 = padrão) — clique pra informar o valor real"
+                          }
                           style={{
                             width: 60,
                             background: "#0d1525",
-                            border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.3)"}`,
+                            border: `1px solid ${selecionado ? gold : informado ? "rgba(74,222,128,0.5)" : "rgba(196,160,80,0.2)"}`,
                             borderRadius: 4,
-                            color: TEXT_PRIM,
+                            color: informado ? TEXT_PRIM : "rgba(143,160,184,0.5)",
+                            fontStyle: informado ? "normal" : "italic",
                             padding: "5px 4px",
                             fontFamily: "'Space Mono', monospace",
                             fontSize: 13,
@@ -6585,8 +6588,8 @@ export default function App() {
               </div>
               <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
                 {lang === "en"
-                  ? "Demand is per pack + destination, independent of departure — fill in every destination you've checked in-game. The list feeds the Best Payouts ranking below."
-                  : "A demanda é por pack + destino, independente da partida — preencha todos os destinos que você já conferiu no jogo. Essa lista alimenta o ranking de Melhores Pagamentos abaixo."}
+                  ? "Demand is per pack + destination, independent of departure. Unfilled destinations assume 100% (baseline, shown in italic) until you confirm the real value in-game."
+                  : "A demanda é por pack + destino, independente da partida. Destinos não preenchidos assumem 100% (padrão, em itálico) até você confirmar o valor real no jogo."}
               </div>
             </div>
 
@@ -6611,59 +6614,59 @@ export default function App() {
               >
                 🏆 {lang === "en" ? "Best Payouts" : "Melhores Pagamentos"}
               </div>
-              {melhoresRotas.length === 0 ? (
-                <div style={{ fontSize: 12, color: dim }}>
-                  {lang === "en"
-                    ? "Fill in the demand % for at least one destination above to see ranked payouts"
-                    : "Preencha a demanda % de pelo menos um destino acima pra ver os pagamentos rankeados"}
-                </div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 620, margin: "0 auto" }}>
-                  {melhoresRotas.slice(0, 5).map((rota, i) => (
-                    <div
-                      key={rota.destino}
-                      onClick={() => {
-                        setPackOrigem(rota.origem);
-                        setPackDestino(rota.destino);
-                      }}
-                      style={{
-                        border: `1px solid ${i === 0 ? gold : "rgba(196,160,80,0.2)"}`,
-                        background: i === 0 ? "rgba(196,160,80,0.08)" : "transparent",
-                        borderRadius: 8,
-                        padding: "10px 12px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, fontWeight: "bold", color: i === 0 ? gold : TEXT_PRIM }}>
-                          {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {rota.origem} → {rota.destino}
-                        </span>
-                        <span style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", fontFamily: "'Space Mono', monospace" }}>
-                          {fmtInt(rota.distancia)} steps · {rota.demanda}%
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 12 }}>
-                        <span style={{ color: dim }}>Silver: </span>
-                        <span style={{ color: gold, fontFamily: "'Space Mono', monospace" }}>{fmtInt(rota.silver)}</span>
-                        <span style={{ color: dim }}> · {lang === "en" ? "Profit: " : "Lucro: "}</span>
-                        <span
-                          style={{
-                            color: rota.lucro >= 0 ? green : red,
-                            fontFamily: "'Space Mono', monospace",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {fmtInt(rota.lucro)}
-                        </span>
-                      </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 620, margin: "0 auto" }}>
+                {melhoresRotas.slice(0, 5).map((rota, i) => (
+                  <div
+                    key={rota.destino}
+                    onClick={() => {
+                      setPackOrigem(rota.origem);
+                      setPackDestino(rota.destino);
+                    }}
+                    style={{
+                      border: `1px solid ${i === 0 ? gold : "rgba(196,160,80,0.2)"}`,
+                      background: i === 0 ? "rgba(196,160,80,0.08)" : "transparent",
+                      borderRadius: 8,
+                      padding: "10px 12px",
+                      cursor: "pointer",
+                      opacity: rota.informado ? 1 : 0.75,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ fontSize: 12, fontWeight: "bold", color: i === 0 ? gold : TEXT_PRIM }}>
+                        {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {rota.origem} → {rota.destino}
+                      </span>
+                      <span style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", fontFamily: "'Space Mono', monospace" }}>
+                        {fmtInt(rota.distancia)} steps ·{" "}
+                        <span style={{ fontStyle: rota.informado ? "normal" : "italic" }}>{rota.demanda}%</span>
+                        {!rota.informado && (
+                          <span style={{ color: "rgba(143,160,184,0.4)" }}>
+                            {" "}
+                            {lang === "en" ? "(estimated)" : "(estimado)"}
+                          </span>
+                        )}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <div style={{ fontSize: 12 }}>
+                      <span style={{ color: dim }}>Silver: </span>
+                      <span style={{ color: gold, fontFamily: "'Space Mono', monospace" }}>{fmtInt(rota.silver)}</span>
+                      <span style={{ color: dim }}> · {lang === "en" ? "Profit: " : "Lucro: "}</span>
+                      <span
+                        style={{
+                          color: rota.lucro >= 0 ? green : red,
+                          fontFamily: "'Space Mono', monospace",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {fmtInt(rota.lucro)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
               <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
                 {lang === "en"
-                  ? "Each row is independent — the best-paying origin for that destination is picked automatically among all Tradeposts. Doesn't assume a round trip; chain whichever destinations pay best. Click a row to load it into the Route above."
-                  : "Cada linha é independente — a origem mais lucrativa pra aquele destino é escolhida automaticamente entre todos os Tradeposts. Não presume ida e volta; encadeie os destinos que mais pagarem. Clique numa linha pra carregar na Rota acima."}
+                  ? "Each row is independent — the best-paying origin for that destination is picked automatically among all Tradeposts. Rows marked \"estimated\" use the 100% baseline because you haven't confirmed that destination's real demand yet — fill it in above for an accurate ranking. Doesn't assume a round trip; chain whichever destinations pay best. Click a row to load it into the Route above."
+                  : "Cada linha é independente — a origem mais lucrativa pra aquele destino é escolhida automaticamente entre todos os Tradeposts. Linhas marcadas \"estimado\" usam o padrão de 100% porque você ainda não confirmou a demanda real daquele destino — preencha acima pra um ranking preciso. Não presume ida e volta; encadeie os destinos que mais pagarem. Clique numa linha pra carregar na Rota acima."}
               </div>
             </div>
 
@@ -10061,8 +10064,8 @@ export default function App() {
               }}
             >
               {lang === "en"
-                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (1 + LocalDemand%) × (1 + Modifiers%) ≈ (154,000 + Distance × 37.4) × (1 + LocalDemand%) × (1 + Modifiers%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Local Demand is per pack + destination, read directly from the in-game Tradepack menu (T → pack → caret icon) and saved per destination for reuse. Modifiers are fixed checkboxes applied to the pack\u2019s final sale value and stack additively: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
-                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (1 + DemandaLocal%) × (1 + Modificadores%) ≈ (154.000 + Distância × 37,4) × (1 + DemandaLocal%) × (1 + Modificadores%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. A Demanda Local é por pack + destino, lida direto do menu de tradepack in-game (T → pack → ícone de seta) e salva por destino pra reaproveitar. Os Modificadores são checkboxes fixos aplicados sobre a venda final do pack e somam entre si: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
+                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (LocalDemand% ÷ 100) × (1 + Modifiers%) ≈ (154,000 + Distance × 37.4) × (LocalDemand% ÷ 100) × (1 + Modifiers%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Local Demand is per pack + destination, read directly from the in-game Tradepack menu (T → pack → caret icon) and saved per destination for reuse; 100% is the baseline (no change) — unfilled destinations default to 100% until you confirm the real value. Modifiers are fixed checkboxes applied to the pack\u2019s final sale value and stack additively: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
+                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (DemandaLocal% ÷ 100) × (1 + Modificadores%) ≈ (154.000 + Distância × 37,4) × (DemandaLocal% ÷ 100) × (1 + Modificadores%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. A Demanda Local é por pack + destino, lida direto do menu de tradepack in-game (T → pack → ícone de seta) e salva por destino pra reaproveitar; 100% é o padrão (sem alteração) — destinos não preenchidos assumem 100% até você confirmar o valor real. Os Modificadores são checkboxes fixos aplicados sobre a venda final do pack e somam entre si: Bartering I +5%, Bartering II +10%, Plundering +10%, Stolen −20%. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
