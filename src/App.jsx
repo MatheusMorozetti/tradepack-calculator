@@ -6269,14 +6269,22 @@ export default function App() {
             </div>
 
             {/* Seletor de rota — preenche a Distância automaticamente */}
-            <div style={{ marginBottom: 12 }}>
+            <div
+              style={{
+                background: BG_CARD,
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: 14,
+              }}
+            >
               <div
                 style={{
                   color: dim,
                   fontSize: 11,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  marginBottom: 6,
+                  marginBottom: 8,
                 }}
               >
                 {lang === "en" ? "Route" : "Rota"}
@@ -6286,41 +6294,49 @@ export default function App() {
                   value={packOrigem}
                   onChange={(e) => setPackOrigem(e.target.value)}
                   style={{
-                    background: "rgba(0,0,0,0.4)",
-                    border: "1px solid rgba(196,160,80,0.3)",
+                    colorScheme: "dark",
+                    background: "#0d1525",
+                    border: `1px solid ${packOrigem ? gold : "rgba(196,160,80,0.4)"}`,
                     borderRadius: 6,
-                    color: dim,
-                    padding: "6px 10px",
+                    color: TEXT_PRIM,
+                    padding: "8px 12px",
                     fontFamily: "'Space Mono', monospace",
-                    fontSize: 12,
+                    fontSize: 13,
                     outline: "none",
+                    cursor: "pointer",
                   }}
                 >
-                  <option value="">{lang === "en" ? "Origin…" : "Origem…"}</option>
+                  <option value="" style={{ background: "#0d1525", color: dim }}>
+                    {lang === "en" ? "Origin…" : "Origem…"}
+                  </option>
                   {TRADEPOSTS.map((t) => (
-                    <option key={t} value={t}>
+                    <option key={t} value={t} style={{ background: "#0d1525", color: TEXT_PRIM }}>
                       {t}
                     </option>
                   ))}
                 </select>
-                <span style={{ color: dim, fontSize: 12 }}>→</span>
+                <span style={{ color: gold, fontSize: 14 }}>→</span>
                 <select
                   value={packDestino}
                   onChange={(e) => setPackDestino(e.target.value)}
                   style={{
-                    background: "rgba(0,0,0,0.4)",
-                    border: "1px solid rgba(196,160,80,0.3)",
+                    colorScheme: "dark",
+                    background: "#0d1525",
+                    border: `1px solid ${packDestino ? gold : "rgba(196,160,80,0.4)"}`,
                     borderRadius: 6,
-                    color: dim,
-                    padding: "6px 10px",
+                    color: TEXT_PRIM,
+                    padding: "8px 12px",
                     fontFamily: "'Space Mono', monospace",
-                    fontSize: 12,
+                    fontSize: 13,
                     outline: "none",
+                    cursor: "pointer",
                   }}
                 >
-                  <option value="">{lang === "en" ? "Destination…" : "Entrega…"}</option>
+                  <option value="" style={{ background: "#0d1525", color: dim }}>
+                    {lang === "en" ? "Destination…" : "Entrega…"}
+                  </option>
                   {TRADEPOSTS.map((t) => (
-                    <option key={t} value={t}>
+                    <option key={t} value={t} style={{ background: "#0d1525", color: TEXT_PRIM }}>
                       {t}
                     </option>
                   ))}
@@ -6334,7 +6350,7 @@ export default function App() {
                         : "Rota não mapeada — usando valor manual"}
                     </span>
                   ) : (
-                    <span style={{ color: gold, fontSize: 12, fontFamily: "'Space Mono', monospace" }}>
+                    <span style={{ color: gold, fontSize: 13, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>
                       = {fmtInt(distanciaPack)} steps
                     </span>
                   ))}
