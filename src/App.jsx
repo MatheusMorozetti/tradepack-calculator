@@ -5296,7 +5296,6 @@ export default function App() {
   const silverPorPack = calcularSilverTradepack(distanciaPack, demandaPack, modificadoresTotal);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
-  const [qtdPlunder, setQtdPlunder] = useState(0);
   const [custoCert, setCustoCert] = useState(1.2);
 
   // HUNT — itens coletados por 1 HORA (base fixa)
@@ -5470,7 +5469,6 @@ export default function App() {
       if (s.modPlunderingOn !== undefined) setModPlunderingOn(s.modPlunderingOn);
       if (s.modStolenOn !== undefined) setModStolenOn(s.modStolenOn);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
-      if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
       if (s.matsOverride !== undefined) setMatsOverride(s.matsOverride);
       if (s.matsQUEST !== undefined) setMatsQUEST(s.matsQUEST);
@@ -5540,7 +5538,6 @@ export default function App() {
             modPlunderingOn,
             modStolenOn,
             qtdEnhanced,
-            qtdPlunder,
             custoCert,
             matsOverride,
             matsQUEST,
@@ -5608,7 +5605,6 @@ export default function App() {
     modStolenOn,
     silverPorPack,
     qtdEnhanced,
-    qtdPlunder,
     custoCert,
     matsOverride,
     matsQUEST,
@@ -5655,14 +5651,12 @@ export default function App() {
     const MES = 30 / 7;
     const packsSemanais = qtdPacks;
     const enhancedVal = Math.min(qtdEnhanced, packsSemanais);
-    const plunderVal = Math.min(qtdPlunder, packsSemanais);
     const packsNormais = packsSemanais - enhancedVal;
 
     const imBase = imPorPack;
     const imNormalTotal = packsNormais * imBase;
     const imEnhancedTotal = enhancedVal * imBase * 2;
-    const imPlunderTotal = plunderVal * imBase * 0.15;
-    const imTotal_semana = imNormalTotal + imEnhancedTotal + imPlunderTotal;
+    const imTotal_semana = imNormalTotal + imEnhancedTotal;
     const imEfetiva = packsSemanais > 0 ? imTotal_semana / packsSemanais : imBase;
 
     // Custos de materiais
@@ -5755,12 +5749,10 @@ export default function App() {
       MES,
       packsSemanais,
       enhancedVal,
-      plunderVal,
       packsNormais,
       imBase,
       imNormalTotal,
       imEnhancedTotal,
-      imPlunderTotal,
       imTotal_semana,
       imEfetiva,
       custoProducaoTotal,
@@ -5815,7 +5807,6 @@ export default function App() {
     modificadoresTotal,
     silverPorPack,
     qtdEnhanced,
-    qtdPlunder,
     custoCert,
     matsOverride,
     matsQUEST,
@@ -5826,6 +5817,49 @@ export default function App() {
     taxSaquePct,
     feeCredit,
   ]);
+
+  // Melhores Pagamentos: para cada destino com demanda preenchida, testa TODAS
+  // as origens possíveis e acha a melhor (a fórmula é Silver = base + distância
+  // × coef, então quanto mais longe a origem, maior o valor — mas calculamos
+  // literalmente todas as combinações, sem assumir isso de antemão). Cada linha
+  // do ranking é uma rota independente — não presume ida e volta pela mesma
+  // origem, já que às vezes vale mais a pena seguir pra outro destino em vez
+  // de voltar.
+  const melhoresRotas = useMemo(() => {
+    const demandasDoPack = packDemandas[packSelecionado] || {};
+    const destinosComDemanda = TRADEPOSTS.filter((t) => {
+      const v = demandasDoPack[t];
+      return v !== undefined && v !== "";
+    });
+
+    const rotas = [];
+    destinosComDemanda.forEach((destino) => {
+      const demanda = Number(demandasDoPack[destino]);
+      let melhor = null;
+      TRADEPOSTS.forEach((origem) => {
+        if (origem === destino) return;
+        const distancia = getTradepostSteps(origem, destino);
+        if (distancia === null) return;
+        const silver = calcularSilverTradepack(distancia, demanda, modificadoresTotal);
+        const lucro = silver - r.custoProducaoTotal;
+        if (!melhor || lucro > melhor.lucro) {
+          melhor = { origem, distancia, silver, lucro };
+        }
+      });
+      if (melhor) {
+        rotas.push({
+          destino,
+          demanda,
+          origem: melhor.origem,
+          distancia: melhor.distancia,
+          silver: melhor.silver,
+          lucro: melhor.lucro,
+        });
+      }
+    });
+
+    return rotas.sort((a, b) => b.lucro - a.lucro);
+  }, [packSelecionado, packDemandas, modificadoresTotal, r.custoProducaoTotal]);
 
   const tabs = [
     { id: "tradepack", label: TR[lang].tabTradepack },
@@ -6433,7 +6467,9 @@ export default function App() {
               </div>
             </div>
 
-            {/* Demandas Locais — % por destino, salvo por pack (T → pack → seta no jogo) */}
+            {/* Demandas Locais — % por destino, salvo por pack (T → pack → seta no jogo). */}
+            {/* Independente da Partida: a demanda local é uma propriedade do destino, */}
+            {/* não da rota — preencha aqui todos os destinos que você já conferiu. */}
             <div
               style={{
                 background: BG_CARD,
@@ -6460,106 +6496,177 @@ export default function App() {
                   {lang === "en" ? "T → pack → caret icon" : "T → pack → ícone de seta"}
                 </span>
               </div>
-              {!packOrigem ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                  maxHeight: 260,
+                  overflowY: "auto",
+                  maxWidth: 480,
+                  margin: "0 auto",
+                }}
+              >
+                {[...TRADEPOSTS].sort().map((t) => {
+                  const ehOrigem = t === packOrigem;
+                  const selecionado = t === packDestino;
+                  const valor = packDemandas[packSelecionado]?.[t] ?? "";
+                  const steps = packOrigem && !ehOrigem ? getTradepostSteps(packOrigem, t) : null;
+                  return (
+                    <div
+                      key={t}
+                      onClick={() => !ehOrigem && setPackDestino(t)}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr auto 84px",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "8px 12px",
+                        borderRadius: 6,
+                        border: `1px solid ${selecionado ? gold : ehOrigem ? "rgba(96,165,250,0.3)" : "rgba(196,160,80,0.15)"}`,
+                        background: selecionado
+                          ? "rgba(196,160,80,0.1)"
+                          : ehOrigem
+                            ? "rgba(96,165,250,0.06)"
+                            : "transparent",
+                        cursor: ehOrigem ? "default" : "pointer",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: selecionado ? TEXT_PRIM : ehOrigem ? blue : dim,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {ehOrigem ? "📦" : "📍"} {t}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: "rgba(143,160,184,0.55)",
+                          fontFamily: "'Space Mono', monospace",
+                          textAlign: "right",
+                          minWidth: 70,
+                        }}
+                      >
+                        {ehOrigem ? (lang === "en" ? "(origin)" : "(origem)") : steps !== null ? `${fmtInt(steps)} steps` : ""}
+                      </span>
+                      <div
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="number"
+                          value={valor}
+                          onFocus={(e) => e.target.select()}
+                          onChange={(e) => setDemandaDestino(t, e.target.value === "" ? "" : Number(e.target.value))}
+                          placeholder="100"
+                          style={{
+                            width: 60,
+                            background: "#0d1525",
+                            border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.3)"}`,
+                            borderRadius: 4,
+                            color: TEXT_PRIM,
+                            padding: "5px 4px",
+                            fontFamily: "'Space Mono', monospace",
+                            fontSize: 13,
+                            textAlign: "center",
+                            outline: "none",
+                          }}
+                        />
+                        <span style={{ fontSize: 11, color: dim }}>%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {lang === "en"
+                  ? "Demand is per pack + destination, independent of departure — fill in every destination you've checked in-game. The list feeds the Best Payouts ranking below."
+                  : "A demanda é por pack + destino, independente da partida — preencha todos os destinos que você já conferiu no jogo. Essa lista alimenta o ranking de Melhores Pagamentos abaixo."}
+              </div>
+            </div>
+
+            {/* Melhores Pagamentos — ranking global: melhor origem×destino pra cada demanda preenchida */}
+            <div
+              style={{
+                background: BG_CARD,
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: 14,
+              }}
+            >
+              <div
+                style={{
+                  color: dim,
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 10,
+                }}
+              >
+                🏆 {lang === "en" ? "Best Payouts" : "Melhores Pagamentos"}
+              </div>
+              {melhoresRotas.length === 0 ? (
                 <div style={{ fontSize: 12, color: dim }}>
                   {lang === "en"
-                    ? "Choose a departure above to see available destinations"
-                    : "Escolha a partida acima para ver os destinos disponíveis"}
+                    ? "Fill in the demand % for at least one destination above to see ranked payouts"
+                    : "Preencha a demanda % de pelo menos um destino acima pra ver os pagamentos rankeados"}
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                    maxHeight: 260,
-                    overflowY: "auto",
-                    maxWidth: 560,
-                    margin: "0 auto",
-                  }}
-                >
-                  {TRADEPOSTS.filter((t) => t !== packOrigem && getTradepostSteps(packOrigem, t) !== null)
-                    .sort((a, b) => getTradepostSteps(packOrigem, a) - getTradepostSteps(packOrigem, b))
-                    .map((t) => {
-                      const selecionado = t === packDestino;
-                      const valor = packDemandas[packSelecionado]?.[t] ?? "";
-                      return (
-                        <div
-                          key={t}
-                          onClick={() => setPackDestino(t)}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 620, margin: "0 auto" }}>
+                  {melhoresRotas.slice(0, 5).map((rota, i) => (
+                    <div
+                      key={rota.destino}
+                      onClick={() => {
+                        setPackOrigem(rota.origem);
+                        setPackDestino(rota.destino);
+                      }}
+                      style={{
+                        border: `1px solid ${i === 0 ? gold : "rgba(196,160,80,0.2)"}`,
+                        background: i === 0 ? "rgba(196,160,80,0.08)" : "transparent",
+                        borderRadius: 8,
+                        padding: "10px 12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: "bold", color: i === 0 ? gold : TEXT_PRIM }}>
+                          {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {rota.origem} → {rota.destino}
+                        </span>
+                        <span style={{ fontSize: 11, color: "rgba(143,160,184,0.6)", fontFamily: "'Space Mono', monospace" }}>
+                          {fmtInt(rota.distancia)} steps · {rota.demanda}%
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12 }}>
+                        <span style={{ color: dim }}>Silver: </span>
+                        <span style={{ color: gold, fontFamily: "'Space Mono', monospace" }}>{fmtInt(rota.silver)}</span>
+                        <span style={{ color: dim }}> · {lang === "en" ? "Profit: " : "Lucro: "}</span>
+                        <span
                           style={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 100px 84px",
-                            alignItems: "center",
-                            gap: 10,
-                            padding: "8px 12px",
-                            borderRadius: 6,
-                            border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.15)"}`,
-                            background: selecionado ? "rgba(196,160,80,0.1)" : "transparent",
-                            cursor: "pointer",
+                            color: rota.lucro >= 0 ? green : red,
+                            fontFamily: "'Space Mono', monospace",
+                            fontWeight: "bold",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: 12,
-                              color: selecionado ? TEXT_PRIM : dim,
-                              whiteSpace: "nowrap",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            📍 {t}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              color: "rgba(143,160,184,0.6)",
-                              fontFamily: "'Space Mono', monospace",
-                              textAlign: "center",
-                            }}
-                          >
-                            {fmtInt(getTradepostSteps(packOrigem, t))} steps
-                          </span>
-                          <div
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <input
-                              type="number"
-                              value={valor}
-                              onFocus={(e) => e.target.select()}
-                              onChange={(e) =>
-                                setDemandaDestino(t, e.target.value === "" ? "" : Number(e.target.value))
-                              }
-                              placeholder="100"
-                              style={{
-                                width: 60,
-                                background: "#0d1525",
-                                border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.3)"}`,
-                                borderRadius: 4,
-                                color: TEXT_PRIM,
-                                padding: "5px 4px",
-                                fontFamily: "'Space Mono', monospace",
-                                fontSize: 13,
-                                textAlign: "center",
-                                outline: "none",
-                              }}
-                            />
-                            <span style={{ fontSize: 11, color: dim }}>%</span>
-                          </div>
-                        </div>
-                      );
-                    })}
+                          {fmtInt(rota.lucro)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
                 {lang === "en"
-                  ? "Demand is per pack + destination — read it in-game and it's saved automatically for next time. Clicking a row selects it as the destination."
-                  : "A demanda é por pack + destino — confira no jogo e fica salva automaticamente pra próxima vez. Clicar na linha seleciona como destino."}
+                  ? "Each row is independent — the best-paying origin for that destination is picked automatically among all Tradeposts. Doesn't assume a round trip; chain whichever destinations pay best. Click a row to load it into the Route above."
+                  : "Cada linha é independente — a origem mais lucrativa pra aquele destino é escolhida automaticamente entre todos os Tradeposts. Não presume ida e volta; encadeie os destinos que mais pagarem. Clique numa linha pra carregar na Rota acima."}
               </div>
             </div>
 
-            {/* Modificadores — bônus percentuais de talento/canal que empilham */}
             <div
               style={{
                 background: BG_CARD,
@@ -6653,13 +6760,6 @@ export default function App() {
                 onChange={setQtdEnhanced}
                 step={1}
                 hint={lang === "en" ? "+100% IM" : "+100% IM"}
-              />
-              <Field
-                label={lang === "en" ? "Plunder packs / week" : "Packs no Plunder / semana"}
-                value={qtdPlunder}
-                onChange={setQtdPlunder}
-                step={1}
-                hint={lang === "en" ? "+15% IM (Plunder Channel)" : "+15% IM (Plunder Channel)"}
               />
             </div>
 
