@@ -6346,8 +6346,8 @@ export default function App() {
                   (getTradepostSteps(packOrigem, packDestino) === null ? (
                     <span style={{ color: red, fontSize: 11 }}>
                       {lang === "en"
-                        ? "Route not mapped — using manual value"
-                        : "Rota não mapeada — usando valor manual"}
+                        ? "Route not mapped yet — keeping last known distance"
+                        : "Rota ainda não mapeada — mantendo a última distância conhecida"}
                     </span>
                   ) : (
                     <span style={{ color: gold, fontSize: 13, fontWeight: "bold", fontFamily: "'Space Mono', monospace" }}>
@@ -6355,21 +6355,14 @@ export default function App() {
                     </span>
                   ))}
               </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {lang === "en" ? "Distance used in the formula: " : "Distância usada na fórmula: "}
+                <span style={{ color: dim, fontFamily: "'Space Mono', monospace" }}>{fmtInt(distanciaPack)} steps</span>
+              </div>
             </div>
 
             {/* Config numérica */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 8 }}>
-              <Field
-                label={lang === "en" ? "Distance (tiles)" : "Distância (tiles)"}
-                value={distanciaPack}
-                onChange={setDistanciaPack}
-                step={1}
-                hint={
-                  lang === "en"
-                    ? "Auto-filled from route above, or check in-game (Tradepost pin icon)"
-                    : "Preenchido pela rota acima, ou confira no jogo (ícone de pin no Tradepost)"
-                }
-              />
               <Field
                 label={lang === "en" ? "Packs / week" : "Packs / semana"}
                 value={qtdPacks}
