@@ -4426,7 +4426,414 @@ const PACKS = {
       { nome: "Thorny Roots", qtd: 120, custoProducao: 85, precoMkt: 85 },
     ],
   },
+  "Yornish Seasoning": {
+    materiais: [
+      { nome: "Twisted Flower", qtd: 100, custoProducao: 0, precoMkt: 0 },
+      { nome: "Withered Stem", qtd: 185, custoProducao: 0, precoMkt: 0 },
+      { nome: "Fungal Dust", qtd: 500, custoProducao: 0, precoMkt: 0 },
+      { nome: "Salt", qtd: 14, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Pirates Anesthesic": {
+    materiais: [
+      { nome: "Numbing Thorns", qtd: 245, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pirate's Cap", qtd: 280, custoProducao: 0, precoMkt: 0 },
+      { nome: "Juice Stem", qtd: 280, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Vegetable Stew": {
+    materiais: [
+      { nome: "Broccoli", qtd: 55, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pumpkin", qtd: 55, custoProducao: 0, precoMkt: 0 },
+      { nome: "Bean", qtd: 211, custoProducao: 0, precoMkt: 0 },
+      { nome: "Potato", qtd: 250, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Exotic Spices": {
+    materiais: [
+      { nome: "Flaming Spores", qtd: 100, custoProducao: 0, precoMkt: 0 },
+      { nome: "Chest Warmer", qtd: 150, custoProducao: 0, precoMkt: 0 },
+      { nome: "Juicy Roots", qtd: 92, custoProducao: 0, precoMkt: 0 },
+      { nome: "Sunberry", qtd: 60, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Sombershade Toppings": {
+    materiais: [
+      { nome: "Dread Bloom", qtd: 110, custoProducao: 0, precoMkt: 0 },
+      { nome: "Dusk Dust", qtd: 170, custoProducao: 0, precoMkt: 0 },
+      { nome: "Thorny Roots", qtd: 240, custoProducao: 0, precoMkt: 0 },
+      { nome: "Fungal Dust", qtd: 220, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Margrove Ale Ingredients": {
+    materiais: [
+      { nome: "Wheat", qtd: 400, custoProducao: 0, precoMkt: 0 },
+      { nome: "Acorn", qtd: 12, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pumpkin", qtd: 45, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Basic Rations": {
+    materiais: [
+      { nome: "Wheat", qtd: 316, custoProducao: 0, precoMkt: 0 },
+      { nome: "Corn", qtd: 110, custoProducao: 0, precoMkt: 0 },
+      { nome: "Apple", qtd: 35, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shank", qtd: 25, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Kabbar's Omelete": {
+    materiais: [
+      { nome: "Egg", qtd: 145, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cheese", qtd: 35, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pepper", qtd: 148, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Ravencrest Greens": {
+    materiais: [
+      { nome: "Broccoli", qtd: 128, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pea", qtd: 112, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cabbage", qtd: 160, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Fruit Basket": {
+    materiais: [
+      { nome: "Grape", qtd: 136, custoProducao: 0, precoMkt: 0 },
+      { nome: "Watermelon", qtd: 30, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cherry", qtd: 45, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Crisp Produce": {
+    materiais: [
+      { nome: "Apple", qtd: 55, custoProducao: 0, precoMkt: 0 },
+      { nome: "Broccoli", qtd: 55, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pea", qtd: 133, custoProducao: 0, precoMkt: 0 },
+      { nome: "Bean", qtd: 133, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Sailor's Remedy": {
+    materiais: [
+      { nome: "Orange", qtd: 20, custoProducao: 0, precoMkt: 0 },
+      { nome: "Bean", qtd: 155, custoProducao: 0, precoMkt: 0 },
+      { nome: "Blueberry", qtd: 535, custoProducao: 0, precoMkt: 0 },
+      { nome: "Carrot", qtd: 260, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Slums Provisions": {
+    materiais: [
+      { nome: "Small Log", qtd: 200, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shank", qtd: 65, custoProducao: 0, precoMkt: 0 },
+      { nome: "Potato", qtd: 690, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Sombreshade's Pie": {
+    materiais: [
+      { nome: "Pumpkin", qtd: 60, custoProducao: 0, precoMkt: 0 },
+      { nome: "Milk", qtd: 60, custoProducao: 0, precoMkt: 0 },
+      { nome: "Ground Flour", qtd: 110, custoProducao: 0, precoMkt: 0 },
+      { nome: "Honey", qtd: 80, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Fried Chicken": {
+    materiais: [
+      { nome: "Onion", qtd: 80, custoProducao: 0, precoMkt: 0 },
+      { nome: "Garlic", qtd: 120, custoProducao: 0, precoMkt: 0 },
+      { nome: "Ground Flour", qtd: 95, custoProducao: 0, precoMkt: 0 },
+      { nome: "Chicken", qtd: 75, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Winemakers Kit": {
+    materiais: [
+      { nome: "Grape", qtd: 200, custoProducao: 0, precoMkt: 0 },
+      { nome: "Blueberry", qtd: 385, custoProducao: 0, precoMkt: 0 },
+      { nome: "Moonberry", qtd: 92, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "General Spices": {
+    materiais: [
+      { nome: "Garlic", qtd: 148, custoProducao: 0, precoMkt: 0 },
+      { nome: "Onion", qtd: 105, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pepper", qtd: 118, custoProducao: 0, precoMkt: 0 },
+      { nome: "Salt", qtd: 13, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Sajecho Fruit Basket": {
+    materiais: [
+      { nome: "Banana", qtd: 40, custoProducao: 0, precoMkt: 0 },
+      { nome: "Watermelon", qtd: 20, custoProducao: 0, precoMkt: 0 },
+      { nome: "Orange", qtd: 14, custoProducao: 0, precoMkt: 0 },
+      { nome: "Grape", qtd: 94, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Settler's Rations": {
+    materiais: [
+      { nome: "Corn", qtd: 200, custoProducao: 0, precoMkt: 0 },
+      { nome: "Potato", qtd: 650, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shank", qtd: 56, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Oceanic Stimulants": {
+    materiais: [
+      { nome: "Fungal Dust", qtd: 380, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pirate's Bliss", qtd: 290, custoProducao: 0, precoMkt: 0 },
+      { nome: "Tin Ore", qtd: 160, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Pie Making Kit": {
+    materiais: [
+      { nome: "Apple", qtd: 56, custoProducao: 0, precoMkt: 0 },
+      { nome: "Sunberry", qtd: 65, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cherry", qtd: 25, custoProducao: 0, precoMkt: 0 },
+      { nome: "Ground Flour", qtd: 60, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Seabreeze Rum": {
+    materiais: [
+      { nome: "Cabbage", qtd: 65, custoProducao: 0, precoMkt: 0 },
+      { nome: "Banana", qtd: 30, custoProducao: 0, precoMkt: 0 },
+      { nome: "Blueberry", qtd: 212, custoProducao: 0, precoMkt: 0 },
+      { nome: "Corn", qtd: 200, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Bakers Basic": {
+    materiais: [
+      { nome: "Milk", qtd: 97, custoProducao: 0, precoMkt: 0 },
+      { nome: "Egg", qtd: 240, custoProducao: 0, precoMkt: 0 },
+      { nome: "Ground Flour", qtd: 230, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Ravencrest Finest Wears": {
+    materiais: [
+      { nome: "Cotton", qtd: 125, custoProducao: 0, precoMkt: 0 },
+      { nome: "Wool", qtd: 78, custoProducao: 0, precoMkt: 0 },
+      { nome: "Hide", qtd: 50, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Seer's Support Pack": {
+    materiais: [
+      { nome: "Thorny Roots", qtd: 400, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shadow Stem", qtd: 190, custoProducao: 0, precoMkt: 0 },
+      { nome: "Mindbender", qtd: 132, custoProducao: 0, precoMkt: 0 },
+      { nome: "Feather", qtd: 20, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Berry Basket": {
+    materiais: [
+      { nome: "Blueberry", qtd: 445, custoProducao: 0, precoMkt: 0 },
+      { nome: "Moonberry", qtd: 30, custoProducao: 0, precoMkt: 0 },
+      { nome: "Sunberry", qtd: 100, custoProducao: 0, precoMkt: 0 },
+      { nome: "Strawberry", qtd: 200, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Strawberry Cakes": {
+    materiais: [
+      { nome: "Ground Flour", qtd: 186, custoProducao: 0, precoMkt: 0 },
+      { nome: "Milk", qtd: 32, custoProducao: 0, precoMkt: 0 },
+      { nome: "Strawberry", qtd: 400, custoProducao: 0, precoMkt: 0 },
+      { nome: "Honey", qtd: 120, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Lush Fibers": {
+    materiais: [
+      { nome: "Wool", qtd: 110, custoProducao: 0, precoMkt: 0 },
+      { nome: "Emerald Spores", qtd: 300, custoProducao: 0, precoMkt: 0 },
+      { nome: "Juicy Roots", qtd: 285, custoProducao: 0, precoMkt: 0 },
+      { nome: "Feather", qtd: 25, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Moisture Aging": {
+    materiais: [
+      { nome: "Juicy Roots", qtd: 400, custoProducao: 0, precoMkt: 0 },
+      { nome: "Dry Stem", qtd: 170, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shank", qtd: 50, custoProducao: 0, precoMkt: 0 },
+      { nome: "Onion", qtd: 43, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Widow's Box": {
+    materiais: [
+      { nome: "Lizard's Delight", qtd: 300, custoProducao: 0, precoMkt: 0 },
+      { nome: "Crystal Cap", qtd: 140, custoProducao: 0, precoMkt: 0 },
+      { nome: "Wailing Leaf", qtd: 155, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Juicers Box": {
+    materiais: [
+      { nome: "Apple", qtd: 64, custoProducao: 0, precoMkt: 0 },
+      { nome: "Strawberry", qtd: 162, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cherry", qtd: 26, custoProducao: 0, precoMkt: 0 },
+      { nome: "Banana", qtd: 12, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Brined Shank": {
+    materiais: [
+      { nome: "Shank", qtd: 70, custoProducao: 0, precoMkt: 0 },
+      { nome: "Salt", qtd: 14, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pepper", qtd: 165, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Exotic Fruits": {
+    materiais: [
+      { nome: "Watermelon", qtd: 52, custoProducao: 0, precoMkt: 0 },
+      { nome: "Sunberry", qtd: 70, custoProducao: 0, precoMkt: 0 },
+      { nome: "Moonberry", qtd: 62, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Hardy Roots": {
+    materiais: [
+      { nome: "Carrot", qtd: 286, custoProducao: 0, precoMkt: 0 },
+      { nome: "Purple Roots", qtd: 65, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cold Roots", qtd: 175, custoProducao: 0, precoMkt: 0 },
+      { nome: "Thin Roots", qtd: 375, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Crafting Basic": {
+    materiais: [
+      { nome: "Copper Ore", qtd: 140, custoProducao: 0, precoMkt: 0 },
+      { nome: "Hide", qtd: 55, custoProducao: 0, precoMkt: 0 },
+      { nome: "Small Log", qtd: 200, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Dairy Delivery": {
+    materiais: [
+      { nome: "Milk", qtd: 80, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cheese", qtd: 22, custoProducao: 0, precoMkt: 0 },
+      { nome: "Egg", qtd: 246, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Poisoner's Kit": {
+    materiais: [
+      { nome: "Toxic Stem", qtd: 120, custoProducao: 0, precoMkt: 0 },
+      { nome: "Thin Roots", qtd: 240, custoProducao: 0, precoMkt: 0 },
+      { nome: "Hagthorn", qtd: 150, custoProducao: 0, precoMkt: 0 },
+      { nome: "Thorny Roots", qtd: 150, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Aged Meat": {
+    materiais: [
+      { nome: "Beef", qtd: 75, custoProducao: 0, precoMkt: 0 },
+      { nome: "Salt", qtd: 10, custoProducao: 0, precoMkt: 0 },
+      { nome: "Garlic", qtd: 208, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Glaceforde Explorers Kit": {
+    materiais: [
+      { nome: "Wool", qtd: 106, custoProducao: 0, precoMkt: 0 },
+      { nome: "Small Log", qtd: 110, custoProducao: 0, precoMkt: 0 },
+      { nome: "Coal", qtd: 100, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cotton", qtd: 20, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Necrobane Kit": {
+    materiais: [
+      { nome: "Bloody Bud", qtd: 250, custoProducao: 0, precoMkt: 0 },
+      { nome: "Brightday", qtd: 275, custoProducao: 0, precoMkt: 0 },
+      { nome: "Feather", qtd: 48, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Bittersweet Delights": {
+    materiais: [
+      { nome: "Cherry", qtd: 65, custoProducao: 0, precoMkt: 0 },
+      { nome: "Ambar Dust", qtd: 140, custoProducao: 0, precoMkt: 0 },
+      { nome: "Green Cap", qtd: 180, custoProducao: 0, precoMkt: 0 },
+      { nome: "Thin Roots", qtd: 105, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Campfire Roast": {
+    materiais: [
+      { nome: "Stone", qtd: 220, custoProducao: 0, precoMkt: 0 },
+      { nome: "Chicken", qtd: 68, custoProducao: 0, precoMkt: 0 },
+      { nome: "Potato", qtd: 155, custoProducao: 0, precoMkt: 0 },
+      { nome: "Small Log", qtd: 120, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Noble Delicacies": {
+    materiais: [
+      { nome: "Moonberry", qtd: 175, custoProducao: 0, precoMkt: 0 },
+      { nome: "Acorn", qtd: 15, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pepper", qtd: 70, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Sajecho's Spices": {
+    materiais: [
+      { nome: "Salt", qtd: 15, custoProducao: 0, precoMkt: 0 },
+      { nome: "Orange", qtd: 20, custoProducao: 0, precoMkt: 0 },
+      { nome: "Onion", qtd: 150, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pepper", qtd: 55, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Kindling Kit": {
+    materiais: [
+      { nome: "Small Log", qtd: 175, custoProducao: 0, precoMkt: 0 },
+      { nome: "Coal", qtd: 124, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cotton", qtd: 70, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Butcher's Box": {
+    materiais: [
+      { nome: "Chicken", qtd: 38, custoProducao: 0, precoMkt: 0 },
+      { nome: "Beef", qtd: 90, custoProducao: 0, precoMkt: 0 },
+      { nome: "Shank", qtd: 30, custoProducao: 0, precoMkt: 0 },
+      { nome: "Cheese", qtd: 5, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Building Materials": {
+    materiais: [
+      { nome: "Stone", qtd: 240, custoProducao: 0, precoMkt: 0 },
+      { nome: "Small Log", qtd: 185, custoProducao: 0, precoMkt: 0 },
+      { nome: "Hide", qtd: 68, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Barbecue Specialty": {
+    materiais: [
+      { nome: "Beef", qtd: 68, custoProducao: 0, precoMkt: 0 },
+      { nome: "Chicken", qtd: 26, custoProducao: 0, precoMkt: 0 },
+      { nome: "Coal", qtd: 42, custoProducao: 0, precoMkt: 0 },
+      { nome: "Honey", qtd: 100, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
+  "Rohna Smoked Ham": {
+    materiais: [
+      { nome: "Shank", qtd: 40, custoProducao: 0, precoMkt: 0 },
+      { nome: "Acorn", qtd: 30, custoProducao: 0, precoMkt: 0 },
+      { nome: "Pea", qtd: 92, custoProducao: 0, precoMkt: 0 },
+      { nome: "Salt", qtd: 8, custoProducao: 0, precoMkt: 0 },
+    ],
+  },
 };
+
+// Ícone temático por pack (varia conforme a "família" de itens, só estética)
+const PACK_ICONS = [
+  "🥕", "🍞", "🍖", "🍇", "🌿", "🍯", "🧂", "🐟", "🍄", "🌾",
+  "🧵", "🪵", "🍷", "🥧", "🧀", "🥩", "🍒", "🌸", "🦴", "🔥",
+];
+const packIconFor = (nome) => {
+  let hash = 0;
+  for (let i = 0; i < nome.length; i++) hash = (hash * 31 + nome.charCodeAt(i)) >>> 0;
+  return PACK_ICONS[hash % PACK_ICONS.length];
+};
+
+// Mapa de defaults (custoProducao / precoMkt) por material — primeiro valor encontrado
+// entre todos os packs é usado como base antes de qualquer override do usuário.
+// Isso alimenta a Tabela Global de Materiais: editar um material lá reflete em
+// TODOS os packs que o utilizam, pois matsOverride é indexado apenas pelo nome do item.
+const MATERIAL_DEFAULTS = {};
+Object.values(PACKS).forEach((p) => {
+  p.materiais.forEach((m) => {
+    if (!(m.nome in MATERIAL_DEFAULTS)) {
+      MATERIAL_DEFAULTS[m.nome] = { custoProducao: m.custoProducao ?? 0, precoMkt: m.precoMkt ?? 0 };
+    }
+  });
+});
+
+// Lista única de todos os materiais usados em todos os packs, com contagem de uso
+const ALL_PACK_MATERIALS = (() => {
+  const map = new Map();
+  Object.entries(PACKS).forEach(([packNome, p]) => {
+    p.materiais.forEach((m) => {
+      if (!map.has(m.nome)) map.set(m.nome, { nome: m.nome, packs: [] });
+      map.get(m.nome).packs.push(packNome);
+    });
+  });
+  return Array.from(map.values()).sort((a, b) => a.nome.localeCompare(b.nome));
+})();
 
 function Field({ label, value, onChange, suffix, step = "any", hint, min = 0, color, decimals }) {
   const [localValue, setLocalValue] = useState(String(value));
@@ -4750,6 +5157,9 @@ export default function App() {
     Math.round(BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095);
 
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
+  const [packSearch, setPackSearch] = useState("");
+  const [matGlobalSearch, setMatGlobalSearch] = useState("");
+  const [matGlobalOnlyEmpty, setMatGlobalOnlyEmpty] = useState(false);
   const [qtdPacks, setQtdPacks] = useState(10);
   // Distância calibrada para reproduzir o valor empírico anterior (79.126 silver
   // na fórmula pré-1.0.9.5) — ajuste esse valor para a distância real da sua rota.
@@ -4893,7 +5303,7 @@ export default function App() {
   const getMat = (nome, campo) =>
     matsOverride[nome]?.[campo] !== undefined
       ? matsOverride[nome][campo]
-      : (packAtual.materiais.find((m) => m.nome === nome)?.[campo] ?? 0);
+      : (MATERIAL_DEFAULTS[nome]?.[campo] ?? 0);
   const setMat = (nome, campo, val) =>
     setMatsOverride((prev) => ({ ...prev, [nome]: { ...(prev[nome] || {}), [campo]: val } }));
   const toggleQUEST = (nome) => setMatsQUEST((prev) => ({ ...prev, [nome]: !prev[nome] }));
@@ -5651,39 +6061,115 @@ export default function App() {
             icon="📦"
             borderColor="rgba(196,160,80,0.3)"
           >
-            {/* Seletor de pack */}
+            {/* Seletor de pack — busca + grid interativo de cards */}
             <div style={{ marginBottom: 16 }}>
               <div
                 style={{
-                  color: dim,
-                  fontSize: 11,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                   marginBottom: 8,
+                  flexWrap: "wrap",
+                  gap: 8,
                 }}
               >
-                {lang === "en" ? "Pack" : "Pack"}
+                <div style={{ color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {lang === "en" ? "Pack" : "Pack"} · {Object.keys(PACKS).length} {lang === "en" ? "available" : "disponíveis"}
+                </div>
+                <div style={{ color: "rgba(143,160,184,0.5)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}>
+                  {packSelecionado}
+                </div>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {Object.keys(PACKS).map((nome) => (
-                  <button
-                    key={nome}
-                    onClick={() => setPackSelecionado(nome)}
-                    style={{
-                      background: packSelecionado === nome ? `linear-gradient(135deg, ${gold}, #8a6a20)` : "rgba(0,0,0,0.4)",
-                      border: `1px solid ${packSelecionado === nome ? gold : "rgba(196,160,80,0.3)"}`,
-                      borderRadius: 8,
-                      color: packSelecionado === nome ? "#000" : dim,
-                      padding: "8px 14px",
-                      fontFamily: "'Space Mono', monospace",
-                      fontSize: 12,
-                      fontWeight: packSelecionado === nome ? "bold" : "normal",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {nome}
-                  </button>
-                ))}
+
+              <input
+                type="text"
+                value={packSearch}
+                onChange={(e) => setPackSearch(e.target.value)}
+                placeholder={lang === "en" ? "🔍 Search pack by name or material..." : "🔍 Buscar pack por nome ou material..."}
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  background: "rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(196,160,80,0.25)",
+                  borderRadius: 8,
+                  color: TEXT_PRIM,
+                  padding: "9px 12px",
+                  fontSize: 12,
+                  fontFamily: "'Space Mono', monospace",
+                  outline: "none",
+                  marginBottom: 10,
+                }}
+              />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+                  gap: 8,
+                  maxHeight: 320,
+                  overflowY: "auto",
+                  paddingRight: 4,
+                }}
+              >
+                {Object.entries(PACKS)
+                  .filter(([nome, p]) => {
+                    if (!packSearch.trim()) return true;
+                    const q = packSearch.trim().toLowerCase();
+                    return (
+                      nome.toLowerCase().includes(q) ||
+                      p.materiais.some((m) => m.nome.toLowerCase().includes(q))
+                    );
+                  })
+                  .map(([nome, p]) => {
+                    const ativo = packSelecionado === nome;
+                    const semPreco = p.materiais.some((m) => getMat(m.nome, "precoMkt") <= 0);
+                    return (
+                      <button
+                        key={nome}
+                        onClick={() => setPackSelecionado(nome)}
+                        title={p.materiais.map((m) => `${m.qtd}x ${m.nome}`).join(" · ")}
+                        style={{
+                          background: ativo ? `linear-gradient(135deg, ${gold}, #8a6a20)` : "rgba(0,0,0,0.4)",
+                          border: `1px solid ${ativo ? gold : "rgba(196,160,80,0.25)"}`,
+                          borderRadius: 10,
+                          color: ativo ? "#000" : dim,
+                          padding: "10px 12px",
+                          fontFamily: "'Space Mono', monospace",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 4,
+                          transition: "transform 0.1s, border-color 0.15s",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 14 }}>{packIconFor(nome)}</span>
+                          <span style={{ fontSize: 12, fontWeight: ativo ? "bold" : "normal", lineHeight: 1.2 }}>
+                            {nome}
+                          </span>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            fontSize: 9,
+                            color: ativo ? "rgba(0,0,0,0.6)" : "rgba(143,160,184,0.55)",
+                          }}
+                        >
+                          <span>
+                            {p.materiais.length} {lang === "en" ? "materials" : "materiais"}
+                          </span>
+                          {semPreco && (
+                            <span title={lang === "en" ? "Missing market price" : "Falta preço de mercado"}>⚠️</span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
 
@@ -5742,6 +6228,174 @@ export default function App() {
                 value={fmtInt(imPorPack)}
                 color={blue}
               />
+            </div>
+          </Section>
+
+          {/* Tabela Global de Materiais */}
+          <Section
+            title={`🌐 ${lang === "en" ? "Global Materials Table" : "Tabela Global de Materiais"}`}
+            icon="🌐"
+            borderColor="rgba(96,165,250,0.3)"
+          >
+            <div style={{ color: "rgba(143,160,184,0.6)", fontSize: 11, marginBottom: 12, lineHeight: 1.5 }}>
+              {lang === "en"
+                ? "Set a material's price once here and it automatically updates in every pack that uses it — no need to re-enter prices per pack."
+                : "Preencha o preço de um material aqui uma única vez e ele atualiza automaticamente em todos os packs que o utilizam — sem precisar repetir por pack."}
+            </div>
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+              <input
+                type="text"
+                value={matGlobalSearch}
+                onChange={(e) => setMatGlobalSearch(e.target.value)}
+                placeholder={lang === "en" ? "🔍 Search material..." : "🔍 Buscar material..."}
+                style={{
+                  flex: "1 1 220px",
+                  boxSizing: "border-box",
+                  background: "rgba(0,0,0,0.4)",
+                  border: "1px solid rgba(96,165,250,0.25)",
+                  borderRadius: 8,
+                  color: TEXT_PRIM,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  fontFamily: "'Space Mono', monospace",
+                  outline: "none",
+                }}
+              />
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  color: dim,
+                  fontSize: 11,
+                  cursor: "pointer",
+                  userSelect: "none",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={matGlobalOnlyEmpty}
+                  onChange={(e) => setMatGlobalOnlyEmpty(e.target.checked)}
+                />
+                {lang === "en" ? "Only missing prices" : "Só sem preço"}
+              </label>
+              <div style={{ color: "rgba(143,160,184,0.5)", fontSize: 10, fontFamily: "'Space Mono', monospace" }}>
+                {ALL_PACK_MATERIALS.length} {lang === "en" ? "unique materials" : "materiais únicos"}
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginBottom: 6,
+                display: "grid",
+                gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.8fr 60px",
+                gap: 4,
+                position: "sticky",
+                top: 0,
+              }}
+            >
+              {[
+                lang === "en" ? "Material" : "Material",
+                lang === "en" ? "Used in" : "Usado em",
+                lang === "en" ? "Prod. cost" : "Custo prod.",
+                lang === "en" ? "Market" : "Mercado",
+                "QUEST -20%",
+              ].map((h) => (
+                <span key={h} style={{ color: dim, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            <div style={{ maxHeight: 420, overflowY: "auto", paddingRight: 4 }}>
+              {ALL_PACK_MATERIALS.filter((mat) => {
+                if (matGlobalSearch.trim() && !mat.nome.toLowerCase().includes(matGlobalSearch.trim().toLowerCase()))
+                  return false;
+                if (matGlobalOnlyEmpty && getMat(mat.nome, "precoMkt") > 0) return false;
+                return true;
+              }).map((mat) => (
+                <div
+                  key={mat.nome}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.4fr 0.7fr 0.8fr 0.8fr 60px",
+                    gap: 4,
+                    alignItems: "center",
+                    padding: "6px 0",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <span style={{ color: "#c0c0d0", fontSize: 12 }}>{mat.nome}</span>
+                  <span
+                    style={{ color: "rgba(143,160,184,0.55)", fontSize: 10 }}
+                    title={mat.packs.join(", ")}
+                  >
+                    {mat.packs.length} {lang === "en" ? "pack(s)" : "pack(s)"}
+                  </span>
+                  <NumInput
+                    value={getMat(mat.nome, "custoProducao")}
+                    onChange={(v) => setMat(mat.nome, "custoProducao", v)}
+                    min={0}
+                    style={{
+                      background: "rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(196,160,80,0.2)",
+                      borderRadius: 6,
+                      color: gold,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      width: "100%",
+                      fontFamily: "'Space Mono', monospace",
+                      outline: "none",
+                    }}
+                  />
+                  <NumInput
+                    value={getMat(mat.nome, "precoMkt")}
+                    onChange={(v) => setMat(mat.nome, "precoMkt", v)}
+                    min={0}
+                    style={{
+                      background: "rgba(0,0,0,0.4)",
+                      border: "1px solid rgba(96,165,250,0.2)",
+                      borderRadius: 6,
+                      color: blue,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      width: "100%",
+                      fontFamily: "'Space Mono', monospace",
+                      outline: "none",
+                    }}
+                  />
+                  <div style={{ textAlign: "center" }}>
+                    <div
+                      onClick={() => toggleQUEST(mat.nome)}
+                      title={lang === "en" ? "Buy with QUEST (-20%)" : "Comprar com QUEST (-20%)"}
+                      style={{
+                        display: "inline-block",
+                        width: 30,
+                        height: 18,
+                        borderRadius: 9,
+                        background: matsQUEST[mat.nome] ? "#c4a050" : "#303040",
+                        cursor: "pointer",
+                        position: "relative",
+                        transition: "background 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: 2,
+                          left: matsQUEST[mat.nome] ? 14 : 2,
+                          width: 14,
+                          height: 14,
+                          borderRadius: "50%",
+                          background: "#f0e6c8",
+                          transition: "left 0.2s",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </Section>
 
