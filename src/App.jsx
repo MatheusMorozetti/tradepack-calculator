@@ -5265,7 +5265,7 @@ export default function App() {
   ]);
 
   const tabs = [
-    { id: "tradepack", label: TR[lang].tabTradepack, locked: true },
+    { id: "tradepack", label: TR[lang].tabTradepack },
     { id: "comparativo", label: TR[lang].tabHunt },
     { id: "expedicao", label: lang === "en" ? "🗺️ Expedition" : "🗺️ Expedição" },
     { id: "mercado", label: TR[lang].tabMateriais, locked: true },
