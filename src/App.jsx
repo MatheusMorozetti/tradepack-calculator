@@ -5236,12 +5236,25 @@ export default function App() {
   const BASE_TRADEPACK_1095 = BASE_TRADEPACK_1080 * AJUSTE_PATCH_1095; // ≈ 154.000
   const COEF_DISTANCIA_1095 = COEF_DISTANCIA_1080 * AJUSTE_PATCH_1095; // ≈ 37,4
 
-  // Demanda da rota: multiplicador % exibido no Tradepost, junto do pack,
-  // antes de craftar. É por rota (origem→destino) inteira e muda a cada
-  // pack/entrega — não há como automatizar, o jogador confere in-game e
-  // insere o valor observado (ou uma média, se for craftar vários de uma vez).
-  const calcularSilverTradepack = (distancia, demandaPct = 0) =>
-    Math.round((BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095) * (1 + demandaPct / 100));
+  // Demanda LOCAL: % exibido no Tradepost por destino, visto ao abrir o menu
+  // de tradepack (tecla T) → selecionar o pack → clicar na seta/caret, que
+  // mostra o dropdown com todos os destinos e o % de demanda de cada um.
+  // É por par (pack, destino) — não por origem — e muda a cada entrega feita
+  // por qualquer jogador naquele posto. Guardamos por pack+destino pra você
+  // reaproveitar o último valor visto sem redigitar toda vez.
+  //
+  // Modificadores: bônus percentuais de talento/canal que empilham sobre o
+  // valor final (confirmado pela TL/comunidade que todos somam). O único
+  // valor confirmado publicamente é o do Plunder Channel (+25% em Tradepacks,
+  // EXP e Loot). Bartering I/II e Stolen não têm % oficial divulgado — os
+  // campos vêm editáveis e zerados por padrão; preencha com o que seu
+  // personagem realmente tem.
+  const calcularSilverTradepack = (distancia, demandaPct = 0, modificadoresPct = 0) =>
+    Math.round(
+      (BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095) *
+        (1 + demandaPct / 100) *
+        (1 + modificadoresPct / 100)
+    );
 
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
   const [packSearch, setPackSearch] = useState("");
@@ -5253,14 +5266,34 @@ export default function App() {
   const [distanciaPack, setDistanciaPack] = useState(5191);
   const [packOrigem, setPackOrigem] = useState("");
   const [packDestino, setPackDestino] = useState("");
-  // % de demanda da rota, visível no Tradepost antes de craftar o pack.
-  // Positivo = rota "quente" (bônus de silver), negativo = rota saturada.
-  const [demandaPack, setDemandaPack] = useState(0);
+  // Demanda local salva por pack + destino: { [packSelecionado]: { [destino]: percent } }
+  const [packDemandas, setPackDemandas] = useState({});
+  // Toggles + % editável de cada modificador (todos empilham/somam)
+  const [modBartering1On, setModBartering1On] = useState(false);
+  const [modBartering2On, setModBartering2On] = useState(false);
+  const [modPlunderingOn, setModPlunderingOn] = useState(false);
+  const [modStolenOn, setModStolenOn] = useState(false);
+  const [modBartering1Pct, setModBartering1Pct] = useState(0);
+  const [modBartering2Pct, setModBartering2Pct] = useState(0);
+  const [modPlunderingPct, setModPlunderingPct] = useState(25); // único confirmado publicamente
+  const [modStolenPct, setModStolenPct] = useState(0);
   useEffect(() => {
     const steps = getTradepostSteps(packOrigem, packDestino);
     if (steps !== null) setDistanciaPack(steps);
   }, [packOrigem, packDestino]);
-  const silverPorPack = calcularSilverTradepack(distanciaPack, demandaPack);
+  const demandaPack = packDemandas[packSelecionado]?.[packDestino] ?? 0;
+  const setDemandaDestino = (destino, valor) => {
+    setPackDemandas((prev) => ({
+      ...prev,
+      [packSelecionado]: { ...(prev[packSelecionado] || {}), [destino]: valor },
+    }));
+  };
+  const modificadoresTotal =
+    (modBartering1On ? modBartering1Pct : 0) +
+    (modBartering2On ? modBartering2Pct : 0) +
+    (modPlunderingOn ? modPlunderingPct : 0) +
+    (modStolenOn ? modStolenPct : 0);
+  const silverPorPack = calcularSilverTradepack(distanciaPack, demandaPack, modificadoresTotal);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
   const [qtdPlunder, setQtdPlunder] = useState(0);
@@ -5431,7 +5464,15 @@ export default function App() {
       if (s.distanciaPack !== undefined) setDistanciaPack(s.distanciaPack);
       if (s.packOrigem !== undefined) setPackOrigem(s.packOrigem);
       if (s.packDestino !== undefined) setPackDestino(s.packDestino);
-      if (s.demandaPack !== undefined) setDemandaPack(s.demandaPack);
+      if (s.packDemandas !== undefined) setPackDemandas(s.packDemandas);
+      if (s.modBartering1On !== undefined) setModBartering1On(s.modBartering1On);
+      if (s.modBartering2On !== undefined) setModBartering2On(s.modBartering2On);
+      if (s.modPlunderingOn !== undefined) setModPlunderingOn(s.modPlunderingOn);
+      if (s.modStolenOn !== undefined) setModStolenOn(s.modStolenOn);
+      if (s.modBartering1Pct !== undefined) setModBartering1Pct(s.modBartering1Pct);
+      if (s.modBartering2Pct !== undefined) setModBartering2Pct(s.modBartering2Pct);
+      if (s.modPlunderingPct !== undefined) setModPlunderingPct(s.modPlunderingPct);
+      if (s.modStolenPct !== undefined) setModStolenPct(s.modStolenPct);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
       if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
@@ -5497,7 +5538,15 @@ export default function App() {
             distanciaPack,
             packOrigem,
             packDestino,
-            demandaPack,
+            packDemandas,
+            modBartering1On,
+            modBartering2On,
+            modPlunderingOn,
+            modStolenOn,
+            modBartering1Pct,
+            modBartering2Pct,
+            modPlunderingPct,
+            modStolenPct,
             qtdEnhanced,
             qtdPlunder,
             custoCert,
@@ -5560,7 +5609,15 @@ export default function App() {
     distanciaPack,
     packOrigem,
     packDestino,
-    demandaPack,
+    packDemandas,
+    modBartering1On,
+    modBartering2On,
+    modPlunderingOn,
+    modStolenOn,
+    modBartering1Pct,
+    modBartering2Pct,
+    modPlunderingPct,
+    modStolenPct,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -5765,7 +5822,9 @@ export default function App() {
     packSelecionado,
     qtdPacks,
     distanciaPack,
-    demandaPack,
+    packDestino,
+    packDemandas,
+    modificadoresTotal,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -6136,8 +6195,8 @@ export default function App() {
             title="Tradepack"
             descricao={
               lang === "en"
-                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5, then scaled by the route's demand % shown at the Tradepost before crafting. Merchant Influence (IM) is 10× the Silver value per pack."
-                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5, e depois escalada pelo % de demanda da rota exibido no Tradepost antes de craftar. A Influência Mercante (IM) é 10× o valor de Silver por pack."
+                ? "Silver per pack is calculated from the official Tavernlight formula (base + distance × coefficient), adjusted by the official +340% factor from patch 1.0.9.5, scaled by the destination's Local Demand % (shown at the Tradepost before crafting), then by any active Modifiers (Bartering, Plundering, Stolen). Merchant Influence (IM) is 10× the Silver value per pack."
+                : "O Silver por pack é calculado pela fórmula oficial da Tavernlight (base + distância × coeficiente), ajustada pelo fator oficial de +340% do patch 1.0.9.5, escalada pela Demanda Local % do destino (exibida no Tradepost antes de craftar), e depois pelos Modificadores ativos (Bartering, Plundering, Stolen). A Influência Mercante (IM) é 10× o valor de Silver por pack."
             }
             formulas={[
               {
@@ -6152,8 +6211,18 @@ export default function App() {
                 formula: "Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4)",
               },
               {
-                label: lang === "en" ? "Route demand (shown in-game, per delivery)" : "Demanda da rota (exibida in-game, por entrega)",
-                formula: "Silver = (154.000 + Distância × 37,4) × (1 + Demanda%)",
+                label:
+                  lang === "en"
+                    ? "Local demand (per pack + destination, shown in-game: T → pack → caret)"
+                    : "Demanda local (por pack + destino, exibida in-game: T → pack → seta)",
+                formula: "Silver = (154.000 + Distância × 37,4) × (1 + DemandaLocal%)",
+              },
+              {
+                label:
+                  lang === "en"
+                    ? "Modifiers (Bartering I/II, Plundering, Stolen — stack additively)"
+                    : "Modificadores (Bartering I/II, Plundering, Stolen — somam entre si)",
+                formula: "Silver = (154.000 + Distância × 37,4) × (1 + DemandaLocal%) × (1 + Modificadores%)",
               },
               {
                 label: lang === "en" ? "Merchant Influence per pack" : "Influência Mercante por pack",
@@ -6376,6 +6445,224 @@ export default function App() {
               </div>
             </div>
 
+            {/* Demandas Locais — % por destino, salvo por pack (T → pack → seta no jogo) */}
+            <div
+              style={{
+                background: BG_CARD,
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: 14,
+              }}
+            >
+              <div
+                style={{
+                  color: dim,
+                  fontSize: 11,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  marginBottom: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>{lang === "en" ? "Local Demands" : "Demandas Locais"}</span>
+                <span style={{ fontSize: 9, color: "rgba(143,160,184,0.5)", textTransform: "none", letterSpacing: 0 }}>
+                  {lang === "en" ? "T → pack → caret icon" : "T → pack → ícone de seta"}
+                </span>
+              </div>
+              {!packOrigem ? (
+                <div style={{ fontSize: 12, color: dim }}>
+                  {lang === "en"
+                    ? "Choose a departure above to see available destinations"
+                    : "Escolha a partida acima para ver os destinos disponíveis"}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 260, overflowY: "auto" }}>
+                  {TRADEPOSTS.filter((t) => t !== packOrigem && getTradepostSteps(packOrigem, t) !== null)
+                    .sort((a, b) => getTradepostSteps(packOrigem, a) - getTradepostSteps(packOrigem, b))
+                    .map((t) => {
+                      const selecionado = t === packDestino;
+                      const valor = packDemandas[packSelecionado]?.[t] ?? "";
+                      return (
+                        <div
+                          key={t}
+                          onClick={() => setPackDestino(t)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 10,
+                            padding: "6px 10px",
+                            borderRadius: 6,
+                            border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.15)"}`,
+                            background: selecionado ? "rgba(196,160,80,0.1)" : "transparent",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 12, color: selecionado ? TEXT_PRIM : dim }}>📍 {t}</span>
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: "rgba(143,160,184,0.55)",
+                                fontFamily: "'Space Mono', monospace",
+                              }}
+                            >
+                              {fmtInt(getTradepostSteps(packOrigem, t))} steps
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="number"
+                              value={valor}
+                              onChange={(e) =>
+                                setDemandaDestino(t, e.target.value === "" ? "" : Number(e.target.value))
+                              }
+                              placeholder="100"
+                              style={{
+                                width: 56,
+                                background: "#0d1525",
+                                border: `1px solid ${selecionado ? gold : "rgba(196,160,80,0.3)"}`,
+                                borderRadius: 4,
+                                color: TEXT_PRIM,
+                                padding: "3px 6px",
+                                fontFamily: "'Space Mono', monospace",
+                                fontSize: 12,
+                                textAlign: "right",
+                                outline: "none",
+                              }}
+                            />
+                            <span style={{ fontSize: 11, color: dim }}>%</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+              <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {lang === "en"
+                  ? "Demand is per pack + destination — read it in-game and it's saved automatically for next time. Clicking a row selects it as the destination."
+                  : "A demanda é por pack + destino — confira no jogo e fica salva automaticamente pra próxima vez. Clicar na linha seleciona como destino."}
+              </div>
+            </div>
+
+            {/* Modificadores — bônus percentuais de talento/canal que empilham */}
+            <div
+              style={{
+                background: BG_CARD,
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "12px 14px",
+                marginBottom: 14,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <span style={{ color: dim, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {lang === "en" ? "Modifiers" : "Modificadores"}
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: "bold",
+                    color: modificadoresTotal >= 0 ? green : red,
+                    fontFamily: "'Space Mono', monospace",
+                  }}
+                >
+                  {modificadoresTotal >= 0 ? "+" : ""}
+                  {modificadoresTotal}%
+                </span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {[
+                  {
+                    on: modBartering1On,
+                    setOn: setModBartering1On,
+                    pct: modBartering1Pct,
+                    setPct: setModBartering1Pct,
+                    label: "Bartering I",
+                  },
+                  {
+                    on: modBartering2On,
+                    setOn: setModBartering2On,
+                    pct: modBartering2Pct,
+                    setPct: setModBartering2Pct,
+                    label: "Bartering II",
+                  },
+                  {
+                    on: modPlunderingOn,
+                    setOn: setModPlunderingOn,
+                    pct: modPlunderingPct,
+                    setPct: setModPlunderingPct,
+                    label: "Plundering",
+                  },
+                  {
+                    on: modStolenOn,
+                    setOn: setModStolenOn,
+                    pct: modStolenPct,
+                    setPct: setModStolenPct,
+                    label: "Stolen",
+                  },
+                ].map((m) => (
+                  <div
+                    key={m.label}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      padding: "8px 10px",
+                      borderRadius: 6,
+                      border: `1px solid ${m.on ? green : "rgba(196,160,80,0.25)"}`,
+                      background: m.on ? "rgba(74,222,128,0.12)" : "transparent",
+                    }}
+                  >
+                    <button
+                      onClick={() => m.setOn(!m.on)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: m.on ? green : dim,
+                        fontSize: 12,
+                        fontWeight: m.on ? "bold" : "normal",
+                        cursor: "pointer",
+                        padding: 0,
+                        textAlign: "left",
+                      }}
+                    >
+                      {m.on ? "✅" : "⬜"} {m.label}
+                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <input
+                        type="number"
+                        value={m.pct}
+                        onChange={(e) => m.setPct(Number(e.target.value))}
+                        style={{
+                          width: 44,
+                          background: "#0d1525",
+                          border: "1px solid rgba(196,160,80,0.3)",
+                          borderRadius: 4,
+                          color: TEXT_PRIM,
+                          padding: "3px 6px",
+                          fontFamily: "'Space Mono', monospace",
+                          fontSize: 11,
+                          textAlign: "right",
+                          outline: "none",
+                        }}
+                      />
+                      <span style={{ fontSize: 11, color: dim }}>%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: "rgba(143,160,184,0.55)" }}>
+                {lang === "en"
+                  ? "Only the Plunder Channel bonus (+25%) is publicly confirmed. Bartering I/II and Stolen have no official % — fill in what your character actually has. Active modifiers stack additively."
+                  : "Só o bônus do Plunder Channel (+25%) é confirmado publicamente. Bartering I/II e Stolen não têm % oficial — preencha com o que seu personagem realmente tem. Os modificadores ativos somam entre si."}
+              </div>
+            </div>
+
             {/* Config numérica */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 8 }}>
               <Field
@@ -6405,18 +6692,6 @@ export default function App() {
                 onChange={setQtdPlunder}
                 step={1}
                 hint={lang === "en" ? "+15% IM (Plunder Channel)" : "+15% IM (Plunder Channel)"}
-              />
-              <Field
-                label={lang === "en" ? "Route demand" : "Demanda da rota"}
-                value={demandaPack}
-                onChange={setDemandaPack}
-                step={1}
-                suffix="%"
-                hint={
-                  lang === "en"
-                    ? "Check at the Tradepost before crafting — changes every delivery"
-                    : "Confira no Tradepost antes de craftar — muda a cada entrega"
-                }
               />
             </div>
 
@@ -9718,8 +9993,8 @@ export default function App() {
               }}
             >
               {lang === "en"
-                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (1 + Demand%) ≈ (154,000 + Distance × 37.4) × (1 + Demand%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. The route demand % is read directly from the Tradepost screen (shown next to the pack before crafting) and entered manually, since it changes every delivery. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
-                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (1 + Demanda%) ≈ (154.000 + Distância × 37,4) × (1 + Demanda%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. O % de demanda da rota é lido direto da tela do Tradepost (exibido junto do pack, antes de craftar) e inserido manualmente, já que muda a cada entrega. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
+                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 × (1 + LocalDemand%) × (1 + Modifiers%) ≈ (154,000 + Distance × 37.4) × (1 + LocalDemand%) × (1 + Modifiers%). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Local Demand is per pack + destination, read directly from the in-game Tradepack menu (T → pack → caret icon) and saved per destination for reuse. Modifiers (Bartering I/II, Plundering, Stolen) stack additively; only the Plunder Channel +25% is publicly confirmed — the rest are editable so you can enter your own confirmed values. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
+                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 × (1 + DemandaLocal%) × (1 + Modificadores%) ≈ (154.000 + Distância × 37,4) × (1 + DemandaLocal%) × (1 + Modificadores%). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. A Demanda Local é por pack + destino, lida direto do menu de tradepack in-game (T → pack → ícone de seta) e salva por destino pra reaproveitar. Os Modificadores (Bartering I/II, Plundering, Stolen) somam entre si; só o +25% do Plunder Channel é confirmado publicamente — os demais ficam editáveis pra você preencher com o valor real do seu personagem. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
