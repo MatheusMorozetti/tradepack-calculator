@@ -4720,9 +4720,41 @@ export default function App() {
   const [joiasTotal, setJoiasTotal] = useState(664);
 
   // TRADEPACK
+  // ══════════════════════════════════════════════════════════════════════
+  // FÓRMULA OFICIAL DO TRADEPACK (base + distância × coeficiente)
+  // Vale para TODOS os packs — a fórmula da Tavernlight é por rota/distância,
+  // não por tipo de item, então o mesmo cálculo se aplica a qualquer pack.
+  //
+  // Fórmula base divulgada oficialmente (patch 1.0.8, post TL de 21/05/2025):
+  //   Silver = 35.000 + (Distância × 8,5)
+  //
+  // Ajuste do patch 1.0.9.5 (16/06/2026): changelog oficial declara aumento
+  // de "aproximadamente 340%" (fator ×4,4) no valor-base e no escalonamento
+  // por distância. A Tavernlight NÃO divulgou os coeficientes exatos novos,
+  // então aplicamos o fator ×4,4 sobre a fórmula anterior:
+  //
+  //   Silver = (35.000 + Distância × 8,5) × 4,4
+  //          ≈ 154.000 + (Distância × 37,4)
+  //
+  // ⚠️ Isso é uma EXTRAPOLAÇÃO (+340% aplicado uniformemente à fórmula antiga),
+  // não os coeficientes reais publicados pela TL. Vale só para packs criados
+  // a partir de 16/06/2026. Recalibrar assim que houver dado real pós-patch.
+  // ══════════════════════════════════════════════════════════════════════
+  const BASE_TRADEPACK_1080 = 35000; // base oficial pré-1.0.9.5 (post TL 21/05/2025)
+  const COEF_DISTANCIA_1080 = 8.5; // coeficiente oficial pré-1.0.9.5 (post TL 21/05/2025)
+  const AJUSTE_PATCH_1095 = 4.4; // +340% (changelog oficial 16/06/2026), fator não confirmado com precisão
+  const BASE_TRADEPACK_1095 = BASE_TRADEPACK_1080 * AJUSTE_PATCH_1095; // ≈ 154.000
+  const COEF_DISTANCIA_1095 = COEF_DISTANCIA_1080 * AJUSTE_PATCH_1095; // ≈ 37,4
+
+  const calcularSilverTradepack = (distancia) =>
+    Math.round(BASE_TRADEPACK_1095 + distancia * COEF_DISTANCIA_1095);
+
   const [packSelecionado, setPackSelecionado] = useState("Cavedweller Findings");
   const [qtdPacks, setQtdPacks] = useState(10);
-  const [silverPorPack, setSilverPorPack] = useState(79126);
+  // Distância calibrada para reproduzir o valor empírico anterior (79.126 silver
+  // na fórmula pré-1.0.9.5) — ajuste esse valor para a distância real da sua rota.
+  const [distanciaPack, setDistanciaPack] = useState(5191);
+  const silverPorPack = calcularSilverTradepack(distanciaPack);
   const imPorPack = silverPorPack * 10;
   const [qtdEnhanced, setQtdEnhanced] = useState(0);
   const [qtdPlunder, setQtdPlunder] = useState(0);
@@ -4890,7 +4922,7 @@ export default function App() {
       if (s.joiasTotal !== undefined) setJoiasTotal(s.joiasTotal);
       if (s.packSelecionado !== undefined) setPackSelecionado(s.packSelecionado);
       if (s.qtdPacks !== undefined) setQtdPacks(s.qtdPacks);
-      if (s.silverPorPack !== undefined) setSilverPorPack(s.silverPorPack);
+      if (s.distanciaPack !== undefined) setDistanciaPack(s.distanciaPack);
       if (s.qtdEnhanced !== undefined) setQtdEnhanced(s.qtdEnhanced);
       if (s.qtdPlunder !== undefined) setQtdPlunder(s.qtdPlunder);
       if (s.custoCert !== undefined) setCustoCert(s.custoCert);
@@ -4953,7 +4985,7 @@ export default function App() {
             joiasTotal,
             packSelecionado,
             qtdPacks,
-            silverPorPack,
+            distanciaPack,
             qtdEnhanced,
             qtdPlunder,
             custoCert,
@@ -5013,6 +5045,7 @@ export default function App() {
     joiasTotal,
     packSelecionado,
     qtdPacks,
+    distanciaPack,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -5216,6 +5249,7 @@ export default function App() {
     imExpSemana,
     packSelecionado,
     qtdPacks,
+    distanciaPack,
     silverPorPack,
     qtdEnhanced,
     qtdPlunder,
@@ -8504,6 +8538,23 @@ export default function App() {
               {lang === "en"
                 ? "Enter the QUEST received from the Friday chest. Total IM is calculated automatically (Expedition + Packs with Enhanced and Plunder)."
                 : "Insira o QUEST recebido no chest de sexta. A IM total é calculada automaticamente (Expedição + Packs com Enhanced e Plunder)."}
+            </div>
+
+            <div
+              style={{
+                background: "rgba(196,160,80,0.06)",
+                border: "1px solid rgba(196,160,80,0.3)",
+                borderRadius: 8,
+                padding: "10px 14px",
+                marginBottom: 16,
+                fontSize: 11,
+                color: gold,
+                lineHeight: 1.7,
+              }}
+            >
+              {lang === "en"
+                ? '⚠️ Formula-based, not officially confirmed: Silver = (35,000 + Distance × 8.5) × 4.4 ≈ 154,000 + (Distance × 37.4). The base formula (35,000 + Distance × 8.5) is the exact one Tavernlight officially published for patch 1.0.8 (TL post, 05/21/2025). The ×4.4 factor (+340%) reflects the official 1.0.9.5 changelog (06/16/2026), which only disclosed the aggregate percentage increase, not new exact coefficients — so this ×4.4 applied on top of the old formula is our extrapolation. Applies only to packs crafted after 06/16/2026. Adjust the Distance field to your real route and recalibrate as soon as you have post-patch in-game data.'
+                : "⚠️ Baseado em fórmula, não confirmado oficialmente: Silver = (35.000 + Distância × 8,5) × 4,4 ≈ 154.000 + (Distância × 37,4). A fórmula base (35.000 + Distância × 8,5) é a exata divulgada oficialmente pela Tavernlight no patch 1.0.8 (post da TL, 21/05/2025). O fator ×4,4 (+340%) reflete o changelog oficial do 1.0.9.5 (16/06/2026), que só divulgou o percentual agregado, não os novos coeficientes exatos — então esse ×4,4 aplicado sobre a fórmula antiga é uma extrapolação nossa. Vale só para packs craftados após 16/06/2026. Ajuste o campo Distância para sua rota real e recalibre assim que tiver dado real do jogo pós-patch."}
             </div>
 
             <div style={{ marginBottom: 14 }}>
