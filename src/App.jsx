@@ -5102,6 +5102,46 @@ function Divider({ label }) {
   );
 }
 
+// Overlay exibido sobre as seções de resultado borradas quando não há login —
+// some assim que `authUser` existe (ver uso junto ao filter: blur(...)).
+function LoginTeaserOverlay({ lang, onLoginClick }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        zIndex: 2,
+      }}
+    >
+      <div style={{ fontSize: 12, color: TEXT_PRIM, textAlign: "center", letterSpacing: "0.05em" }}>
+        🔒 {lang === "en" ? "Log in to see the full result" : "Faça login para ver o resultado completo"}
+      </div>
+      <button
+        onClick={onLoginClick}
+        style={{
+          background: "linear-gradient(135deg, #c4a050, #8a6a20)",
+          border: "none",
+          borderRadius: 8,
+          color: "#000",
+          padding: "8px 18px",
+          cursor: "pointer",
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 12,
+          fontWeight: "bold",
+          letterSpacing: "0.05em",
+        }}
+      >
+        {TR[lang].enter}
+      </button>
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState("expedicao");
   const [lang, setLang] = useState("ptBR");
@@ -5136,6 +5176,87 @@ export default function App() {
   const [guildPlan, setGuildPlan] = useState(null); // 'guild' | 'friends' | null
   const [guildPrices, setGuildPrices] = useState({}); // preços sincronizados da guilda
   const [guildSyncing, setGuildSyncing] = useState(false);
+
+  // ── AUTENTICAÇÃO ─────────────────────────────────────────────────────────
+  // Login é OPCIONAL: sem login o app continua em "modo público" (localStorage
+  // apenas, resultado principal borrado). Logado, os dados passam a ser
+  // salvos também na conta (Supabase, tabela user_settings) além do cache.
+  const [authUser, setAuthUser] = useState(null);
+  const [authProfile, setAuthProfile] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  // authUserRef espelha authUser — lido por flushSave/listeners de saída de
+  // página, que são fechados sobre a versão do componente de quando o efeito
+  // rodou pela última vez, então não podem confiar em `authUser` diretamente.
+  // remoteSettingsLoadedRef não tem state pareado: só controla se flushSave
+  // já pode gravar na conta (evita sobrescrever a nuvem com dados antigos do
+  // localStorage antes da carga inicial pós-login terminar).
+  const authUserRef = useRef(null);
+  const remoteSettingsLoadedRef = useRef(false);
+  useEffect(() => {
+    authUserRef.current = authUser;
+  });
+
+  // Restaura sessão existente (refresh da página) e valida o perfil de novo —
+  // um acesso suspenso/expirado enquanto a aba estava fechada não deve voltar
+  // a entrar só porque o token do Supabase ainda é válido.
+  useEffect(() => {
+    let active = true;
+    const restoreSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!active) return;
+      if (!session?.user) {
+        setAuthChecking(false);
+        return;
+      }
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      if (!active) return;
+      const valido = profile && !error && profile.active && new Date(profile.expires_at) >= new Date();
+      if (!valido) {
+        await supabase.auth.signOut();
+        if (!active) return;
+        setAuthChecking(false);
+        return;
+      }
+      setAuthUser(session.user);
+      setAuthProfile(profile);
+      setAuthChecking(false);
+    };
+    restoreSession();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        authUserRef.current = null;
+        remoteSettingsLoadedRef.current = false;
+        setAuthUser(null);
+        setAuthProfile(null);
+      }
+    });
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  const handleLoginSuccess = (user, _tabId, profile) => {
+    setAuthUser(user);
+    setAuthProfile(profile);
+    setShowLogin(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    authUserRef.current = null;
+    remoteSettingsLoadedRef.current = false;
+    setAuthUser(null);
+    setAuthProfile(null);
+  };
+
   // Carrega settings do localStorage (modo público)
   useEffect(() => {
     try {
@@ -5527,19 +5648,15 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
 
-  // PERSISTÊNCIA — localStorage (modo público)
+  // PERSISTÊNCIA — localStorage (cache, modo público) + Supabase (conta, quando logado)
   const STORAGE_KEY = "ravenlab_v2";
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      // IMPORTANTE: nunca usar `return` aqui dentro do try — isso sairia da
-      // função inteira do useEffect e pularia o setSettingsLoaded/setDataLoading
-      // logo abaixo, travando o app em "carregando..." pra sempre sempre que
-      // não houvesse nada salvo ainda (primeira visita, aba anônima, etc.).
-      // Por isso o corpo fica dentro de um if(saved) em vez de um early return.
-      if (saved) {
-        const s = JSON.parse(saved);
-        if (s.poolRate !== undefined) setPoolRate(s.poolRate);
+
+  // Aplica um snapshot salvo (vindo do localStorage OU da conta no Supabase)
+  // ao estado do app — mesmo formato nas duas origens, então uma função só
+  // serve pras duas cargas.
+  const applySettings = (s) => {
+    if (!s) return;
+    if (s.poolRate !== undefined) setPoolRate(s.poolRate);
         if (s.questUSD !== undefined) setQuestUSD(s.questUSD);
         if (s.questToSilver !== undefined) setQuestToSilver(s.questToSilver);
         if (s.calQUEST !== undefined) setCalQUEST(s.calQUEST);
@@ -5602,13 +5719,45 @@ export default function App() {
         if (s.taxExchHunt !== undefined) setTaxExchHunt(s.taxExchHunt);
         if (s.taxSaqueAtivo !== undefined) setTaxSaqueAtivo(s.taxSaqueAtivo);
         if (s.taxSaquePct !== undefined) setTaxSaquePct(s.taxSaquePct);
-        if (s.feeCredit !== undefined) setFeeCredit(s.feeCredit);
-        if (s.lang !== undefined) setLang(s.lang);
-      }
+    if (s.feeCredit !== undefined) setFeeCredit(s.feeCredit);
+    if (s.lang !== undefined) setLang(s.lang);
+  };
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) applySettings(JSON.parse(saved));
     } catch {}
     setSettingsLoaded(true);
     setDataLoading(false);
   }, []);
+
+  // Carrega os settings salvos na conta (Supabase) assim que o usuário loga —
+  // sobrescreve o que veio do localStorage com o que está salvo na nuvem pra
+  // esse usuário. Se a conta ainda não tiver nada salvo (primeiro login),
+  // semeia a conta com o snapshot local atual em vez de apagar tudo.
+  useEffect(() => {
+    if (!authUser) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("data")
+        .eq("user_id", authUser.id)
+        .maybeSingle();
+      if (!active) return;
+      remoteSettingsLoadedRef.current = true;
+      if (data?.data) {
+        applySettings(data.data);
+      } else {
+        flushSave();
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUser]);
 
   // Monta o snapshot atual de TODAS as configurações — usado tanto pelo
   // auto-save com debounce (2s) quanto pelo flush imediato ao sair da
@@ -5687,6 +5836,23 @@ export default function App() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settingsSnapshotRef.current));
     } catch {}
+    // Além do cache local, se houver usuário logado e a carga inicial da
+    // conta já tiver rodado (evita sobrescrever a nuvem com dados antigos
+    // do localStorage durante a janela de login), grava também na conta.
+    if (authUserRef.current && remoteSettingsLoadedRef.current) {
+      supabase
+        .from("user_settings")
+        .upsert(
+          {
+            user_id: authUserRef.current.id,
+            data: settingsSnapshotRef.current,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" }
+        )
+        .then(() => {})
+        .catch(() => {});
+    }
   };
 
   // Auto-save no localStorage 2s após qualquer mudança
@@ -6128,6 +6294,13 @@ export default function App() {
     return { completos, incompletos };
   }, [packDemandas, matsOverride, matsQUEST, matsFonte, modificadoresTotal]);
 
+  // Login é opcional — só troca a tela inteira pela tela de login quando o
+  // usuário clica em "Entrar" e ainda não está logado. Fora isso o app segue
+  // 100% acessível em modo público (com prévia borrada nos resultados).
+  if (showLogin && !authUser) {
+    return <LoginScreen onLogin={handleLoginSuccess} onBack={() => setShowLogin(false)} lang={lang} />;
+  }
+
   const tabs = [
     { id: "tradepack", label: TR[lang].tabTradepack },
     { id: "comparativo", label: TR[lang].tabHunt },
@@ -6204,15 +6377,77 @@ export default function App() {
           )}
         </div>
 
-        {/* Direita: idioma + guild sync */}
+        {/* Direita: idioma + conta */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <LangToggle lang={lang} setLang={setLang} />
+          {authUser ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "rgba(74,222,128,0.7)",
+                  letterSpacing: "0.05em",
+                  maxWidth: 160,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+                title={authUser.email}
+              >
+                ☁ {authUser.email}
+              </span>
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "none",
+                  border: "1px solid rgba(248,113,113,0.3)",
+                  borderRadius: 6,
+                  color: "rgba(248,113,113,0.8)",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {TR[lang].logout}
+              </button>
+            </div>
+          ) : (
+            !authChecking && (
+              <button
+                onClick={() => setShowLogin(true)}
+                style={{
+                  background: "linear-gradient(135deg, #c4a050, #8a6a20)",
+                  border: "none",
+                  borderRadius: 6,
+                  color: "#000",
+                  padding: "5px 12px",
+                  cursor: "pointer",
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: 10,
+                  fontWeight: "bold",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {TR[lang].enter}
+              </button>
+            )
+          )}
         </div>
       </div>
 
-      {/* RESULTADO PRINCIPAL — VEREDICTO + CENÁRIOS (preview com blur) */}
+      {/* RESULTADO PRINCIPAL — VEREDICTO + CENÁRIOS (borrado até logar) */}
       <div style={{ position: "relative" }}>
-        <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", opacity: 0.6 }}>
+        {!authUser && <LoginTeaserOverlay lang={lang} onLoginClick={() => setShowLogin(true)} />}
+        <div
+          style={{
+            filter: authUser ? "none" : "blur(4px)",
+            pointerEvents: authUser ? "auto" : "none",
+            userSelect: authUser ? "auto" : "none",
+            opacity: authUser ? 1 : 0.6,
+          }}
+        >
         <div
         style={{
           background: BG_CARD,
@@ -8086,9 +8321,17 @@ export default function App() {
             </div>
           </div>
 
-          {/* Comparativo Hunt vs Tradepack — preview com blur */}
+          {/* Comparativo Hunt vs Tradepack — borrado até logar */}
           <div style={{ position: "relative" }}>
-            <div style={{ filter: "blur(4px)", pointerEvents: "none", userSelect: "none", opacity: 0.6 }}>
+            {!authUser && <LoginTeaserOverlay lang={lang} onLoginClick={() => setShowLogin(true)} />}
+            <div
+              style={{
+                filter: authUser ? "none" : "blur(4px)",
+                pointerEvents: authUser ? "auto" : "none",
+                userSelect: authUser ? "auto" : "none",
+                opacity: authUser ? 1 : 0.6,
+              }}
+            >
           <Section
             title={`📊 ${lang === "en" ? "Hunt vs Tradepack — Monthly Comparison" : "Hunt vs Tradepack — Comparativo Mensal"}`}
             icon="⚖️"
